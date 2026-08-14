@@ -17,63 +17,64 @@
         .sidebar-item-active { background-color: #eff6ff; color: #4f46e5; font-weight: 600; }
         .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
         .sidebar-item:hover { color: #4f46e5; background-color: #f8fafc; }
+        /* Kustom scrollbar agar lebih ramping */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
+    <aside class="w-56 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
         <div class="overflow-y-auto">
-            <!-- Header Sidebar (Logo Area) -->
-            <div class="bg-brand-gradient p-6 text-white rounded-br-3xl">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+            <!-- Header Sidebar -->
+            <div class="bg-brand-gradient p-5 text-white rounded-br-2xl">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-white/20 p-1.5 rounded-md backdrop-blur-sm">
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold tracking-wide">EduLearn</h1>
-                        <p class="text-xs text-indigo-100">Sistem Pembelajaran</p>
+                        <h1 class="text-base font-bold tracking-wide">EduLearn</h1>
+                        <p class="text-[10px] text-indigo-100 uppercase tracking-wider">Sistem Pembelajaran</p>
                     </div>
                 </div>
             </div>
 
             <!-- Menu Navigasi -->
-            <div class="px-4 py-6">
-                <!-- Aktif -->
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl mb-6">
-                    <i class="fa-solid fa-house w-5 text-center"></i>
+            <div class="px-3 py-5 text-xs">
+                <a href="#" class="flex items-center space-x-3 px-3 py-2.5 sidebar-item-active rounded-lg mb-5">
+                    <i class="fa-solid fa-house w-4 text-center"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <p class="px-4 text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Menu Utama</p>
-                <nav class="space-y-1 mb-8">
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-book w-5 text-center"></i><span>Mata Kuliah</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-calendar w-5 text-center"></i><span>Jadwal</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-folder-open w-5 text-center"></i><span>Materi</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-file-pen w-5 text-center"></i><span>Tugas</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Ujian</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-user-check w-5 text-center"></i><span>Absensi</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-chart-simple w-5 text-center"></i><span>Nilai</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Pengumuman</span></a>
+                <p class="px-3 text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Menu Utama</p>
+                <nav class="space-y-0.5 mb-6">
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-book w-4 text-center"></i><span>Mata Kuliah</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-regular fa-calendar w-4 text-center"></i><span>Jadwal</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-regular fa-folder-open w-4 text-center"></i><span>Materi</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-file-pen w-4 text-center"></i><span>Tugas</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-regular fa-file-lines w-4 text-center"></i><span>Ujian</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-user-check w-4 text-center"></i><span>Absensi</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-chart-simple w-4 text-center"></i><span>Nilai</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-bullhorn w-4 text-center"></i><span>Pengumuman</span></a>
                 </nav>
 
-                <p class="px-4 text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Akun</p>
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-user w-5 text-center"></i><span>Profil Saya</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-gear w-5 text-center"></i><span>Pengaturan</span></a>
+                <p class="px-3 text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Akun</p>
+                <nav class="space-y-0.5">
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-regular fa-user w-4 text-center"></i><span>Profil Saya</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 sidebar-item rounded-md"><i class="fa-solid fa-gear w-4 text-center"></i><span>Pengaturan</span></a>
                 </nav>
             </div>
         </div>
 
-        <!-- Footer Sidebar -->
-        <div class="p-4 border-t border-slate-100">
-            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-4">
+        <div class="p-3 border-t border-slate-100">
+            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-3 py-2 border border-red-200 text-red-500 hover:bg-red-50 rounded-md transition-colors font-medium text-xs mb-3">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Keluar</span>
             </button>
-            <div class="text-center text-xs text-slate-400">
+            <div class="text-center text-[10px] text-slate-400">
                 <p>&copy; 2026 EduLearn</p>
-                <p>All rights reserved</p>
             </div>
         </div>
     </aside>
@@ -82,176 +83,179 @@
     <main class="flex-1 overflow-y-auto flex flex-col">
         
         <!-- Top Navbar -->
-        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-            <h2 class="text-xl font-bold text-slate-800">Dashboard Mahasiswa</h2>
+        <header class="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center sticky top-0 z-10">
+            <h2 class="text-sm font-bold text-slate-800">Dashboard Mahasiswa</h2>
             
-            <div class="flex items-center space-x-6">
-                <!-- Search Bar -->
+            <div class="flex items-center space-x-5">
                 <div class="relative hidden md:block">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" placeholder="Cari mata kuliah, materi, tugas..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm w-72 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" placeholder="Cari mata kuliah..." class="pl-8 pr-3 py-1.5 border border-slate-200 rounded-full text-xs w-64 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300">
                 </div>
                 
-                <!-- Notifikasi -->
                 <button class="relative text-slate-500 hover:text-indigo-600 transition">
-                    <i class="fa-regular fa-bell text-xl"></i>
-                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white rounded-full text-[8px] font-bold text-white flex items-center justify-center">3</span>
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full text-[8px] font-bold text-white flex items-center justify-center">3</span>
                 </button>
                 
-                <!-- Profil Dropdown -->
-                <div class="flex items-center space-x-3 border-l border-slate-200 pl-6 cursor-pointer">
-                    <img src="https://ui-avatars.com/api/?name=Andi+P&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-10 h-10 rounded-full border border-slate-200">
-                    <div class="hidden md:block">
-                        <p class="text-sm font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
-                        <p class="text-xs text-slate-500">Mahasiswa</p>
+                <div class="flex items-center space-x-2 border-l border-slate-200 pl-4 cursor-pointer">
+                    <img src="https://ui-avatars.com/api/?name=Andi+P&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-8 h-8 rounded-full border border-slate-200">
+                    <div class="hidden md:block leading-tight">
+                        <p class="text-xs font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
+                        <p class="text-[10px] text-slate-500">Mahasiswa</p>
                     </div>
-                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
                 </div>
             </div>
         </header>
 
         <!-- Content Area -->
-        <div class="p-8 space-y-6">
+        <div class="p-6 space-y-5">
             
             <!-- Hero Banner -->
-            <div class="bg-banner-gradient rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
+            <div class="bg-banner-gradient rounded-xl p-5 flex justify-between items-center shadow-sm relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat datang, <span id="bannerNameDisplay" class="text-indigo-700">Mahasiswa</span>! 👋</h2>
-                    <p class="text-slate-600">Tetap semangat belajar dan jangan lupa menyelesaikan tugas tepat waktu.</p>
+                    <h2 class="text-lg font-bold text-slate-800 mb-1">Selamat datang, <span id="bannerNameDisplay" class="text-indigo-700">Mahasiswa</span>! 👋</h2>
+                    <p class="text-xs text-slate-600">Tetap semangat belajar dan jangan lupa menyelesaikan tugas tepat waktu.</p>
                 </div>
-                <!-- Tempat ilustrasi vektor (menggunakan icon sebagai dummy) -->
-                <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-indigo-200 opacity-50 text-8xl">
+                <div class="hidden md:flex absolute right-6 top-0 h-full items-center text-indigo-200 opacity-40 text-6xl">
                     <i class="fa-solid fa-laptop-code"></i>
                 </div>
             </div>
 
-            <!-- Stat Cards (5 Kolom) -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-xl"><i class="fa-solid fa-book-open"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">5</h3><p class="text-xs text-slate-500">Mata Kuliah Aktif</p></div>
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-book-open text-sm"></i></div>
+                    <div><h3 class="text-lg font-bold text-slate-800 leading-none">5</h3><p class="text-[10px] text-slate-500 mt-1">Mata Kuliah Aktif</p></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-xl"><i class="fa-solid fa-file-lines"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">3</h3><p class="text-xs text-slate-500">Tugas Belum Selesai</p></div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-green-50 text-green-500 flex items-center justify-center"><i class="fa-solid fa-file-lines text-sm"></i></div>
+                    <div><h3 class="text-lg font-bold text-slate-800 leading-none">3</h3><p class="text-[10px] text-slate-500 mt-1">Tugas Aktif</p></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-xl"><i class="fa-solid fa-calendar-check"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">1</h3><p class="text-xs text-slate-500">Ujian Mendatang</p></div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-sm"></i></div>
+                    <div><h3 class="text-lg font-bold text-slate-800 leading-none">1</h3><p class="text-[10px] text-slate-500 mt-1">Ujian Mendatang</p></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-xl"><i class="fa-regular fa-circle-check"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">92%</h3><p class="text-xs text-slate-500">Kehadiran</p></div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center"><i class="fa-regular fa-circle-check text-sm"></i></div>
+                    <div><h3 class="text-lg font-bold text-slate-800 leading-none">92%</h3><p class="text-[10px] text-slate-500 mt-1">Kehadiran</p></div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-column"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">3.75</h3><p class="text-xs text-slate-500">IP Semester Ini</p></div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center"><i class="fa-solid fa-chart-column text-sm"></i></div>
+                    <div><h3 class="text-lg font-bold text-slate-800 leading-none">3.75</h3><p class="text-[10px] text-slate-500 mt-1">IP Semester Ini</p></div>
                 </div>
             </div>
 
-            <!-- Grid Layout Utama (3 Kolom) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Grid Layout Utama -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 
                 <!-- Kolom 1 -->
-                <div class="space-y-6">
-                    <!-- Jadwal Hari Ini -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-slate-800 flex items-center"><i class="fa-regular fa-calendar text-blue-500 mr-2"></i>Jadwal Hari Ini</h3>
-                        </div>
-                        <div class="space-y-4 relative border-l-2 border-slate-100 ml-2 pl-4">
-                            <!-- Item 1 -->
+                <div class="space-y-5">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <h3 class="text-xs font-bold text-slate-800 mb-4 flex items-center"><i class="fa-regular fa-calendar text-blue-500 mr-2"></i>Jadwal Hari Ini</h3>
+                        <div class="space-y-4 relative border-l border-slate-100 ml-1.5 pl-3">
                             <div class="relative">
-                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
-                                <p class="text-xs font-semibold text-slate-500">09.00 - 10.40 <span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded ml-2">Online</span></p>
-                                <h4 class="font-bold text-slate-800 text-sm mt-1">Patologi Tumbuhan</h4>
-                                <p class="text-xs text-slate-500">Pertemuan 8 • Dr. Budi Santoso</p>
-                                <button class="mt-2 text-xs bg-blue-500 text-white px-3 py-1.5 rounded flex items-center"><i class="fa-solid fa-video mr-1"></i> Masuk Kelas</button>
+                                <div class="absolute -left-[17px] top-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full border border-white"></div>
+                                <p class="text-[10px] font-semibold text-slate-500">09.00 - 10.40 <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded ml-1">Online</span></p>
+                                <h4 class="font-bold text-slate-800 text-xs mt-0.5">Patologi Tumbuhan</h4>
+                                <p class="text-[10px] text-slate-500">Pertemuan 8 • Dr. Budi Santoso</p>
+                                <button class="mt-2 text-[10px] bg-blue-500 text-white px-2 py-1 rounded flex items-center"><i class="fa-solid fa-video mr-1"></i> Masuk Kelas</button>
                             </div>
-                            <!-- Item 2 -->
                             <div class="relative">
-                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                                <p class="text-xs font-semibold text-slate-500">13.00 - 14.40 <span class="bg-green-50 text-green-600 px-2 py-0.5 rounded ml-2">Tatap Muka</span></p>
-                                <h4 class="font-bold text-slate-800 text-sm mt-1">Mikrobiologi Pertanian</h4>
-                                <p class="text-xs text-slate-500">Pertemuan 6 • Ir. Dwi Haryanti, M.P.</p>
+                                <div class="absolute -left-[17px] top-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border border-white"></div>
+                                <p class="text-[10px] font-semibold text-slate-500">13.00 - 14.40 <span class="bg-green-50 text-green-600 px-1.5 py-0.5 rounded ml-1">Tatap Muka</span></p>
+                                <h4 class="font-bold text-slate-800 text-xs mt-0.5">Pengelolaan Hama Terpadu</h4>
+                                <p class="text-[10px] text-slate-500">Pertemuan 6 • Ir. Dwi Haryanti, M.P.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Mata Kuliah Saya -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                        <h3 class="font-bold text-slate-800 mb-4">Mata Kuliah Saya</h3>
-                        <div class="space-y-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-xs font-bold text-slate-800">Mata Kuliah Saya</h3>
+                        </div>
+                        <div class="space-y-3">
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3"><div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center text-sm"><i class="fa-solid fa-flask"></i></div><div><p class="text-sm font-bold text-slate-800">Patologi Tumbuhan</p></div></div>
-                                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">80%</span>
+                                <div class="flex items-center space-x-2"><div class="w-6 h-6 rounded bg-purple-100 text-purple-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-flask"></i></div><p class="text-xs font-bold text-slate-800">Patologi Tumbuhan</p></div>
+                                <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">80%</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3"><div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center text-sm"><i class="fa-solid fa-leaf"></i></div><div><p class="text-sm font-bold text-slate-800">Manajemen Hama</p></div></div>
-                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">60%</span>
+                                <div class="flex items-center space-x-2"><div class="w-6 h-6 rounded bg-green-100 text-green-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-leaf"></i></div><p class="text-xs font-bold text-slate-800">Manajemen Hama</p></div>
+                                <span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">60%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2"><div class="w-6 h-6 rounded bg-orange-100 text-orange-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-seedling"></i></div><p class="text-xs font-bold text-slate-800">Kesuburan Tanah & Pemupukan</p></div>
+                                <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">95%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Kolom 2 -->
-                <div class="space-y-6">
-                    <!-- Tugas Terdekat -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                        <h3 class="font-bold text-slate-800 mb-4">Tugas Terdekat</h3>
-                        <div class="space-y-3">
-                            <div class="border border-slate-100 p-3 rounded-xl flex items-start space-x-3 hover:border-blue-200 transition">
-                                <div class="bg-blue-50 text-blue-500 p-2 rounded-lg"><i class="fa-regular fa-file-pdf"></i></div>
+                <div class="space-y-5">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <h3 class="text-xs font-bold text-slate-800 mb-3">Tugas Terdekat</h3>
+                        <div class="space-y-2.5">
+                            <div class="border border-slate-100 p-2 rounded-lg flex items-start space-x-2">
+                                <div class="bg-blue-50 text-blue-500 p-1.5 rounded"><i class="fa-regular fa-file-pdf text-xs"></i></div>
                                 <div class="flex-1">
-                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Tugas Identifikasi Penyakit</h4><span class="text-xs text-slate-400">20 Mei 2026</span></div>
-                                    <div class="flex justify-between mt-1"><p class="text-xs text-slate-500">Patologi Tumbuhan</p><span class="text-xs font-bold text-orange-500">3 hari lagi</span></div>
+                                    <div class="flex justify-between"><h4 class="text-xs font-bold text-slate-800">Tugas Identifikasi Penyakit</h4><span class="text-[9px] text-slate-400">20 Ags</span></div>
+                                    <div class="flex justify-between"><p class="text-[10px] text-slate-500">Patologi Tumbuhan</p><span class="text-[9px] font-bold text-orange-500">3 hari lagi</span></div>
                                 </div>
                             </div>
-                             <div class="border border-slate-100 p-3 rounded-xl flex items-start space-x-3 hover:border-blue-200 transition">
-                                <div class="bg-green-50 text-green-500 p-2 rounded-lg"><i class="fa-solid fa-file-word"></i></div>
+                             <div class="border border-slate-100 p-2 rounded-lg flex items-start space-x-2">
+                                <div class="bg-green-50 text-green-500 p-1.5 rounded"><i class="fa-solid fa-file-word text-xs"></i></div>
                                 <div class="flex-1">
-                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Laporan Praktikum 4</h4><span class="text-xs text-slate-400">22 Mei 2026</span></div>
-                                    <div class="flex justify-between mt-1"><p class="text-xs text-slate-500">Mikrobiologi Pertanian</p><span class="text-xs font-bold text-orange-500">5 hari lagi</span></div>
+                                    <div class="flex justify-between"><h4 class="text-xs font-bold text-slate-800">Draft Media Semai Biochar</h4><span class="text-[9px] text-slate-400">22 Ags</span></div>
+                                    <div class="flex justify-between"><p class="text-[10px] text-slate-500">Kesuburan Tanah</p><span class="text-[9px] font-bold text-orange-500">5 hari lagi</span></div>
+                                </div>
+                            </div>
+                            <div class="border border-slate-100 p-2 rounded-lg flex items-start space-x-2">
+                                <div class="bg-purple-50 text-purple-500 p-1.5 rounded"><i class="fa-solid fa-bug text-xs"></i></div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between"><h4 class="text-xs font-bold text-slate-800">Review Siklus M. anisopliae</h4><span class="text-[9px] text-slate-400">25 Ags</span></div>
+                                    <div class="flex justify-between"><p class="text-[10px] text-slate-500">Manajemen Hama</p><span class="text-[9px] font-bold text-slate-400">Minggu depan</span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Kelas Berikutnya -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between">
-                        <div>
-                            <h3 class="font-bold text-slate-800 mb-1">Kelas Berikutnya</h3>
-                            <p class="text-xl font-bold text-slate-800 mt-4">09.00 - 10.40</p>
-                            <p class="text-sm text-slate-500">Besok, Kamis 22 Mei 2026</p>
-                            <h4 class="font-bold text-slate-800 mt-4">Patologi Tumbuhan</h4>
-                            <p class="text-sm text-slate-500">Pertemuan 9 • Dr. Budi Santoso</p>
-                        </div>
-                        <button class="mt-6 w-full bg-indigo-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-600 transition">Lihat Detail Kelas</button>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <h3 class="text-xs font-bold text-slate-800 mb-1">Kelas Berikutnya</h3>
+                        <p class="text-sm font-bold text-slate-800 mt-2">09.00 - 10.40</p>
+                        <p class="text-[10px] text-slate-500">Besok, Kamis 22 Agustus 2026</p>
+                        <h4 class="font-bold text-slate-800 text-xs mt-2">Patologi Tumbuhan</h4>
+                        <p class="text-[10px] text-slate-500">Pertemuan 9 • Dr. Budi Santoso</p>
+                        <button class="mt-3 w-full bg-indigo-500 text-white py-1.5 rounded-md text-[10px] font-medium hover:bg-indigo-600 transition">Lihat Detail</button>
                     </div>
                 </div>
 
                 <!-- Kolom 3 -->
-                <div class="space-y-6">
-                    <!-- Pengumuman -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                        <h3 class="font-bold text-slate-800 mb-4">Pengumuman Terbaru</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-start space-x-3">
-                                <div class="bg-purple-50 text-purple-500 p-2 rounded-lg mt-1"><i class="fa-solid fa-bullhorn text-sm"></i></div>
+                <div class="space-y-5">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <h3 class="text-xs font-bold text-slate-800 mb-3">Pengumuman Terbaru</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-2">
+                                <div class="bg-purple-50 text-purple-500 p-1.5 rounded-md mt-0.5"><i class="fa-solid fa-bullhorn text-[10px]"></i></div>
                                 <div>
-                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Perubahan Jadwal Kuliah</h4><span class="text-[10px] text-slate-400">18 Mei 2026</span></div>
-                                    <p class="text-xs text-slate-500 mt-1">Kuliah hari Kamis (20 Mei) diubah menjadi online.</p>
+                                    <div class="flex justify-between"><h4 class="text-xs font-bold text-slate-800">Jadwal Praktikum Hama</h4><span class="text-[9px] text-slate-400">Hari ini</span></div>
+                                    <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Praktikum pengamatan infeksi Beauveria bassiana dipindah ke Lab. Biologi.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="bg-blue-50 text-blue-500 p-1.5 rounded-md mt-0.5"><i class="fa-solid fa-calendar-days text-[10px]"></i></div>
+                                <div>
+                                    <div class="flex justify-between"><h4 class="text-xs font-bold text-slate-800">Batas Laporan PKL</h4><span class="text-[9px] text-slate-400">Kemarin</span></div>
+                                    <p class="text-[10px] text-slate-500 leading-tight mt-0.5">Harap segera mengunggah laporan kegiatan Karantina OPTK.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Kalender Dummy -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                        <h3 class="font-bold text-slate-800 mb-4">Kalender Akademik</h3>
-                        <div class="text-center bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-500">
-                            <i class="fa-regular fa-calendar-days text-2xl mb-2 text-slate-300"></i>
-                            <p>Tampilan Kalender Bulan Mei 2026</p>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+                        <h3 class="text-xs font-bold text-slate-800 mb-3">Kalender Akademik</h3>
+                        <div class="text-center bg-slate-50 p-4 rounded-lg border border-slate-100 text-slate-400">
+                            <i class="fa-regular fa-calendar-days text-xl mb-1 text-slate-300"></i>
+                            <p class="text-[10px]">Agustus 2026</p>
                         </div>
                     </div>
                 </div>
@@ -259,11 +263,9 @@
         </div>
     </main>
 
-    <!-- Script Koneksi -->
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa.js"></script>
     <script>
-        // Memperbarui nama tambahan di file dashboard baru ini
         document.addEventListener('DOMContentLoaded', () => {
             const sessionData = localStorage.getItem('user_session');
             if (sessionData) {
@@ -271,7 +273,6 @@
                 const namaAwal = user.username.split('@')[0];
                 const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
                 
-                // Update display nama di navbar atas dan banner sapaan
                 if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
                 if(document.getElementById('bannerNameDisplay')) document.getElementById('bannerNameDisplay').innerText = CapitalizedName;
             }
