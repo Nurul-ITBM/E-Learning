@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi - EduLearn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .bg-brand-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .sidebar-item-active { background-color: #eff6ff; color: #4f46e5; font-weight: 600; }
+        .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
+        .sidebar-item:hover { color: #4f46e5; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <!-- SIDEBAR (Sama persis dengan menu lain) -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
+        <div class="overflow-y-auto">
+            <div class="bg-brand-gradient p-6 text-white rounded-br-2xl">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
+                        <p class="text-xs text-indigo-100 uppercase tracking-wider mt-0.5">Sistem Pembelajaran</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-6 text-sm">
+                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg mb-6"><i class="fa-solid fa-house w-5 text-center"></i><span>Dashboard</span></a>
+                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Menu Utama</p>
+                <nav class="space-y-1 mb-8">
+                    <a href="matakuliah.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-book w-5 text-center"></i><span>Mata Kuliah</span></a>
+                    <a href="tugas.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-file-pen w-5 text-center"></i><span>Tugas</span></a>
+                    <a href="ujian.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Ujian</span></a>
+                    <!-- Absensi Aktif -->
+                    <a href="absensi.html" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl"><i class="fa-solid fa-user-check w-5 text-center"></i><span>Absensi</span></a>
+                    <a href="nilai.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-chart-simple w-5 text-center"></i><span>Nilai</span></a>
+                    <a href="pengumuman.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Pengumuman</span></a>
+                </nav>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-100">
+            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-3">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Keluar</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800">Riwayat Kehadiran</h2>
+            <div class="flex items-center space-x-3 border-l border-slate-200 pl-6">
+                <p class="text-sm font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-slate-800 uppercase font-bold text-xs">
+                        <tr>
+                            <th class="px-6 py-4">Nama Pertemuan</th>
+                            <th class="px-6 py-4">Tanggal</th>
+                            <th class="px-6 py-4">Waktu Absen</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelAbsensiBody">
+                        <!-- Loading Row -->
+                        <tr><td colspan="4" class="text-center py-10 text-slate-400 italic">Memuat data absensi...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user_session'));
+            document.getElementById('userNameDisplay').innerText = user.username.split('@')[0];
+            
+            // Panggil API Absensi
+            const res = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'get_absensi', id_mahasiswa: user.id_user })
+            });
+            const result = await res.json();
+            
+            const tbody = document.getElementById('tabelAbsensiBody');
+            tbody.innerHTML = ''; // Hapus loading
+            
+            result.data.forEach(item => {
+                let color = item.status === 'Hadir' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200';
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50">
+                        <td class="px-6 py-4 font-bold text-slate-800">${item.nama_pertemuan}</td>
+                        <td class="px-6 py-4">${item.tanggal}</td>
+                        <td class="px-6 py-4 font-mono">${item.waktu_absen}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
