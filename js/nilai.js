@@ -1,4 +1,6 @@
-// js/nilai.js
+// ==========================================
+// js/nilai.js - Logika Frontend Nilai Mahasiswa
+// ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Validasi Sesi Login
@@ -31,16 +33,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             let totalBobotSKS = 0;
 
             result.data.forEach((item, index) => {
-                const sks = parseInt(item.sks) || 0;
+                // Pastikan SKS dibaca sebagai angka, default ke 3 jika kosong
+                const sks = parseInt(item.sks) || 3; 
                 totalSKS += sks;
 
                 // Konversi Grade ke Angka Mutu (A=4, B=3, C=2, D=1, E=0)
                 let bobot = 0;
-                const g = String(item.grade).toUpperCase();
+                const g = String(item.grade || '').trim().toUpperCase();
+                
                 if (g === 'A') bobot = 4;
                 else if (g === 'B') bobot = 3;
                 else if (g === 'C') bobot = 2;
                 else if (g === 'D') bobot = 1;
+                else if (g === 'E') bobot = 0;
 
                 totalBobotSKS += (sks * bobot);
 
@@ -54,19 +59,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-800">${index + 1}</td>
                         <td class="px-6 py-4 font-medium text-slate-800">${item.nama_matkul}</td>
-                        <td class="px-6 py-4 text-center">${item.sks}</td>
+                        <td class="px-6 py-4 text-center">${item.sks || '-'}</td>
                         <td class="px-6 py-4 text-center">${item.tugas}</td>
                         <td class="px-6 py-4 text-center">${item.uts}</td>
                         <td class="px-6 py-4 text-center">${item.uas}</td>
                         <td class="px-6 py-4 text-center font-bold text-slate-700">${item.akhir}</td>
                         <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">${item.grade}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">${item.grade || '-'}</span>
                         </td>
                     </tr>
                 `;
             });
 
-            // Hitung dan tampilkan IPK / IPS ringkas jika diperlukan
+            // Hitung dan tampilkan IPK secara akurat
             if (totalSKS > 0) {
                 const ipk = (totalBobotSKS / totalSKS).toFixed(2);
                 const ipkDisplay = document.getElementById('ipkDisplay');
