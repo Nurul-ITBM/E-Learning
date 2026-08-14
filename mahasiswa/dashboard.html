@@ -257,21 +257,22 @@
 
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa.js"></script>
-    <script>
+    <script>  
         document.addEventListener('DOMContentLoaded', () => {
             const sessionData = localStorage.getItem('user_session');
             if (sessionData) {
                 const user = JSON.parse(sessionData);
                 
-                // --- LETAKKAN DI SINI ---
-                console.log("Data user dari session:", user);
-                // ------------------------
-
-                const namaAwal = user.username.split('@')[0];
-                const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
+                // Mengambil langsung dari kolom 'nama_mahasiswa' di sheet Anda
+                const namaUser = user.nama_mahasiswa || 'Mahasiswa'; 
                 
-                if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
-                if(document.getElementById('bannerNameDisplay')) document.getElementById('bannerNameDisplay').innerText = CapitalizedName;
+                // Memasukkan ke elemen tampilan
+                if(document.getElementById('userNameDisplay')) {
+                    document.getElementById('userNameDisplay').innerText = namaUser;
+                }
+                if(document.getElementById('bannerNameDisplay')) {
+                    document.getElementById('bannerNameDisplay').innerText = namaUser;
+                }
             }
         });
     </script>
