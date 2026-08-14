@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EduLearn E-Learning</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CryptoJS untuk Hash Password -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-primary-btn { background-color: #5d5fef; } /* Indigo/Purple */
+        .bg-primary-btn:hover { background-color: #4b4ce0; }
+        .text-navy { color: #21253d; }
+    </style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center h-screen">
+
+    <!-- Card Login -->
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        
+        <!-- Header & Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="bg-indigo-500 p-3 rounded-xl text-white mb-4 shadow-md">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-navy tracking-wide">EduLearn</h1>
+            <p class="text-gray-500 text-sm mt-1">Sistem Pembelajaran Terintegrasi</p>
+        </div>
+
+        <form id="loginForm">
+            <!-- Input Username/Email -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Username / Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="username" placeholder="Masukkan NIM atau NIP" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" required>
+                </div>
+            </div>
+            
+            <!-- Input Password -->
+            <div class="mb-6">
+                <div class="flex justify-between mb-2">
+                    <label class="block text-sm font-semibold text-gray-700">Password</label>
+                    <a href="#" class="text-xs text-indigo-600 hover:underline font-medium">Lupa password?</a>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" required>
+                </div>
+            </div>
+
+            <!-- Tombol Login -->
+            <button type="submit" id="loginBtn" class="w-full bg-primary-btn text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex justify-center items-center space-x-2">
+                <span>Masuk ke Dashboard</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+            
+            <!-- Pesan Notifikasi -->
+            <div id="statusMessage" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
+        </form>
+    </div>
+
+    <script>
+        // =========================================================
+        // WAJIB: GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+        // =========================================================
+        const API_URL = 'MASUKKAN_URL_EXEC_APPS_SCRIPT_ANDA_DI_SINI';
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('statusMessage');
+            const btnOriginalContent = btn.innerHTML;
+
+            // Loading state
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Memvalidasi...</span>';
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            
+            msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200';
+            msg.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Menghubungkan ke server...';
+
+            // Hash password sesuai dengan database dummy kita
+            const hashedPassword = CryptoJS.SHA256(pass).toString();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: user,
+                        password: hashedPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Berhasil
+                    msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-green-50 text-green-600 border border-green-200 font-medium';
+                    msg.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Login Berhasil! Mengalihkan...';
+                    
+                    // Simpan data login ke Local Storage
+                    localStorage.setItem('user_session', JSON.stringify(result.data));
+
+                    // Arahkan ke dashboard yang sesuai (beri jeda 1 detik agar animasi terlihat)
+                    setTimeout(() => {
+                        if (result.data.role === 'dosen') {
+                            window.location.href = 'dosen/dashboard.html';
+                        } else if (result.data.role === 'mahasiswa') {
+                            window.location.href = 'mahasiswa/dashboard.html';
+                        }
+                    }, 1000);
+                } else {
+                    // Gagal (Password salah / akun tidak ada)
+                    msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-red-50 text-red-600 border border-red-200';
+                    msg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> ${result.message}`;
+                    
+                    // Kembalikan tombol ke semula
+                    btn.innerHTML = btnOriginalContent;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
+                }
+            } catch (error) {
+                // Error koneksi (API_URL salah / belum di deploy)
+                msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-red-50 text-red-600 border border-red-200';
+                msg.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Gagal terhubung. Pastikan URL API sudah benar.';
+                
+                btn.innerHTML = btnOriginalContent;
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+            }
+        });
+    </script>
+</body>
+</html>
