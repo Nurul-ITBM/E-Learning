@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td class="px-6 py-4">
                             <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status || 'Belum'}</span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 text-center">
                             <div class="flex justify-center space-x-2">
                                 <button onclick="kirimAbsen('MASUK', '${item.id_pertemuan}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm transition">MASUK</button>
                                 <button onclick="kirimAbsen('KELUAR', '${item.id_pertemuan}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm transition">KELUAR</button>
