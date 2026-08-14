@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tbody = document.getElementById('tabelAbsensiBody');
         tbody.innerHTML = '';
         
+        // Di dalam file js/absensi.js
         if (result.status === 'success' && result.data.length > 0) {
             result.data.forEach(item => {
-                // Tentukan warna badge status
                 let color = 'text-slate-600 bg-slate-50 border-slate-200';
                 if (item.status === 'Hadir') {
                     color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     color = 'text-amber-600 bg-amber-50 border-amber-200';
                 }
                 
-                // Render baris tabel beserta Tombol Masuk & Keluar
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-800">${item.nama_pertemuan || '-'}</td>
                         <td class="px-6 py-4">${item.tanggal || '-'}</td>
-                        <td class="px-6 py-4 font-mono">${item.waktu_absen || '-'}</td>
+                        <td class="px-6 py-4 font-mono text-emerald-600 font-semibold">${item.waktu_masuk || '-'}</td>
+                        <td class="px-6 py-4 font-mono text-red-600 font-semibold">${item.waktu_keluar || '-'}</td>
                         <td class="px-6 py-4">
                             <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status || 'Belum'}</span>
                         </td>
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
             });
         } else {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-slate-400">Belum ada riwayat absensi.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-400">Belum ada riwayat absensi.</td></tr>`;
         }
     } catch (err) {
         console.error(err);
