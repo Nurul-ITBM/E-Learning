@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EduLearn E-Learning</title>
+    
+    <!-- Tailwind CSS & Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Kustom Buatan Kita -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Library Kriptografi untuk Hash Password -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center h-screen font-sans">
+
+    <!-- Tombol Kembali ke Beranda -->
+    <a href="index.html" class="absolute top-6 left-6 text-gray-500 hover:text-indigo-600 flex items-center space-x-2 transition-colors">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="font-medium text-sm">Kembali ke Beranda</span>
+    </a>
+
+    <!-- Card Login -->
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        
+        <!-- Header & Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="bg-indigo-500 p-3 rounded-xl text-white mb-4 shadow-md">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-navy tracking-wide">EduLearn</h1>
+            <p class="text-gray-500 text-sm mt-1">Sistem Pembelajaran Terintegrasi</p>
+        </div>
+
+        <form id="loginForm">
+            <!-- Input Username -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Username / Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="username" placeholder="Masukkan NIM atau NIP" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" required>
+                </div>
+            </div>
+            
+            <!-- Input Password -->
+            <div class="mb-6">
+                <div class="flex justify-between mb-2">
+                    <label class="block text-sm font-semibold text-gray-700">Password</label>
+                    <a href="#" class="text-xs text-indigo-600 hover:underline font-medium">Lupa password?</a>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" required>
+                </div>
+            </div>
+
+            <!-- Tombol Login -->
+            <button type="submit" id="loginBtn" class="w-full bg-primary-btn text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex justify-center items-center space-x-2">
+                <span>Masuk ke Dashboard</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+            
+            <!-- Pesan Notifikasi (Muncul jika loading/error/sukses) -->
+            <div id="statusMessage" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
+        </form>
+    </div>
+
+    <!-- Script Terpisah (Perhatikan urutannya: config dulu, baru auth) -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
