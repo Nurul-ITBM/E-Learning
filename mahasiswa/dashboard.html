@@ -262,11 +262,17 @@
             const sessionData = localStorage.getItem('user_session');
             if (sessionData) {
                 const user = JSON.parse(sessionData);
-                const namaAwal = user.username.split('@')[0];
-                const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
                 
-                if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
-                if(document.getElementById('bannerNameDisplay')) document.getElementById('bannerNameDisplay').innerText = CapitalizedName;
+                // Mengambil langsung nama dari kolom 'nama_mahasiswa' sheet (fallback ke 'Mahasiswa' jika kosong)
+                const namaLengkap = user.nama_mahasiswa || 'Mahasiswa'; 
+                
+                // Menampilkan ke elemen navbar dan banner
+                if(document.getElementById('userNameDisplay')) {
+                    document.getElementById('userNameDisplay').innerText = namaLengkap;
+                }
+                if(document.getElementById('bannerNameDisplay')) {
+                    document.getElementById('bannerNameDisplay').innerText = namaLengkap;
+                }
             }
         });
     </script>
