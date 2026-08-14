@@ -5,8 +5,12 @@ let daftarSoal = [];
 let jawabanSiswa = {}; // Menyimpan jawaban: { indexSoal: { opsi: 'A', ragu: false } }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Ambil data soal dari backend (contoh id_ujian = U001)
-    await loadSoalUjian('U001');
+    // Menangkap id_ujian dari URL (contoh: ujian_soal.html?id_ujian=U001)
+    const urlParams = new URLSearchParams(window.location.search);
+    const idUjian = urlParams.get('id_ujian') || 'U001'; // Default ke U001 jika kosong
+    
+    // PERBAIKAN: Gunakan variabel idUjian, bukan string 'U001' langsung
+    await loadSoalUjian(idUjian);
 
     // Event listener untuk pilihan ganda agar langsung tersimpan saat diklik
     document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
