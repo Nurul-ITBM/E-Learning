@@ -1,0 +1,28 @@
+/* css/style.css - Variabel & Styling Utama EduLearn */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg-navy: #21253d;
+    --bg-navy-active: #3b4269;
+    --primary-indigo: #5d5fef;
+    --primary-indigo-hover: #4b4ce0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Class Kustom Komponen */
+.bg-navy { background-color: var(--bg-navy); }
+.bg-navy-active { background-color: var(--bg-navy-active); }
+
+.bg-primary-btn { 
+    background-color: var(--primary-indigo); 
+    transition: background-color 0.2s ease;
+}
+.bg-primary-btn:hover { 
+    background-color: var(--primary-indigo-hover); 
+}
+
+.text-navy { color: var(--bg-navy); }
