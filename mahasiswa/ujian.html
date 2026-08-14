@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Berbasis Komputer - EduLearn</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen flex flex-col justify-between overflow-hidden">
+
+    <!-- Top Bar Ujian -->
+    <header class="bg-white border-b border-slate-200 px-8 py-3.5 flex justify-between items-center z-10 shadow-sm">
+        <div>
+            <h1 class="text-base font-bold text-slate-800">Ujian Tengah Semester - Patologi Tumbuhan</h1>
+            <p class="text-xs text-slate-500">Sistem Ujian Terintegrasi EduLearn</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- Timer Countdown -->
+            <div class="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-2">
+                <i class="fa-regular fa-clock"></i>
+                <span id="timerCountdown">01:29:45</span>
+            </div>
+            <button onclick="if(confirm('Akhiri ujian sekarang?')) window.location.href='dashboard.html';" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition">
+                Selesai Ujian
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace (Grid 2 Kolom) -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
+        
+        <!-- KOLOM KIRI: NAVIGASI SOAL (1 Kolom) -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-y-auto">
+            <div>
+                <h3 class="font-bold text-slate-800 text-sm mb-3">Navigasi Soal</h3>
+                
+                <!-- Keterangan Status -->
+                <div class="space-y-1.5 text-xs text-slate-600 mb-5 pb-4 border-b border-slate-100">
+                    <div class="flex items-center space-x-2"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span><span>Dijawab</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-3 h-3 bg-slate-200 rounded-full inline-block"></span><span>Belum Dijawab</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-3 h-3 bg-amber-500 rounded-full inline-block"></span><span>Ragu-ragu</span></div>
+                </div>
+
+                <!-- Grid Nomor Soal (1 sampai 20 sebagai contoh) -->
+                <div class="grid grid-cols-5 gap-2.5">
+                    <!-- Tombol Nomor Soal (Status Dinamis) -->
+                    <button class="w-10 h-10 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">1</button>
+                    <button class="w-10 h-10 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">2</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">3</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">4</button>
+                    <button class="w-10 h-10 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">5</button>
+                    
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">6</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">7</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">8</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">9</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">10</button>
+                    
+                    <button class="w-10 h-10 rounded-xl bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">11</button>
+                    <!-- Soal Aktif (Sedang dibuka) -->
+                    <button class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center ring-4 ring-indigo-100 shadow-md">12</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">13</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">14</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">15</button>
+                    
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">16</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">17</button>
+                    <button class="w-10 h-10 rounded-xl bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">18</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">19</button>
+                    <button class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold text-xs flex items-center justify-center">20</button>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 text-center pt-4 border-t border-slate-100">
+                Total Soal: 40 Pilihan Ganda
+            </div>
+        </div>
+
+        <!-- KOLOM KANAN: KONTEN SOAL (3 Kolom) -->
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 md:col-span-3 flex flex-col justify-between overflow-y-auto">
+            <div>
+                <!-- Header Soal & Poin -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                    <span class="text-sm font-bold text-slate-700">Soal 12 dari 40</span>
+                    <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1 rounded-full border border-indigo-100">2 Poin</span>
+                </div>
+
+                <!-- Teks Pertanyaan -->
+                <p class="text-base font-semibold text-slate-800 mb-6 leading-relaxed">
+                    Penyakit layu pada tanaman tomat disebabkan oleh organisme berikut, yaitu...
+                </p>
+
+                <!-- Pilihan Jawaban (A, B, C, D) -->
+                <div class="space-y-3 mb-8">
+                    <label class="flex items-center p-3.5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition">
+                        <input type="radio" name="jawaban" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-3 text-sm font-medium text-slate-700">A. Jamur <em>Fusarium oxysporum</em></span>
+                    </label>
+                    
+                    <!-- Pilihan yang dipilih (Aktif) -->
+                    <label class="flex items-center p-3.5 rounded-xl border-2 border-indigo-600 bg-indigo-50/50 cursor-pointer transition shadow-sm">
+                        <input type="radio" name="jawaban" checked class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-3 text-sm font-bold text-indigo-900">B. Bakteri <em>Ralstonia solanacearum</em></span>
+                    </label>
+
+                    <label class="flex items-center p-3.5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition">
+                        <input type="radio" name="jawaban" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-3 text-sm font-medium text-slate-700">C. Virus TMV (Tobacco Mosaic Virus)</span>
+                    </label>
+
+                    <label class="flex items-center p-3.5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition">
+                        <input type="radio" name="jawaban" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-3 text-sm font-medium text-slate-700">D. Nematoda <em>Meloidogyne sp.</em></span>
+                    </label>
+                </div>
+
+                <!-- Kotak Ragu-ragu -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-700">Ragu-ragu?</p>
+                        <p class="text-[11px] text-slate-500">Tandai soal ini jika Anda ingin memeriksanya kembali nanti.</p>
+                    </div>
+                    <label class="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-100">
+                        <input type="checkbox" class="rounded text-amber-500 focus:ring-amber-400">
+                        <span class="text-xs font-bold text-slate-700">Tandai Ragu-ragu</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tombol Navigasi Bawah -->
+            <div class="flex justify-between items-center pt-6 mt-6 border-t border-slate-100">
+                <button class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs transition flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-2">}</i> Sebelumnya
+                </button>
+                <button class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-md flex items-center">
+                    Berikutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
