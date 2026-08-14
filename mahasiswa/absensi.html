@@ -80,36 +80,8 @@
         </div>
     </main>
 
+    <!-- Panggil file JS eksternal -->
     <script src="../js/config.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = JSON.parse(localStorage.getItem('user_session'));
-            document.getElementById('userNameDisplay').innerText = user.username.split('@')[0];
-            
-            // Panggil API Absensi
-            const res = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'get_absensi', id_mahasiswa: user.id_user })
-            });
-            const result = await res.json();
-            
-            const tbody = document.getElementById('tabelAbsensiBody');
-            tbody.innerHTML = ''; // Hapus loading
-            
-            result.data.forEach(item => {
-                let color = item.status === 'Hadir' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200';
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-50 hover:bg-slate-50">
-                        <td class="px-6 py-4 font-bold text-slate-800">${item.nama_pertemuan}</td>
-                        <td class="px-6 py-4">${item.tanggal}</td>
-                        <td class="px-6 py-4 font-mono">${item.waktu_absen}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-        });
-    </script>
+    <script src="../js/absensi.js"></script>
 </body>
 </html>
