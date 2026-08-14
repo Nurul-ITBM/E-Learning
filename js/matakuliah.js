@@ -1,4 +1,4 @@
-// js/matakuliah.js - Menarik dan menampilkan data Kelas Gabungan
+// js/matakuliah.js - Menarik dan menampilkan data Kelas Gabungan dengan 2 Tombol
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '../login.html';
     });
 
-    // Panggil fungsi memuat kelas
     await loadKelasGabungan(user.id_user);
 });
 
@@ -28,7 +27,7 @@ async function loadKelasGabungan(id_user) {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({ 
-                action: 'get_kelas_mahasiswa', // Memanggil fungsi gabungan
+                action: 'get_kelas_mahasiswa', 
                 id_mahasiswa: id_user 
             })
         });
@@ -44,6 +43,28 @@ async function loadKelasGabungan(id_user) {
             }
 
             result.data.forEach(item => {
+                
+                // LOGIKA TOMBOL 1 (CEK ONLINE/OFFLINE BERDASARKAN KOLOM RUANGAN)
+                // Jika kolom ruangan mengandung "http", kita anggap itu link Zoom/Gmeet
+                let isOnline = item.ruangan.toLowerCase().includes('http');
+                let namaRuangan = isOnline ? "Kelas Online (Virtual)" : item.ruangan;
+                
+                let tombolSatuHTML = '';
+                if (isOnline) {
+                    tombolSatuHTML = `
+                        <button onclick="window.open('${item.ruangan}', '_blank')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-video mr-1.5"></i> Masuk Zoom
+                        </button>
+                    `;
+                } else {
+                    tombolSatuHTML = `
+                        <button disabled class="flex-1 bg-slate-100 text-slate-500 py-2 rounded-lg text-xs font-bold flex items-center justify-center cursor-not-allowed border border-slate-200">
+                            <i class="fa-solid fa-building mr-1.5"></i> Kelas Offline
+                        </button>
+                    `;
+                }
+
+                // PEMBUATAN KARTU
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all flex flex-col justify-between";
                 
@@ -59,7 +80,7 @@ async function loadKelasGabungan(id_user) {
                         <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah}</h3>
                         <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu}</p>
                         
-                        <!-- Info Jadwal -->
+                        <!-- Info Jadwal & Ruangan -->
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
                             <div class="flex items-center text-xs text-slate-600 font-medium">
                                 <i class="fa-regular fa-clock w-5 text-blue-500"></i>
@@ -67,15 +88,19 @@ async function loadKelasGabungan(id_user) {
                             </div>
                             <div class="flex items-center text-xs text-slate-600 font-medium">
                                 <i class="fa-solid fa-location-dot w-5 text-red-500"></i>
-                                <span>${item.ruangan}</span>
+                                <span>${namaRuangan}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Tombol Masuk Kelas -->
-                    <div class="mt-5">
-                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}'" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-colors flex items-center justify-center">
-                            Masuk Kelas Terpadu <i class="fa-solid fa-arrow-right ml-2"></i>
+                    <!-- DUA TOMBOL AKSI -->
+                    <div class="mt-5 flex space-x-3">
+                        <!-- Tombol 1: Zoom / Offline -->
+                        ${tombolSatuHTML}
+                        
+                        <!-- Tombol 2: Lihat Materi -->
+                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}&tab=materi'" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-folder-open mr-1.5"></i> Lihat Materi
                         </button>
                     </div>
                 `;
