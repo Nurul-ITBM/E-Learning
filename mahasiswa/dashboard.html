@@ -5,195 +5,297 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Mahasiswa - EduLearn</title>
     
-    <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- CSS Kustom (Gunakan ../ untuk naik satu folder) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .bg-brand-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .bg-banner-gradient { background: linear-gradient(to right, #e0e7ff, #ede9fe); }
+        .sidebar-item-active { background-color: #eff6ff; color: #4f46e5; font-weight: 600; }
+        .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
+        .sidebar-item:hover { color: #4f46e5; background-color: #f8fafc; }
+    </style>
 </head>
-<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+<body class="flex h-screen overflow-hidden text-slate-800">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-navy text-white flex flex-col justify-between transition-all duration-300 shadow-xl z-20">
-        <div>
-            <!-- Logo -->
-            <div class="p-6 flex items-center space-x-3 border-b border-gray-700">
-                <div class="bg-indigo-500 p-2 rounded-lg text-white">
-                    <i class="fa-solid fa-graduation-cap text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
-                    <p class="text-xs text-gray-400">Panel Mahasiswa</p>
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
+        <div class="overflow-y-auto">
+            <!-- Header Sidebar (Logo Area) -->
+            <div class="bg-brand-gradient p-6 text-white rounded-br-3xl">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-wide">EduLearn</h1>
+                        <p class="text-xs text-indigo-100">Sistem Pembelajaran</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Navigasi Menu -->
-            <nav class="mt-6 px-4 space-y-1 text-sm font-medium">
-                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 bg-navy-active rounded-lg text-white shadow-md">
+            <!-- Menu Navigasi -->
+            <div class="px-4 py-6">
+                <!-- Aktif -->
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl mb-6">
                     <i class="fa-solid fa-house w-5 text-center"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-navy-active hover:text-white rounded-lg transition-colors">
-                    <i class="fa-solid fa-book w-5 text-center"></i>
-                    <span>Mata Kuliah</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-navy-active hover:text-white rounded-lg transition-colors">
-                    <i class="fa-regular fa-calendar w-5 text-center"></i>
-                    <span>Jadwal Kelas</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-navy-active hover:text-white rounded-lg transition-colors">
-                    <i class="fa-solid fa-file-pen w-5 text-center"></i>
-                    <span>Tugas & PKL</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-navy-active hover:text-white rounded-lg transition-colors">
-                    <i class="fa-regular fa-file-lines w-5 text-center"></i>
-                    <span>Ujian</span>
-                </a>
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-navy-active hover:text-white rounded-lg transition-colors">
-                    <i class="fa-solid fa-user-check w-5 text-center"></i>
-                    <span>Absensi</span>
-                </a>
-            </nav>
+
+                <p class="px-4 text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Menu Utama</p>
+                <nav class="space-y-1 mb-8">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-book w-5 text-center"></i><span>Mata Kuliah</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-calendar w-5 text-center"></i><span>Jadwal</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-folder-open w-5 text-center"></i><span>Materi</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-file-pen w-5 text-center"></i><span>Tugas</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Ujian</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-user-check w-5 text-center"></i><span>Absensi</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-chart-simple w-5 text-center"></i><span>Nilai</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Pengumuman</span></a>
+                </nav>
+
+                <p class="px-4 text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Akun</p>
+                <nav class="space-y-1">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-user w-5 text-center"></i><span>Profil Saya</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-gear w-5 text-center"></i><span>Pengaturan</span></a>
+                </nav>
+            </div>
         </div>
 
-        <!-- Logout -->
-        <div class="px-4 pb-6">
-            <button id="btnLogout" class="w-full flex items-center space-x-3 px-4 py-3 text-gray-400 hover:text-red-400 hover:bg-navy-active rounded-lg transition-colors">
-                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i>
-                <span>Keluar Sistem</span>
+        <!-- Footer Sidebar -->
+        <div class="p-4 border-t border-slate-100">
+            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-4">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Keluar</span>
             </button>
+            <div class="text-center text-xs text-slate-400">
+                <p>&copy; 2026 EduLearn</p>
+                <p>All rights reserved</p>
+            </div>
         </div>
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto p-8 relative">
+    <main class="flex-1 overflow-y-auto flex flex-col">
         
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold text-gray-800">Dashboard Utama</h2>
-            <div class="flex items-center space-x-4">
-                <button class="relative p-2 text-gray-500 hover:text-indigo-600 transition">
-                    <i class="fa-regular fa-bell text-xl"></i>
-                    <span class="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border-2 border-white shadow-sm">
-                    M
-                </div>
-            </div>
-        </div>
-
-        <!-- Greeting -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Halo, <span id="userNameDisplay">Memuat...</span> 👋</h1>
-            <p class="text-gray-500 mt-1">Selamat datang kembali, semangat belajar hari ini!</p>
-        </div>
-
-        <!-- STAT CARDS -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                        <i class="fa-solid fa-book-open text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-800">5</h3>
-                        <p class="text-sm text-gray-500">Mata Kuliah</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-orange-50 text-orange-500 rounded-xl">
-                        <i class="fa-solid fa-file-pen text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-800">2</h3>
-                        <p class="text-sm text-gray-500">Tugas Aktif</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-red-50 text-red-500 rounded-xl">
-                        <i class="fa-solid fa-clock text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-2xl font-bold text-gray-800">1</h3>
-                        <p class="text-sm text-gray-500">Ujian Mendatang</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-shadow">
-                <div>
-                    <h3 class="text-2xl font-bold text-gray-800">92%</h3>
-                    <p class="text-sm text-gray-500">Kehadiran</p>
-                </div>
-                <div class="relative w-12 h-12">
-                    <svg class="w-full h-full" viewBox="0 0 36 36">
-                        <path class="text-gray-100" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path class="text-green-500" stroke-dasharray="92, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- GRIDS JADWAL & PENGUMUMAN -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Navbar -->
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <h2 class="text-xl font-bold text-slate-800">Dashboard Mahasiswa</h2>
             
-            <!-- Jadwal Kelas Hari Ini -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-gray-800"><i class="fa-solid fa-calendar-day text-indigo-600 mr-2"></i>Kelas Hari Ini</h3>
+            <div class="flex items-center space-x-6">
+                <!-- Search Bar -->
+                <div class="relative hidden md:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" placeholder="Cari mata kuliah, materi, tugas..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm w-72 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300">
                 </div>
                 
-                <!-- Nanti data dari Google Sheets akan dimasukkan ke sini oleh JavaScript -->
-                <div id="containerJadwal">
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div class="space-y-2">
-                                <div class="h-4 bg-gray-200 rounded"></div>
-                                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                <!-- Notifikasi -->
+                <button class="relative text-slate-500 hover:text-indigo-600 transition">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white rounded-full text-[8px] font-bold text-white flex items-center justify-center">3</span>
+                </button>
+                
+                <!-- Profil Dropdown -->
+                <div class="flex items-center space-x-3 border-l border-slate-200 pl-6 cursor-pointer">
+                    <img src="https://ui-avatars.com/api/?name=Andi+P&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-10 h-10 rounded-full border border-slate-200">
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
+                        <p class="text-xs text-slate-500">Mahasiswa</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="p-8 space-y-6">
+            
+            <!-- Hero Banner -->
+            <div class="bg-banner-gradient rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat datang, <span id="bannerNameDisplay" class="text-indigo-700">Mahasiswa</span>! 👋</h2>
+                    <p class="text-slate-600">Tetap semangat belajar dan jangan lupa menyelesaikan tugas tepat waktu.</p>
+                </div>
+                <!-- Tempat ilustrasi vektor (menggunakan icon sebagai dummy) -->
+                <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-indigo-200 opacity-50 text-8xl">
+                    <i class="fa-solid fa-laptop-code"></i>
+                </div>
+            </div>
+
+            <!-- Stat Cards (5 Kolom) -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-xl"><i class="fa-solid fa-book-open"></i></div>
+                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">5</h3><p class="text-xs text-slate-500">Mata Kuliah Aktif</p></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-xl"><i class="fa-solid fa-file-lines"></i></div>
+                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">3</h3><p class="text-xs text-slate-500">Tugas Belum Selesai</p></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-xl"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">1</h3><p class="text-xs text-slate-500">Ujian Mendatang</p></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center text-xl"><i class="fa-regular fa-circle-check"></i></div>
+                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">92%</h3><p class="text-xs text-slate-500">Kehadiran</p></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-column"></i></div>
+                    <div><h3 class="text-2xl font-bold text-slate-800 leading-tight">3.75</h3><p class="text-xs text-slate-500">IP Semester Ini</p></div>
+                </div>
+            </div>
+
+            <!-- Grid Layout Utama (3 Kolom) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Kolom 1 -->
+                <div class="space-y-6">
+                    <!-- Jadwal Hari Ini -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-800 flex items-center"><i class="fa-regular fa-calendar text-blue-500 mr-2"></i>Jadwal Hari Ini</h3>
+                        </div>
+                        <div class="space-y-4 relative border-l-2 border-slate-100 ml-2 pl-4">
+                            <!-- Item 1 -->
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>
+                                <p class="text-xs font-semibold text-slate-500">09.00 - 10.40 <span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded ml-2">Online</span></p>
+                                <h4 class="font-bold text-slate-800 text-sm mt-1">Patologi Tumbuhan</h4>
+                                <p class="text-xs text-slate-500">Pertemuan 8 • Dr. Budi Santoso</p>
+                                <button class="mt-2 text-xs bg-blue-500 text-white px-3 py-1.5 rounded flex items-center"><i class="fa-solid fa-video mr-1"></i> Masuk Kelas</button>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                <p class="text-xs font-semibold text-slate-500">13.00 - 14.40 <span class="bg-green-50 text-green-600 px-2 py-0.5 rounded ml-2">Tatap Muka</span></p>
+                                <h4 class="font-bold text-slate-800 text-sm mt-1">Mikrobiologi Pertanian</h4>
+                                <p class="text-xs text-slate-500">Pertemuan 6 • Ir. Dwi Haryanti, M.P.</p>
                             </div>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-400 mt-2">Sedang memuat jadwal dari database...</p>
+
+                    <!-- Mata Kuliah Saya -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">Mata Kuliah Saya</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3"><div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center text-sm"><i class="fa-solid fa-flask"></i></div><div><p class="text-sm font-bold text-slate-800">Patologi Tumbuhan</p></div></div>
+                                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">80%</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3"><div class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center text-sm"><i class="fa-solid fa-leaf"></i></div><div><p class="text-sm font-bold text-slate-800">Manajemen Hama</p></div></div>
+                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">60%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom 2 -->
+                <div class="space-y-6">
+                    <!-- Tugas Terdekat -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">Tugas Terdekat</h3>
+                        <div class="space-y-3">
+                            <div class="border border-slate-100 p-3 rounded-xl flex items-start space-x-3 hover:border-blue-200 transition">
+                                <div class="bg-blue-50 text-blue-500 p-2 rounded-lg"><i class="fa-regular fa-file-pdf"></i></div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Tugas Identifikasi Penyakit</h4><span class="text-xs text-slate-400">20 Mei 2026</span></div>
+                                    <div class="flex justify-between mt-1"><p class="text-xs text-slate-500">Patologi Tumbuhan</p><span class="text-xs font-bold text-orange-500">3 hari lagi</span></div>
+                                </div>
+                            </div>
+                             <div class="border border-slate-100 p-3 rounded-xl flex items-start space-x-3 hover:border-blue-200 transition">
+                                <div class="bg-green-50 text-green-500 p-2 rounded-lg"><i class="fa-solid fa-file-word"></i></div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Laporan Praktikum 4</h4><span class="text-xs text-slate-400">22 Mei 2026</span></div>
+                                    <div class="flex justify-between mt-1"><p class="text-xs text-slate-500">Mikrobiologi Pertanian</p><span class="text-xs font-bold text-orange-500">5 hari lagi</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kelas Berikutnya -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1">Kelas Berikutnya</h3>
+                            <p class="text-xl font-bold text-slate-800 mt-4">09.00 - 10.40</p>
+                            <p class="text-sm text-slate-500">Besok, Kamis 22 Mei 2026</p>
+                            <h4 class="font-bold text-slate-800 mt-4">Patologi Tumbuhan</h4>
+                            <p class="text-sm text-slate-500">Pertemuan 9 • Dr. Budi Santoso</p>
+                        </div>
+                        <button class="mt-6 w-full bg-indigo-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-600 transition">Lihat Detail Kelas</button>
+                    </div>
+                </div>
+
+                <!-- Kolom 3 -->
+                <div class="space-y-6">
+                    <!-- Pengumuman -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">Pengumuman Terbaru</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-purple-50 text-purple-500 p-2 rounded-lg mt-1"><i class="fa-solid fa-bullhorn text-sm"></i></div>
+                                <div>
+                                    <div class="flex justify-between"><h4 class="text-sm font-bold text-slate-800">Perubahan Jadwal Kuliah</h4><span class="text-[10px] text-slate-400">18 Mei 2026</span></div>
+                                    <p class="text-xs text-slate-500 mt-1">Kuliah hari Kamis (20 Mei) diubah menjadi online.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kalender Dummy -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <h3 class="font-bold text-slate-800 mb-4">Kalender Akademik</h3>
+                        <div class="text-center bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-500">
+                            <i class="fa-regular fa-calendar-days text-2xl mb-2 text-slate-300"></i>
+                            <p>Tampilan Kalender Bulan Mei 2026</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Pengumuman Terbaru -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-gray-800"><i class="fa-solid fa-bullhorn text-orange-500 mr-2"></i>Pengumuman</h3>
-                    <a href="#" class="text-indigo-600 text-sm font-medium hover:underline">Lihat semua</a>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="flex items-start space-x-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                        <div class="p-2 bg-white text-indigo-600 rounded shadow-sm"><i class="fa-solid fa-vial"></i></div>
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-800">Praktikum Patologi Tumbuhan</h4>
-                            <p class="text-xs text-gray-600 mt-1">Jangan lupa membawa jas lab dan modul praktikum untuk pertemuan minggu ini.</p>
-                        </div>
+            <!-- Akses Cepat (Quick Links) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="font-bold text-slate-800 mb-4">Akses Cepat</h3>
+                <div class="flex space-x-4 overflow-x-auto pb-2">
+                    <div class="flex-shrink-0 flex items-center space-x-3 p-3 border border-slate-100 rounded-xl min-w-[150px] cursor-pointer hover:bg-slate-50">
+                        <div class="bg-blue-50 text-blue-500 p-2 rounded"><i class="fa-solid fa-desktop"></i></div>
+                        <div><p class="text-xs font-bold text-slate-800">Kelas Online</p></div>
                     </div>
-                    <div class="flex items-start space-x-4 p-3 bg-green-50 rounded-lg border border-green-100">
-                        <div class="p-2 bg-white text-green-600 rounded shadow-sm"><i class="fa-solid fa-clipboard-check"></i></div>
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-800">Batas Waktu Pengumpulan Laporan PKL</h4>
-                            <p class="text-xs text-gray-600 mt-1">Pengumpulan laporan akhir diundur hingga akhir bulan.</p>
-                        </div>
+                    <div class="flex-shrink-0 flex items-center space-x-3 p-3 border border-slate-100 rounded-xl min-w-[150px] cursor-pointer hover:bg-slate-50">
+                        <div class="bg-purple-50 text-purple-500 p-2 rounded"><i class="fa-solid fa-book"></i></div>
+                        <div><p class="text-xs font-bold text-slate-800">Materi Kuliah</p></div>
+                    </div>
+                    <div class="flex-shrink-0 flex items-center space-x-3 p-3 border border-slate-100 rounded-xl min-w-[150px] cursor-pointer hover:bg-slate-50">
+                        <div class="bg-orange-50 text-orange-500 p-2 rounded"><i class="fa-solid fa-upload"></i></div>
+                        <div><p class="text-xs font-bold text-slate-800">Kumpul Tugas</p></div>
                     </div>
                 </div>
             </div>
+
         </div>
     </main>
 
-    <!-- Script Kustom -->
+    <!-- Script Koneksi -->
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa.js"></script>
+    <script>
+        // Memperbarui nama tambahan di file dashboard baru ini
+        document.addEventListener('DOMContentLoaded', () => {
+            const sessionData = localStorage.getItem('user_session');
+            if (sessionData) {
+                const user = JSON.parse(sessionData);
+                const namaAwal = user.username.split('@')[0];
+                const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
+                
+                // Update display nama di navbar atas dan banner sapaan
+                if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
+                if(document.getElementById('bannerNameDisplay')) document.getElementById('bannerNameDisplay').innerText = CapitalizedName;
+            }
+        });
+    </script>
 </body>
 </html>
