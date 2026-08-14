@@ -1,18 +1,25 @@
 // js/absensi.js
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Validasi Sesi
+    // 1. Validasi Sesi Login
     const sessionData = localStorage.getItem('user_session');
-    if (!sessionData) { window.location.href = '../login.html'; return; }
+    if (!sessionData) { 
+        window.location.href = '../login.html'; 
+        return; 
+    }
     
     const user = JSON.parse(sessionData);
-    document.getElementById('userNameDisplay').innerText = user.username.split('@')[0];
+    const namaUser = user.username ? user.username.split('@')[0] : 'Mahasiswa';
+    document.getElementById('userNameDisplay').innerText = namaUser;
 
-    // 2. Fetch Data dari Server
+    // 2. Fetch Data dari Server (Google Apps Script)
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'get_absensi', id_mahasiswa: user.id_mahasiswa }) // Gunakan id_mahasiswa hasil login
+            body: JSON.stringify({ 
+                action: 'get_absensi', 
+                id_mahasiswa: user.id_mahasiswa 
+            })
         });
         const result = await res.json();
         
@@ -21,16 +28,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (result.status === 'success' && result.data.length > 0) {
             result.data.forEach(item => {
-                let color = item.status === 'Hadir' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200';
+                // Tentukan warna badge status
+                let color = 'text-slate-600 bg-slate-50 border-slate-200';
+                if (item.status === 'Hadir') {
+                    color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
+                } else if (item.status === 'Izin' || item.status === 'Sakit') {
+                    color = 'text-amber-600 bg-amber-50 border-amber-200';
+                }
                 
-                // Tambahkan kolom tombol aksi di sini
+                // Render baris tabel beserta Tombol Masuk & Keluar
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-slate-800">${item.nama_pertemuan}</td>
-                        <td class="px-6 py-4">${item.tanggal}</td>
-                        <td class="px-6 py-4 font-mono">${item.waktu_absen}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800">${item.nama_pertemuan || '-'}</td>
+                        <td class="px-6 py-4">${item.tanggal || '-'}</td>
+                        <td class="px-6 py-4 font-mono">${item.waktu_absen || '-'}</td>
                         <td class="px-6 py-4">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status}</span>
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold border ${color}">${item.status || 'Belum'}</span>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex justify-center space-x-2">
@@ -46,20 +59,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         console.error(err);
-        document.getElementById('tabelAbsensiBody').innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-400">Gagal memuat data.</td></tr>`;
+        document.getElementById('tabelAbsensiBody').innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-400">Gagal memuat data dari server.</td></tr>`;
     }
 
-    // Logout
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('user_session');
-        window.location.href = '../login.html';
-    });
+    // 3. Tombol Logout
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('user_session');
+            window.location.href = '../login.html';
+        });
+    }
 });
 
-// 3. Tambahkan fungsi ini di bawahnya (di luar DOMContentLoaded)
+// 4. Fungsi untuk Mengirim Aksi Tombol Absen (Masuk / Keluar)
 async function kirimAbsen(aksi, id_pertemuan) {
-    const user = JSON.parse(localStorage.getItem('user_session'));
-    if (!confirm(`Konfirmasi Absen ${aksi}?`)) return;
+    const sessionData = localStorage.getItem('user_session');
+    if (!sessionData) return;
+    
+    const user = JSON.parse(sessionData);
+    
+    if (!confirm(`Apakah Anda yakin ingin melakukan absen ${aksi}?`)) return;
 
     try {
         const res = await fetch(CONFIG.API_URL, {
@@ -73,8 +93,12 @@ async function kirimAbsen(aksi, id_pertemuan) {
         });
         const result = await res.json();
         alert(result.message);
-        if(result.status === 'success') location.reload(); // Refresh untuk update status
+        
+        if (result.status === 'success') {
+            location.reload(); // Muat ulang halaman untuk memperbarui status
+        }
     } catch (err) {
-        alert("Gagal terhubung ke server.");
+        console.error(err);
+        alert("Terjadi kesalahan koneksi ke server.");
     }
 }
