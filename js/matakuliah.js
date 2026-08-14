@@ -1,4 +1,4 @@
-// js/matakuliah.js - Menarik dan menampilkan data dari Sheet MataKuliah
+// js/matakuliah.js - Menarik dan menampilkan data Kelas Gabungan
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
@@ -8,70 +8,83 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const user = JSON.parse(sessionData);
-    
-    // Tampilkan Nama User di Header
     const namaAwal = user.username.split('@')[0];
     const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
     if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
 
-    // Logout
     document.getElementById('btnLogout').addEventListener('click', () => {
         localStorage.removeItem('user_session');
         window.location.href = '../login.html';
     });
 
-    // Panggil fungsi untuk mengambil data mata kuliah
-    await loadMataKuliah();
+    // Panggil fungsi memuat kelas
+    await loadKelasGabungan(user.id_user);
 });
 
-async function loadMataKuliah() {
+async function loadKelasGabungan(id_user) {
     const container = document.getElementById('containerMataKuliah');
     
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'get_mata_kuliah' })
+            body: JSON.stringify({ 
+                action: 'get_kelas_mahasiswa', // Memanggil fungsi gabungan
+                id_mahasiswa: id_user 
+            })
         });
 
         const result = await response.json();
 
         if (result.status === 'success') {
-            container.innerHTML = ''; // Kosongkan animasi loading
+            container.innerHTML = ''; 
             
-            // Looping data dari Google Sheets
-            result.data.forEach(mk => {
-                // Membuat elemen kartu HTML untuk tiap mata kuliah
+            if (result.data.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10">Belum ada kelas yang didaftarkan pada KRS.</p>';
+                return;
+            }
+
+            result.data.forEach(item => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex flex-col justify-between";
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all flex flex-col justify-between";
                 
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
-                                <i class="fa-solid fa-book-bookmark"></i>
-                            </div>
-                            <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded">Semester ${mk.semester}</span>
+                        <!-- Header Kartu: Semester & Kode -->
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100">Semester ${item.semester}</span>
+                            <span class="text-xs font-semibold text-slate-400">${item.kode_mk} - ${item.sks} SKS</span>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-1">${mk.nama_mk}</h3>
-                        <p class="text-sm text-slate-500 font-medium">Kode: ${mk.kode_mk}</p>
+                        
+                        <!-- Nama Mata Kuliah -->
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah}</h3>
+                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu}</p>
+                        
+                        <!-- Info Jadwal -->
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
+                            <div class="flex items-center text-xs text-slate-600 font-medium">
+                                <i class="fa-regular fa-clock w-5 text-blue-500"></i>
+                                <span>${item.hari}, ${item.jam}</span>
+                            </div>
+                            <div class="flex items-center text-xs text-slate-600 font-medium">
+                                <i class="fa-solid fa-location-dot w-5 text-red-500"></i>
+                                <span>${item.ruangan}</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-layer-group text-slate-400 text-sm"></i>
-                            <span class="text-sm font-semibold text-slate-700">${mk.sks} SKS</span>
-                        </div>
-                        <button class="text-indigo-600 hover:text-white border border-indigo-600 hover:bg-indigo-600 px-4 py-1.5 rounded-lg text-xs font-bold transition-colors">
-                            Lihat Modul
+                    <!-- Tombol Masuk Kelas -->
+                    <div class="mt-5">
+                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}'" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-colors flex items-center justify-center">
+                            Masuk Kelas Terpadu <i class="fa-solid fa-arrow-right ml-2"></i>
                         </button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${result.message}</p>`;
+            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">${result.message}</p>`;
         }
     } catch (error) {
-        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Gagal terhubung ke server.</p>`;
+        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Gagal terhubung ke server. Pastikan Anda sudah deploy ulang Apps Script.</p>`;
     }
 }
