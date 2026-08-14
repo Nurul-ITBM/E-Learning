@@ -69,15 +69,13 @@
                             <th class="px-6 py-4">Tanggal</th>
                             <th class="px-6 py-4">Waktu Absen</th>
                             <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelAbsensiBody">
-                        <!-- Loading Row -->
-                        <tr><td colspan="4" class="text-center py-10 text-slate-400 italic">Memuat data absensi...</td></tr>
-                        <div class="flex space-x-2">
-                            <button onclick="kirimAbsen('MASUK', 'PT-001')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Masuk</button>
-                            <button onclick="kirimAbsen('KELUAR', 'PT-001')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Keluar</button>
-                        </div>
+                        <tr>
+                            <td colspan="5" class="text-center py-10 text-slate-400 italic">Memuat data absensi...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
