@@ -74,6 +74,10 @@
                     <tbody id="tabelAbsensiBody">
                         <!-- Loading Row -->
                         <tr><td colspan="4" class="text-center py-10 text-slate-400 italic">Memuat data absensi...</td></tr>
+                        <div class="flex space-x-2">
+                            <button onclick="kirimAbsen('MASUK', 'PT-001')" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Masuk</button>
+                            <button onclick="kirimAbsen('KELUAR', 'PT-001')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Keluar</button>
+                        </div>
                     </tbody>
                 </table>
             </div>
