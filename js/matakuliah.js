@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '../login.html';
     });
 
-    await loadKelasGabungan(user.id);
+    await loadKelasGabungan(user.id_mahasiswa);
 });
 
 async function loadKelasGabungan(id_user) {
