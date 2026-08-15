@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const user = JSON.parse(sessionData);
+    console.log('User Session:', user); // DEBUG
+    
     const namaAwal = user.username.split('@')[0];
     const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
     if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
@@ -17,13 +19,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '../login.html';
     });
 
-    await loadKelasGabungan(user.id_mahasiswa);
+    // Coba kedua kemungkinan field
+    const id_user = user.id_mahasiswa || user.id;
+    console.log('ID User yang digunakan:', id_user); // DEBUG
+    
+    if (!id_user) {
+        document.getElementById('containerMataKuliah').innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: ID Mahasiswa tidak ditemukan di session.</p>';
+        return;
+    }
+    
+    await loadKelasGabungan(id_user);
 });
 
 async function loadKelasGabungan(id_user) {
     const container = document.getElementById('containerMataKuliah');
     
     try {
+        console.log('Loading kelas untuk ID:', id_user); // DEBUG
+        
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({ 
@@ -32,12 +45,15 @@ async function loadKelasGabungan(id_user) {
             })
         });
 
+        console.log('Response Status:', response.status); // DEBUG
+        
         const result = await response.json();
+        console.log('API Response:', result); // DEBUG
 
         if (result.status === 'success') {
             container.innerHTML = ''; 
             
-            if (result.data.length === 0) {
+            if (!result.data || result.data.length === 0) {
                 container.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10">Belum ada kelas yang didaftarkan pada KRS.</p>';
                 return;
             }
@@ -46,13 +62,13 @@ async function loadKelasGabungan(id_user) {
                 
                 // LOGIKA TOMBOL 1 (CEK ONLINE/OFFLINE BERDASARKAN KOLOM RUANGAN)
                 // Jika kolom ruangan mengandung "http", kita anggap itu link Zoom/Gmeet
-                let isOnline = item.ruangan.toLowerCase().includes('http');
-                let namaRuangan = isOnline ? "Kelas Online (Virtual)" : item.ruangan;
+                let isOnline = item.ruangan && item.ruangan.toLowerCase().includes('http');
+                let namaRuangan = isOnline ? "Kelas Online (Virtual)" : (item.ruangan || 'Ruangan Tidak Ditentukan');
                 
                 let tombolSatuHTML = '';
                 if (isOnline) {
                     tombolSatuHTML = `
-                        <button onclick="window.open('${item.ruangan}', '_blank')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                        <button onclick="window.open('${item.ruangan}', '_blank')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center">
                             <i class="fa-solid fa-video mr-1.5"></i> Masuk Zoom
                         </button>
                     `;
@@ -72,19 +88,19 @@ async function loadKelasGabungan(id_user) {
                     <div>
                         <!-- Header Kartu: Semester & Kode -->
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100">Semester ${item.semester}</span>
-                            <span class="text-xs font-semibold text-slate-400">${item.kode_mk} - ${item.sks} SKS</span>
+                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100">Semester ${item.semester || '-'}</span>
+                            <span class="text-xs font-semibold text-slate-400">${item.kode_mk || '-'} - ${item.sks || '-'} SKS</span>
                         </div>
                         
                         <!-- Nama Mata Kuliah -->
-                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah}</h3>
-                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu}</p>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah || 'Mata Kuliah'}</h3>
+                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu || 'Dosen Tidak Ditentukan'}</p>
                         
                         <!-- Info Jadwal & Ruangan -->
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
                             <div class="flex items-center text-xs text-slate-600 font-medium">
                                 <i class="fa-regular fa-clock w-5 text-blue-500"></i>
-                                <span>${item.hari}, ${item.jam}</span>
+                                <span>${item.hari || '-'}, ${item.jam || '-'}</span>
                             </div>
                             <div class="flex items-center text-xs text-slate-600 font-medium">
                                 <i class="fa-solid fa-location-dot w-5 text-red-500"></i>
@@ -99,7 +115,7 @@ async function loadKelasGabungan(id_user) {
                         ${tombolSatuHTML}
                         
                         <!-- Tombol 2: Lihat Materi -->
-                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}&tab=materi'" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}&tab=materi'" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center">
                             <i class="fa-solid fa-folder-open mr-1.5"></i> Lihat Materi
                         </button>
                     </div>
@@ -107,9 +123,10 @@ async function loadKelasGabungan(id_user) {
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">${result.message}</p>`;
+            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Error: ${result.message || 'Data tidak dapat dimuat'}</p>`;
         }
     } catch (error) {
-        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Gagal terhubung ke server. Pastikan Anda sudah deploy ulang Apps Script.</p>`;
+        console.error('Error loading kelas:', error); // DEBUG
+        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">❌ Gagal terhubung ke server.<br><small>${error.message}</small></p>`;
     }
 }
