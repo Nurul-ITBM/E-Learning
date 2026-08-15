@@ -226,6 +226,7 @@ async function bukaModalTambahMatkul() {
     container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>';
 
     try {
+        console.log(">>> Mengambil data mahasiswa dari server...");
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({ action: 'get_list_mahasiswa' })
@@ -236,23 +237,32 @@ async function bukaModalTambahMatkul() {
         }
 
         const result = await response.json();
+        console.log(">>> Response dari Backend:", result); // Cek di Console F12
 
-        if (result.status === 'success' && result.data.length > 0) {
-            let html = '';
-            result.data.forEach(mhs => {
-                html += `
-                    <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200">
-                        <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
-                        <span class="text-sm text-slate-700 flex-1">
-                            <span class="font-semibold">${mhs.nim}</span> - ${mhs.nama_mahasiswa}
-                            <span class="block text-xs text-slate-400">${mhs.program_studi} | Angkatan ${mhs.angkatan}</span>
-                        </span>
-                    </label>
-                `;
-            });
-            container.innerHTML = html;
+        if (result.status === 'success') {
+            // Cek apakah data benar-benar ada dan berbentuk array
+            if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(mhs => {
+                    // Tambahkan fallback (|| '-') agar tidak error jika ada data kosong
+                    html += `
+                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200">
+                            <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
+                            <span class="text-sm text-slate-700 flex-1">
+                                <span class="font-semibold">${mhs.nim || '-'}</span> - ${mhs.nama_mahasiswa || '-'}
+                                <span class="block text-xs text-slate-400">${mhs.program_studi || '-'} | Angkatan ${mhs.angkatan || '-'}</span>
+                            </span>
+                        </label>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                // Jika data kosong (mahasiswa belum ada)
+                container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa yang terdaftar di sistem.</p>`;
+            }
         } else {
-            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">${result.message || 'Tidak ada data mahasiswa ditemukan.'}</p>`;
+            // Jika Backend mengembalikan status error (misal sheet rusak)
+            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error dari server: ${result.message || 'Terjadi kesalahan'}</p>`;
         }
     } catch (error) {
         console.error("ERROR di bukaModalTambahMatkul:", error);
