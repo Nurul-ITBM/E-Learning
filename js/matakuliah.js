@@ -115,7 +115,7 @@ async function loadKelasGabungan(id_user) {
                         ${tombolSatuHTML}
                         
                         <!-- Tombol 2: Lihat Materi -->
-                        <button onclick="window.location.href='detail_kelas.html?id_kelas=${item.id_kelas}&tab=materi'" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center">
+                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center">
                             <i class="fa-solid fa-folder-open mr-1.5"></i> Lihat Materi
                         </button>
                     </div>
@@ -129,4 +129,74 @@ async function loadKelasGabungan(id_user) {
         console.error('Error loading kelas:', error); // DEBUG
         container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">❌ Gagal terhubung ke server.<br><small>${error.message}</small></p>`;
     }
+}
+
+// --- FUNGSI MODAL DETAIL PERTEMUAN ---
+
+// 1. Membuka Modal dan Memuat Data
+async function bukaModalDetail(id_kelas, nama_matkul) {
+    const modal = document.getElementById('modalDetailKelas');
+    const judul = document.getElementById('modalJudulKelas');
+    const container = document.getElementById('modalContainerPertemuan');
+
+    // Reset dan tampilkan loading
+    judul.innerText = nama_matkul;
+    container.innerHTML = `
+        <div class="text-center py-10 text-slate-400">
+            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+            <p>Memuat jadwal pertemuan...</p>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+
+    // Fetch data dari backend
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'get_jadwal_pertemuan', // Pastikan fungsi ini ada di Apps Script Anda
+                id_kelas: id_kelas 
+            })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data.length > 0) {
+            let html = '';
+            result.data.forEach(pert => {
+                const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
+                html += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
+                                <span class="text-sm text-slate-500">${pert.tanggal}</span>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-700">Jenis: ${pert.jenis_kuliah}</p>
+                        </div>
+                        <div>
+                            ${isOnline ? 
+                                `<a href="${pert.ruang_atau_link}" target="_blank" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
+                                : 
+                                `<span class="text-slate-400 text-sm bg-slate-100 px-4 py-2 rounded-lg">${pert.ruang_atau_link || 'Kelas Offline'}</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<p class="text-center text-slate-500 py-10">Belum ada data pertemuan untuk kelas ini.</p>`;
+        }
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Gagal memuat data pertemuan.</p>`;
+    }
+}
+
+// 2. Menutup Modal
+function tutupModalDetail() {
+    const modal = document.getElementById('modalDetailKelas');
+    modal.classList.add('hidden');
+    // Bersihkan konten agar tidak menumpuk saat dibuka kembali
+    document.getElementById('modalContainerPertemuan').innerHTML = '';
 }
