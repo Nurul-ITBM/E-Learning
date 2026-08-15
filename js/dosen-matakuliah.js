@@ -223,6 +223,14 @@ async function bukaModalTambahMatkul() {
     modal.classList.remove('hidden');
 
     const container = document.getElementById('mahasiswaContainer');
+    const searchInput = document.getElementById('searchMahasiswa');
+
+    // Reset pencarian saat modal dibuka
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.style.display = 'block';
+    }
+
     container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>';
 
     try {
@@ -237,16 +245,14 @@ async function bukaModalTambahMatkul() {
         }
 
         const result = await response.json();
-        console.log(">>> Response dari Backend:", result); // Cek di Console F12
+        console.log(">>> Response dari Backend:", result);
 
         if (result.status === 'success') {
-            // Cek apakah data benar-benar ada dan berbentuk array
             if (result.data && Array.isArray(result.data) && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(mhs => {
-                    // Tambahkan fallback (|| '-') agar tidak error jika ada data kosong
                     html += `
-                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200">
+                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200 search-item">
                             <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
                             <span class="text-sm text-slate-700 flex-1">
                                 <span class="font-semibold">${mhs.nim || '-'}</span> - ${mhs.nama_mahasiswa || '-'}
@@ -256,13 +262,33 @@ async function bukaModalTambahMatkul() {
                     `;
                 });
                 container.innerHTML = html;
+
+                // --- FITUR SEARCH BAR DINAMIS ---
+                // Memfilter list saat user mengetik di kolom pencarian
+                searchInput.oninput = function() {
+                    const keyword = this.value.toLowerCase().trim();
+                    const items = container.querySelectorAll('.search-item');
+                    
+                    if (keyword === '') {
+                        items.forEach(el => el.style.display = 'flex');
+                        return;
+                    }
+
+                    items.forEach(item => {
+                        const textContent = item.textContent.toLowerCase();
+                        // Jika teks di dalam label mengandung keyword, tampilkan. Jika tidak, sembunyikan.
+                        item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
+                    });
+                };
+                // --- AKHIR FITUR SEARCH ---
+
             } else {
-                // Jika data kosong (mahasiswa belum ada)
                 container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa yang terdaftar di sistem.</p>`;
+                if (searchInput) searchInput.style.display = 'none';
             }
         } else {
-            // Jika Backend mengembalikan status error (misal sheet rusak)
             container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error dari server: ${result.message || 'Terjadi kesalahan'}</p>`;
+            if (searchInput) searchInput.style.display = 'none';
         }
     } catch (error) {
         console.error("ERROR di bukaModalTambahMatkul:", error);
@@ -272,6 +298,7 @@ async function bukaModalTambahMatkul() {
                 <span class="text-xs block mt-1">Cek Console (F12) untuk detail: ${error.message}</span>
             </p>
         `;
+        if (searchInput) searchInput.style.display = 'none';
     }
 }
 function bukaModalTambahPertemuan(id_kelas) {
