@@ -81,17 +81,14 @@ async function loadKelasGabungan(id_user) {
 
 // --- FUNGSI MODAL DETAIL PERTEMUAN (VERSI TERBARU) ---
 
-// 1. Fungsi Helper untuk Format Tanggal yang Cantik
-function formatTanggal(isoString) {
-    if (!isoString) return '-';
-    const date = new Date(isoString);
-    // Format: 17 Agustus 2026
-    return date.toLocaleDateString('id-ID', { 
-        day: 'numeric', month: 'long', year: 'numeric' 
-    });
+// 1. Tambahkan fungsi helper untuk memformat jam (di atas fungsi bukaModalDetail)
+function formatJam(isoString) {
+    if (!isoString) return '';
+    // Ambil jam:menit dari format ISO "1899-12-30T16:00:00.000Z"
+    // Jika dikonversi ke Date, kita ambil bagian 'T' lalu potong 5 karakter pertama setelah 'T'
+    return isoString.split('T')[1].slice(0, 5);
 }
 
-// 2. Membuka Modal
 async function bukaModalDetail(id_kelas, nama_matkul) {
     const modal = document.getElementById('modalDetailKelas');
     const judul = document.getElementById('modalJudulKelas');
@@ -121,21 +118,22 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
             result.data.forEach(pert => {
                 const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
                 
-                // Cek apakah Judul Materi benar-benar ada (tidak kosong/null/spasi)
                 const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' 
                                     ? pert.judul_materi 
                                     : 'Judul Materi (Belum diisi)';
 
-                // Format Jam yang rapi
+                // 2. Gunakan formatJam() untuk membersihkan string jam
                 let jamTampil = '';
                 if (pert.jam_mulai && pert.jam_selesai) {
-                    jamTampil = ` · ${pert.jam_mulai} - ${pert.jam_selesai}`;
+                    const jamMulai = formatJam(pert.jam_mulai);
+                    const jamSelesai = formatJam(pert.jam_selesai);
+                    jamTampil = ` · ${jamMulai} - ${jamSelesai}`;
                 }
 
                 html += `
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="flex-1">
-                            <!-- Tanggal & Jam Tampil Sekarang -->
+                            <!-- Tanggal & Jam (Sekarang bersih!) -->
                             <div class="flex flex-wrap items-center gap-2 mb-1">
                                 <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
                                 <span class="text-sm text-slate-700 font-medium">
