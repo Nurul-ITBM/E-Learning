@@ -81,15 +81,19 @@ async function loadKelasGabungan(id_user) {
 
 // --- FUNGSI MODAL DETAIL PERTEMUAN (VERSI TERBARU) ---
 
-// === PERBAIKAN 1: Ganti fungsi formatJam menjadi aman ===
-function formatJam(isoString) {
-    // Jika string kosong, null, atau undefined, langsung return kosong
-    if (!isoString || typeof isoString !== 'string') return '';
-    
-    // Jika sudah berupa "08:00" (tanpa tanggal), langsung kembalikan
-    if (!isoString.includes('T')) return isoString;
+// 1. Memformat Tanggal (Mengubah ISO menjadi "17 Agustus 2026")
+function formatTanggal(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    return date.toLocaleDateString('id-ID', { 
+        day: 'numeric', month: 'long', year: 'numeric' 
+    });
+}
 
-    // Potong string ISO (misal: "1899-12-30T16:00:00.000Z" menjadi "16:00")
+// 2. Memformat Jam (Mengubah "1899-12-30T16:00:00.000Z" menjadi "16:00")
+function formatJam(isoString) {
+    if (!isoString || typeof isoString !== 'string') return '';
+    if (!isoString.includes('T')) return isoString;
     const parts = isoString.split('T');
     if (parts.length < 2) return '';
     return parts[1].slice(0, 5);
