@@ -40,13 +40,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             localStorage.setItem('user_session', JSON.stringify(result.data));
 
             setTimeout(() => {
-                if (result.data.role === 'dosen') {
-                    window.location.href = 'dosen/dosen-dashboard.html'; // BENAR: masuk ke folder dosen
-                } else if (result.data.role === 'mahasiswa') {
-                    window.location.href = 'mahasiswa/dashboard.html'; // BENAR: masuk ke folder mahasiswa
+                const role = result.data.role;
+                const origin = window.location.origin;
+                const basePath = window.location.pathname.replace(/\/[^/]*$/, '/');
+            
+                if (role === 'dosen') {
+                    window.location.href = origin + basePath + 'dosen/dosen-dashboard.html';
+                } else if (role === 'mahasiswa') {
+                    window.location.href = origin + basePath + 'mahasiswa/dashboard.html';
+                } else {
+                    window.location.href = origin + basePath;
                 }
             }, 1000);
-            
         } else {
             msg.className = 'mt-4 text-center text-red-600 bg-red-50 p-2 rounded-lg text-sm block border border-red-200';
             msg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> ${result.message}`;
