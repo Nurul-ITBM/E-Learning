@@ -1,178 +1,95 @@
-/**
- * Logika JavaScript untuk Halaman Dosen & Mata Kuliah
- * Mengelola pemuatan data, pencarian, filter, dan modal form.
- */
+// js/dosen-matakuliah.js - Data Kelas Ampuan Dosen (Dinamis)
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi komponen saat DOM siap
-    loadDosenMatakuliahData();
-    initEventListeners();
-});
-
-/**
- * Memuat data Dosen dan Mata Kuliah dari API / localStorage
- */
-function loadDosenMatakuliahData() {
-    const tableBody = document.getElementById('dosenMatkulTableBody');
-    if (!tableBody) return;
-
-    // Tampilkan indikator loading
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="5" class="text-center py-4 text-muted">
-                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                Memuat data...
-            </td>
-        </tr>
-    `;
-
-    // Simulasi pengambilan data (Ganti dengan endpoint fetch API yang sesuai)
-    setTimeout(() => {
-        // Contoh data dummy (Sesuaikan dengan struktur database/backend Anda)
-        const dummyData = [
-            {
-                id: 1,
-                kodeDosen: 'DSN001',
-                namaDosen: 'Dr. Ir. H. Ahmad, M.P.',
-                mataKuliah: [
-                    { kode: 'AGR101', nama: 'Dasar-Dasar Agronomi', sks: 3, semester: 1 },
-                    { kode: 'AGR302', nama: 'Fisiologi Tumbuhan', sks: 3, semester: 3 }
-                ]
-            },
-            {
-                id: 2,
-                kodeDosen: 'DSN002',
-                namaDosen: 'Siti Rahma, S.P., M.Sc.',
-                mataKuliah: [
-                    { kode: 'AGR201', nama: 'Ilmu Tanah & Kesuburan', sks: 3, semester: 2 },
-                    { kode: 'AGR405', nama: 'Bioteknologi Pertanian', sks: 3, semester: 4 }
-                ]
-            }
-        ];
-
-        renderTable(dummyData);
-    }, 500);
-}
-
-/**
- * Merender data ke dalam tabel HTML
- * @param {Array} data - Array objek data dosen dan mata kuliah
- */
-function renderTable(data) {
-    const tableBody = document.getElementById('dosenMatkulTableBody');
-    tableBody.innerHTML = '';
-
-    if (data.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center py-4 text-muted">Tidak ada data ditemukan.</td>
-            </tr>
-        `;
+document.addEventListener('DOMContentLoaded', async () => {
+    const sessionData = localStorage.getItem('user_session');
+    if (!sessionData) {
+        window.location.href = '../login.html';
+        return;
+    }
+    const user = JSON.parse(sessionData);
+    if (user.role !== 'dosen') {
+        alert('Anda bukan dosen!');
+        window.location.href = '../login.html';
         return;
     }
 
-    data.forEach((item, index) => {
-        // Gabungkan daftar mata kuliah menjadi format list HTML
-        const matkulList = item.mataKuliah.map(mk => 
-            `<span class="badge bg-light text-dark border me-1 mb-1" title="SKS: ${mk.sks}, Semester: ${mk.semester}">
-                [${mk.kode}] ${mk.nama} (${mk.sks} SKS)
-             </span>`
-        ).join('');
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="text-center">${index + 1}</td>
-            <td>
-                <strong>${item.namaDosen}</strong><br>
-                <small class="text-muted">NIDN/Kode: ${item.kodeDosen}</small>
-            </td>
-            <td>${matkulList}</td>
-            <td class="text-center">
-                <span class="badge bg-primary">${item.mataKuliah.reduce((acc, curr) => acc + curr.sks, 0)} SKS</span>
-            </td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-outline-warning me-1" onclick="editData(${item.id})" title="Edit">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteData(${item.id})" title="Hapus">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
-
-/**
- * Inisialisasi Event Listener untuk Pencarian dan Aksi Form
- */
-function initEventListeners() {
-    const searchInput = document.getElementById('searchDosenMatkul');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const keyword = e.target.value.toLowerCase();
-            filterData(keyword);
+    // Logout
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('user_session');
+            window.location.href = '../login.html';
         });
     }
 
-    const form = document.getElementById('formDosenMatkul');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            saveData();
+    // Tampilkan nama dosen di header
+    if (document.getElementById('dosenNameDisplay')) {
+        document.getElementById('dosenNameDisplay').innerText = user.nama_dosen || 'Dosen';
+    }
+    
+    if (user.id_dosen) {
+        await loadKelasDosen(user.id_dosen);
+    } else {
+        const container = document.getElementById('containerMatkulDosen');
+        if (container) container.innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: ID Dosen tidak ditemukan.</p>';
+    }
+});
+
+async function loadKelasDosen(id_dosen) {
+    const container = document.getElementById('containerMatkulDosen');
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'get_matakuliah_ampuan',
+                id_dosen: id_dosen 
+            })
         });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            container.innerHTML = ''; 
+            if (!result.data || result.data.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10">Belum ada kelas yang diampu.</p>';
+                return;
+            }
+
+            result.data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">Semester ${item.semester || '-'}</span>
+                            <span class="text-xs font-semibold text-slate-400">${item.kode_mk || '-'} - ${item.sks || '-'} SKS</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah || 'Mata Kuliah'}</h3>
+                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu || 'Dosen Pengampu'}</p>
+                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-700"><i class="fa-solid fa-list-check mr-2"></i> Rekap Kelas</span>
+                            <span class="text-xs font-bold text-teal-700 bg-white px-3 py-1 rounded-full border border-teal-200">${item.total_pertemuan || 0} Pertemuan</span>
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-door-open mr-1.5"></i> Lihat / Kelola Kelas
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } else {
+            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Error: ${result.message || 'Data tidak dapat dimuat'}</p>`;
+        }
+    } catch (error) {
+        console.error('Error loading kelas:', error);
+        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">❌ Gagal terhubung ke server.</p>`;
     }
 }
 
-/**
- * Filter data berdasarkan kata kunci pencarian
- * @param {String} keyword 
- */
-function filterData(keyword) {
-    // Implementasi pencarian lokal atau panggil ulang API dengan parameter query
-    const rows = document.querySelectorAll('#dosenMatkulTableBody tr');
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(keyword) ? '' : 'none';
-    });
-}
-
-/**
- * Fungsi untuk memproses penyimpanan data (Simpan / Update)
- */
-function saveData() {
-    // Ambil data dari form modal
-    const dosenId = document.getElementById('dosenId')?.value;
-    // ... proses kirim via AJAX/Fetch ke backend ...
-
-    // Contoh penutupan modal setelah simpan sukses
-    const modalElement = document.getElementById('modalDosenMatkul');
-    if (modalElement) {
-        const modalInstance = bootstrap.Modal.getInstance(modalElement);
-        if (modalInstance) modalInstance.hide();
-    }
-
-    // Muat ulang data tabel
-    loadDosenMatakuliahData();
-}
-
-/**
- * Fungsi placeholder untuk Edit Data
- * @param {Number} id 
- */
-function editData(id) {
-    console.log(`Edit data dengan ID: ${id}`);
-    // Buka modal dan isi form dengan data terkait
-}
-
-/**
- * Fungsi placeholder untuk Hapus Data
- * @param {Number} id 
- */
-function deleteData(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus penugasan mata kuliah ini?')) {
-        console.log(`Hapus data dengan ID: ${id}`);
-        // Lakukan pemanggilan API delete, lalu muat ulang tabel
-        loadDosenMatakuliahData();
-    }
-}
+// --- FUNGSI MODAL (Sama persis seperti mahasiswa) ---
+function formatTanggal(isoString) { /* ... */ }
+function formatJam(isoString) { /* ... */ }
+async function bukaModalDetail(id_kelas, nama_matkul) { /* ... */ }
+function tutupModalDetail() { /* ... */ }
