@@ -81,12 +81,18 @@ async function loadKelasGabungan(id_user) {
 
 // --- FUNGSI MODAL DETAIL PERTEMUAN (VERSI TERBARU) ---
 
-// 1. Tambahkan fungsi helper untuk memformat jam (di atas fungsi bukaModalDetail)
+// === PERBAIKAN 1: Ganti fungsi formatJam menjadi aman ===
 function formatJam(isoString) {
-    if (!isoString) return '';
-    // Ambil jam:menit dari format ISO "1899-12-30T16:00:00.000Z"
-    // Jika dikonversi ke Date, kita ambil bagian 'T' lalu potong 5 karakter pertama setelah 'T'
-    return isoString.split('T')[1].slice(0, 5);
+    // Jika string kosong, null, atau undefined, langsung return kosong
+    if (!isoString || typeof isoString !== 'string') return '';
+    
+    // Jika sudah berupa "08:00" (tanpa tanggal), langsung kembalikan
+    if (!isoString.includes('T')) return isoString;
+
+    // Potong string ISO (misal: "1899-12-30T16:00:00.000Z" menjadi "16:00")
+    const parts = isoString.split('T');
+    if (parts.length < 2) return '';
+    return parts[1].slice(0, 5);
 }
 
 async function bukaModalDetail(id_kelas, nama_matkul) {
