@@ -38,14 +38,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             msg.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Login Berhasil! Mengalihkan...';
             
             localStorage.setItem('user_session', JSON.stringify(result.data));
-
+            
             setTimeout(() => {
                 if (result.data.role === 'dosen') {
-                    window.location.href = 'dosen/dashboard.html';
+                    window.location.href = 'dosen-dashboard.html'; // BENAR
                 } else if (result.data.role === 'mahasiswa') {
-                    window.location.href = 'mahasiswa/dashboard.html';
+                    window.location.href = 'dashboard.html'; // BENAR
                 }
             }, 1000);
+            
         } else {
             msg.className = 'mt-4 text-center text-red-600 bg-red-50 p-2 rounded-lg text-sm block border border-red-200';
             msg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> ${result.message}`;
