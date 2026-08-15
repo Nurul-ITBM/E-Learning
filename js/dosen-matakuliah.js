@@ -215,8 +215,6 @@ function tutupModalDetail() {
     document.getElementById('modalContainerPertemuan').innerHTML = '';
 }
 
-// --- FUNGSI CRUD UNTUK DOSEN ---
-
 // Membuka Modal Tambah Matkul + Load Data Mahasiswa (GANTI DENGAN INI)
 async function bukaModalTambahMatkul() {
     const modal = document.getElementById('modalTambahMatkul');
@@ -263,23 +261,27 @@ async function bukaModalTambahMatkul() {
                 });
                 container.innerHTML = html;
 
-                // --- FITUR SEARCH BAR DINAMIS ---
-                // Memfilter list saat user mengetik di kolom pencarian
-                searchInput.oninput = function() {
-                    const keyword = this.value.toLowerCase().trim();
-                    const items = container.querySelectorAll('.search-item');
-                    
-                    if (keyword === '') {
-                        items.forEach(el => el.style.display = 'flex');
-                        return;
-                    }
+                // --- FITUR SEARCH BAR DINAMIS (DIPERBAIKI) ---
+                if (searchInput) {
+                    searchInput.oninput = function() {
+                        const keyword = this.value.toLowerCase().trim();
+                        const items = container.querySelectorAll('.search-item');
+                        
+                        if (keyword === '') {
+                            items.forEach(el => el.style.display = 'flex');
+                            return;
+                        }
 
-                    items.forEach(item => {
-                        const textContent = item.textContent.toLowerCase();
-                        // Jika teks di dalam label mengandung keyword, tampilkan. Jika tidak, sembunyikan.
-                        item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
-                    });
-                };
+                        items.forEach(item => {
+                            const textContent = item.textContent.toLowerCase();
+                            // Jika teks di dalam label mengandung keyword, tampilkan. Jika tidak, sembunyikan.
+                            item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
+                        });
+                    };
+                } else {
+                    // Jika elemen searchInput tidak ditemukan di HTML, beri peringatan di console
+                    console.warn("Peringatan: Elemen input dengan id 'searchMahasiswa' tidak ditemukan di HTML. Fitur pencarian tidak aktif.");
+                }
                 // --- AKHIR FITUR SEARCH ---
 
             } else {
