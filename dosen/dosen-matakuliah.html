@@ -156,25 +156,46 @@
 
     <!-- Modal Tambah Mata Kuliah -->
     <div id="modalTambahMatkul" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"> <!-- Lebarkan sedikit menjadi max-w-lg -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800">Tambah Mata Kuliah Baru</h3>
                 <button onclick="tutupModal('modalTambahMatkul')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            
             <form id="formTambahMatkul" class="p-5 space-y-4">
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Kode MK</label><input id="mk_kode" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: AGR401" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Nama Mata Kuliah</label><input id="mk_nama" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: Bioteknologi" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">SKS</label><input id="mk_sks" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="3" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Semester</label><input id="mk_semester" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="6" required></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Kode MK</label>
+                    <input id="mk_kode" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: AGR401" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Nama Mata Kuliah</label>
+                    <input id="mk_nama" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: Bioteknologi" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">SKS</label>
+                    <input id="mk_sks" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="3" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Semester</label>
+                    <input id="mk_semester" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="6" required>
+                </div>
                 
-                <!-- BAGIAN BARU: PILIH MAHASISWA -->
+                <!-- ========================================== -->
+                <!-- BAGIAN SEARCH BAR DAN DAFTAR MAHASISWA BARU -->
+                <!-- ========================================== -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Mahasiswa Peserta (KRS)</label>
+                    
+                    <!-- SEARCH BAR UNTUK MEMFILTER -->
+                    <input type="text" id="searchMahasiswa" placeholder="Cari NIM / Nama / Prodi..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-slate-50">
+                    
+                    <!-- CONTAINER LIST MAHASISWA -->
                     <div id="mahasiswaContainer" class="border border-slate-200 rounded-lg p-2 max-h-48 overflow-y-auto bg-slate-50 space-y-1.5">
                         <!-- Checkbox akan di-load oleh JavaScript -->
                         <p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>
                     </div>
                 </div>
+                <!-- ========================================== -->
     
                 <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Mata Kuliah & Daftarkan Mahasiswa</button>
             </form>
