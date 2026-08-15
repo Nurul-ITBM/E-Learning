@@ -217,9 +217,52 @@ function tutupModalDetail() {
 
 // --- FUNGSI CRUD UNTUK DOSEN ---
 
-// Membuka & Menutup Modal CRUD
-function bukaModalTambahMatkul() {
-    document.getElementById('modalTambahMatkul').classList.remove('hidden');
+// Membuka Modal Tambah Matkul + Load Data Mahasiswa (GANTI DENGAN INI)
+async function bukaModalTambahMatkul() {
+    const modal = document.getElementById('modalTambahMatkul');
+    modal.classList.remove('hidden');
+
+    const container = document.getElementById('mahasiswaContainer');
+    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>';
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_list_mahasiswa' })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.status === 'success' && result.data.length > 0) {
+            let html = '';
+            result.data.forEach(mhs => {
+                html += `
+                    <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200">
+                        <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
+                        <span class="text-sm text-slate-700 flex-1">
+                            <span class="font-semibold">${mhs.nim}</span> - ${mhs.nama_mahasiswa}
+                            <span class="block text-xs text-slate-400">${mhs.program_studi} | Angkatan ${mhs.angkatan}</span>
+                        </span>
+                    </label>
+                `;
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">${result.message || 'Tidak ada data mahasiswa ditemukan.'}</p>`;
+        }
+    } catch (error) {
+        console.error("ERROR di bukaModalTambahMatkul:", error);
+        container.innerHTML = `
+            <p class="text-center text-sm text-red-500 py-4">
+                Gagal memuat mahasiswa. <br>
+                <span class="text-xs block mt-1">Cek Console (F12) untuk detail: ${error.message}</span>
+            </p>
+        `;
+    }
 }
 function bukaModalTambahPertemuan(id_kelas) {
     document.getElementById('modalTambahPertemuan').classList.remove('hidden');
@@ -229,24 +272,37 @@ function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
 
-// Logic Simpan Mata Kuliah
+// Logic Simpan Mata Kuliah (GANTI DENGAN INI)
 document.getElementById('formTambahMatkul').addEventListener('submit', async function(e) {
     e.preventDefault();
     const session = JSON.parse(localStorage.getItem('user_session'));
+    
+    // Ambil data mahasiswa yang dicentang (sesuai id yang ada di value checkbox)
+    const checkedBoxes = document.querySelectorAll('#mahasiswaContainer input[type="checkbox"]:checked');
+    const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (mahasiswaTerpilih.length === 0) {
+        alert('Anda harus memilih minimal 1 mahasiswa untuk kelas ini!');
+        return;
+    }
+
     const data = {
         action: 'tambah_matakuliah',
         kode_mk: document.getElementById('mk_kode').value,
         nama_mk: document.getElementById('mk_nama').value,
         sks: document.getElementById('mk_sks').value,
         semester: document.getElementById('mk_semester').value,
-        id_dosen: session.id_dosen // Kirim ID Dosen yang sedang login
+        id_dosen: session.id_dosen,
+        mahasiswa_terpilih: mahasiswaTerpilih // <--- KIRIM ARRAY ID MAHASISWA
     };
+    
     const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
     const result = await res.json();
+    
     if(result.status === 'success') {
-        alert('Mata kuliah berhasil ditambahkan!');
+        alert(result.message);
         tutupModal('modalTambahMatkul');
-        location.reload();
+        location.reload(); // Refresh halaman agar kartu baru dan data langsung terlihat
     } else {
         alert('Gagal: ' + result.message);
     }
