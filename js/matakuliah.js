@@ -177,8 +177,9 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
             container.innerHTML = `<p class="text-center text-slate-500 py-10">Belum ada data pertemuan untuk kelas ini.</p>`;
         }
     } catch (error) {
-        console.error(error);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Gagal memuat data pertemuan.</p>`;
+        console.error("ERROR DETAIL:", error); // Menampilkan di Console (F12)
+        // Menampilkan pesan error asli di layar popup
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Error: ${error.message || 'Terjadi kesalahan yang tidak diketahui'}</p>`;
     }
 }
 
