@@ -38,12 +38,12 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             msg.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Login Berhasil! Mengalihkan...';
             
             localStorage.setItem('user_session', JSON.stringify(result.data));
-            
+
             setTimeout(() => {
                 if (result.data.role === 'dosen') {
-                    window.location.href = 'dosen-dashboard.html'; // BENAR
+                    window.location.href = 'dosen/dosen-dashboard.html'; // BENAR: masuk ke folder dosen
                 } else if (result.data.role === 'mahasiswa') {
-                    window.location.href = 'dashboard.html'; // BENAR
+                    window.location.href = 'mahasiswa/dashboard.html'; // BENAR: masuk ke folder mahasiswa
                 }
             }, 1000);
             
