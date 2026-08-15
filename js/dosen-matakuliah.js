@@ -22,10 +22,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Tampilkan nama dosen di header
-    if (document.getElementById('dosenNameDisplay')) {
-        document.getElementById('dosenNameDisplay').innerText = user.nama_dosen || 'Dosen';
+    // --- PERBAIKAN DIMULAI DI SINI ---
+    // Tampilkan nama dan spesialisasi dosen di header (Sama persis dengan dashboard)
+    const namaDosen = user.nama_dosen || 'Dosen EduLearn';
+    const spesialisasiDosen = user.spesialisasi || 'Dosen Pengajar';
+    
+    const userNameDisplay = document.getElementById('dosenNameDisplay');
+    if (userNameDisplay) {
+        userNameDisplay.innerText = namaDosen;
     }
+
+    const userSpesialisasi = document.getElementById('dosenSpesialisasiDisplay');
+    if (userSpesialisasi) {
+        userSpesialisasi.innerText = spesialisasiDosen;
+    }
+    // --- PERBAIKAN SELESAI DI SINI ---
     
     if (user.id_dosen) {
         await loadKelasDosen(user.id_dosen);
