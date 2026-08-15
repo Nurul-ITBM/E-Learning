@@ -2,34 +2,34 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
+    
+    // 1. Cek apakah ada sesi login
     if (!sessionData) {
         window.location.href = '../login.html';
         return;
     }
 
     const user = JSON.parse(sessionData);
-    console.log('User Session:', user); // DEBUG
-    
-    const namaAwal = user.username.split('@')[0];
-    const CapitalizedName = namaAwal.charAt(0).toUpperCase() + namaAwal.slice(1);
-    if(document.getElementById('userNameDisplay')) document.getElementById('userNameDisplay').innerText = CapitalizedName;
 
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('user_session');
-        window.location.href = '../login.html';
-    });
-
-    // Coba kedua kemungkinan field
-    const id_user = user.id_mahasiswa || user.id;
-    console.log('ID User yang digunakan:', id_user); // DEBUG
-    
-    if (!id_user) {
-        document.getElementById('containerMataKuliah').innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: ID Mahasiswa tidak ditemukan di session.</p>';
-        return;
+    // 2. Logika Logout
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            localStorage.removeItem('user_session');
+            window.location.href = '../login.html';
+        });
     }
-    
-    await loadKelasGabungan(id_user);
+
+    // 3. Panggil data kelas mahasiswa
+    // Pastikan user.id_mahasiswa ada (nilainya harus M001, dst berdasarkan template Excel)
+    if (user.id_mahasiswa) {
+        await loadKelasGabungan(user.id_mahasiswa);
+    } else {
+        const container = document.getElementById('containerMataKuliah');
+        if (container) container.innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: ID Mahasiswa tidak ditemukan di sesi Anda. Silakan login ulang.</p>';
+    }
 });
+
 
 async function loadKelasGabungan(id_user) {
     const container = document.getElementById('containerMataKuliah');
