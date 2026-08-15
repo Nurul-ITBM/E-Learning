@@ -79,8 +79,19 @@ async function loadKelasGabungan(id_user) {
     }
 }
 
-// --- FUNGSI MODAL DETAIL PERTEMUAN ---
+// --- FUNGSI MODAL DETAIL PERTEMUAN (VERSI TERBARU) ---
 
+// 1. Fungsi Helper untuk Format Tanggal yang Cantik
+function formatTanggal(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    // Format: 17 Agustus 2026
+    return date.toLocaleDateString('id-ID', { 
+        day: 'numeric', month: 'long', year: 'numeric' 
+    });
+}
+
+// 2. Membuka Modal
 async function bukaModalDetail(id_kelas, nama_matkul) {
     const modal = document.getElementById('modalDetailKelas');
     const judul = document.getElementById('modalJudulKelas');
@@ -110,19 +121,33 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
             result.data.forEach(pert => {
                 const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
                 
-                // Karena database belum punya jam dan judul, kita tampilkan data yang ada.
-                // Jika Anda nanti menambahkan kolom jam_mulai di sheet Pertemuan, tambahkan di sini.
+                // Cek apakah Judul Materi benar-benar ada (tidak kosong/null/spasi)
+                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' 
+                                    ? pert.judul_materi 
+                                    : 'Judul Materi (Belum diisi)';
+
+                // Format Jam yang rapi
+                let jamTampil = '';
+                if (pert.jam_mulai && pert.jam_selesai) {
+                    jamTampil = ` · ${pert.jam_mulai} - ${pert.jam_selesai}`;
+                }
+
                 html += `
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="flex-1">
+                            <!-- Tanggal & Jam Tampil Sekarang -->
                             <div class="flex flex-wrap items-center gap-2 mb-1">
                                 <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
-                                <span class="text-sm text-slate-600 font-medium">${pert.tanggal}</span>
+                                <span class="text-sm text-slate-700 font-medium">
+                                    ${formatTanggal(pert.tanggal)}${jamTampil}
+                                </span>
                             </div>
-                            <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || 'Belum ditentukan'}</span></p>
                             
-                            <!-- Tempat Judul Materi jika ada -->
-                            <p class="mt-1 text-sm font-bold text-slate-800">${pert.judul_materi || 'Judul Materi (Belum diisi)'}</p>
+                            <!-- Judul Materi -->
+                            <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
+                            
+                            <!-- Jenis Kuliah -->
+                            <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || 'Belum ditentukan'}</span></p>
                         </div>
                         
                         <!-- Tombol Aksi Kanan -->
@@ -149,6 +174,7 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
     }
 }
 
+// 3. Menutup Modal
 function tutupModalDetail() {
     const modal = document.getElementById('modalDetailKelas');
     modal.classList.add('hidden');
