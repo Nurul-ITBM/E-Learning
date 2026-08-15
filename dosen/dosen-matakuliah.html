@@ -115,62 +115,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 <!-- Card Mata Kuliah 1 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between hover:border-teal-300 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-semibold bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg">3 SKS • Semester Genap</span>
-                            <span class="text-xs font-bold text-slate-400">AGR301</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-800 mb-1">Manajemen Hama & Penyakit</h3>
-                        <p class="text-xs text-slate-500 mb-4"><i class="fa-solid fa-users mr-1 text-teal-600"></i> Kelas Agroteknologi A (40 Mahasiswa)</p>
-                        <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">Mempelajari identifikasi, bioekologi, dan teknik pengendalian hama serta penyakit tanaman secara terpadu.</p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <span class="text-xs text-slate-400 font-medium">Ruang Kuliah 3</span>
-                        <button class="bg-teal-600 text-white text-xs px-4 py-2 rounded-xl hover:bg-teal-700 transition font-medium flex items-center space-x-1.5">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            <span>Kelola Kelas</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card Mata Kuliah 2 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between hover:border-teal-300 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-semibold bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg">3 SKS • Semester Genap</span>
-                            <span class="text-xs font-bold text-slate-400">AGR305</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-800 mb-1">Fisiologi Tanaman</h3>
-                        <p class="text-xs text-slate-500 mb-4"><i class="fa-solid fa-users mr-1 text-teal-600"></i> Kelas Agroteknologi B (45 Mahasiswa)</p>
-                        <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">Kajian mengenai proses metabolisme, fotosintesis, transpirasi, serta respon tanaman terhadap lingkungan.</p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <span class="text-xs text-slate-400 font-medium">Ruang Kuliah 1</span>
-                        <button class="bg-teal-600 text-white text-xs px-4 py-2 rounded-xl hover:bg-teal-700 transition font-medium flex items-center space-x-1.5">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            <span>Kelola Kelas</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Card Mata Kuliah 3 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between hover:border-teal-300 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-semibold bg-teal-100 text-teal-700 px-2.5 py-1 rounded-lg">2 SKS • Semester Genap</span>
-                            <span class="text-xs font-bold text-slate-400">AGR310</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-800 mb-1">Dasar-Dasar Agronomi</h3>
-                        <p class="text-xs text-slate-500 mb-4"><i class="fa-solid fa-users mr-1 text-teal-600"></i> Kelas Agroteknologi C (35 Mahasiswa)</p>
-                        <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">Prinsip dasar pengelolaan tanaman budidaya, faktor lingkungan, serta teknik budidaya modern.</p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <span class="text-xs text-slate-400 font-medium">Ruang Kuliah 2</span>
-                        <button class="bg-teal-600 text-white text-xs px-4 py-2 rounded-xl hover:bg-teal-700 transition font-medium flex items-center space-x-1.5">
-                            <i class="fa-solid fa-arrow-right"></i>
-                            <span>Kelola Kelas</span>
-                        </button>
+                
+                <!-- GANTI DENGAN INI -->
+                <div id="containerMatkulDosen" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Loading Skeleton (akan hilang otomatis saat data dimuat) -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between animate-pulse h-48">
+                        <div><div class="w-12 h-12 rounded-xl bg-slate-200 mb-4"></div><div class="h-5 bg-slate-200 rounded w-3/4 mb-2"></div><div class="h-3 bg-slate-200 rounded w-1/2"></div></div>
                     </div>
                 </div>
 
@@ -181,6 +131,6 @@
 
     <!-- File JavaScript Terpisah untuk Dosen -->
     <script src="../js/config.js"></script>
-    <script src="../js/dosen.js"></script>
+    <script src="../js/dosen-matakuliah.js"></script>
 </body>
 </html>
