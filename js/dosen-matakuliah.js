@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadKelasDosen(id_dosen) {
     const container = document.getElementById('containerMatkulDosen');
+    // Tampilkan loading
+    container.innerHTML = '<p class="text-center text-slate-400 py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Sedang memuat data...</p>';
+
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
@@ -56,15 +59,29 @@ async function loadKelasDosen(id_dosen) {
                 id_dosen: id_dosen 
             })
         });
+        
+        // Cek apakah response HTTP berhasil (200)
+        if (!response.ok) {
+            throw new Error(`HTTP Error ${response.status}`);
+        }
+
         const result = await response.json();
+        console.log("DATA DARI SERVER:", result); // Lihat di Console (F12)
 
         if (result.status === 'success') {
             container.innerHTML = ''; 
             if (!result.data || result.data.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10">Belum ada kelas yang diampu.</p>';
+                container.innerHTML = `
+                    <div class="col-span-full bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg text-center">
+                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
+                        Belum ada kelas yang diampu oleh dosen dengan ID <b>${id_dosen}</b>.<br>
+                        <span class="text-xs">Pastikan di sheet <b>Kelas</b> di Google Sheets sudah ada baris dengan id_dosen ini.</span>
+                    </div>
+                `;
                 return;
             }
 
+            // RENDER KARTU (Kode kartu Anda yang sudah ada)
             result.data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
@@ -91,11 +108,20 @@ async function loadKelasDosen(id_dosen) {
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Error: ${result.message || 'Data tidak dapat dimuat'}</p>`;
+            container.innerHTML = `<p class="text-red-500 text-center">Server Error: ${result.message || 'Terjadi kesalahan'}</p>`;
         }
     } catch (error) {
-        console.error('Error loading kelas:', error);
-        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">❌ Gagal terhubung ke server.</p>`;
+        console.error("ERROR FETCH:", error);
+        container.innerHTML = `
+            <div class="col-span-full bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-center">
+                <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                Gagal memuat data. Kemungkinan:<br>
+                1. URL API di js/config.js salah.<br>
+                2. Apps Script belum di-deploy ulang.<br>
+                3. Backend crash (Cek Logs Apps Script).<br>
+                <span class="text-xs block mt-1">Detail error: ${error.message}</span>
+            </div>
+        `;
     }
 }
 
