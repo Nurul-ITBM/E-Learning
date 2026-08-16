@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Tugas - EduLearn Dosen</title>
+    <!-- ... (copy semua CSS, Tailwind, FontAwesome, Style dari `dosen-matakuliah.html`) ... -->
+    <style>
+        /* Style persis seperti file dosen lainnya */
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+    <!-- SIDEBAR DOSEN (copy persis dari file sebelumnya, aktifkan menu Kelola Tugas) -->
+    <!-- ... -->
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto flex flex-col">
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <h2 class="text-lg font-bold text-slate-800">Kelola Tugas</h2>
+            <div class="flex items-center space-x-6">
+                <!-- Avatar & Logout (copy persis) -->
+            </div>
+        </header>
+
+        <div class="p-8 space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-banner-gradient rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Manajemen Tugas Kuliah 📝</h2>
+                    <p class="text-sm text-slate-600">Buat, edit, dan kelola tugas untuk setiap mata kuliah yang Anda ampu.</p>
+                </div>
+                <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-teal-200 opacity-50 text-7xl">
+                    <i class="fa-solid fa-file-pen"></i>
+                </div>
+            </div>
+
+            <!-- Filter Dropdown Kelas & Tombol Tambah -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="w-full md:w-1/3">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Mata Kuliah</label>
+                    <select id="filterKelasDosen" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500">
+                        <option value="">-- Pilih Mata Kuliah --</option>
+                    </select>
+                </div>
+                <button id="btnTambahTugas" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg shadow-sm font-semibold text-sm transition flex items-center gap-2 disabled:opacity-50" disabled>
+                    <i class="fa-solid fa-plus"></i> Tambah Tugas
+                </button>
+            </div>
+
+            <!-- Area Chart 1: Daftar Tugas & Progress -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-list-check text-teal-600 mr-2.5"></i> Daftar Tugas & Progress Kelas
+                </h3>
+                <div id="containerProgressTugas" class="space-y-4">
+                    <!-- List tugas diisi oleh JS -->
+                    <p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>
+                </div>
+            </div>
+
+            <!-- Area Chart 2: Detail Pengumpulan & Penilaian -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-user-graduate text-teal-600 mr-2.5"></i> Pengumpulan & Penilaian
+                    <span id="judulTugasTerpilih" class="ml-auto text-sm font-normal text-slate-500 italic">(Pilih tugas di sebelah kiri)</span>
+                </h3>
+                <div id="containerPengumpulanTugas" class="overflow-x-auto">
+                    <p class="text-sm text-slate-500 italic text-center py-10">Klik kartu tugas di kiri untuk melihat detail pengumpulan.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Tambah / Edit Tugas -->
+    <div id="modalTambahTugas" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800" id="modalTugasTitle">Tambah Tugas Baru</h3>
+                <button onclick="tutupModal('modalTambahTugas')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formTambahTugas" class="p-5 space-y-4">
+                <input type="hidden" id="tugas_id_kelas">
+                <input type="hidden" id="tugas_id_tugas_edit">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Tugas</label><input id="tugas_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Deskripsi Instruksi</label><textarea id="tugas_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" required></textarea></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Tenggat Waktu</label><input id="tugas_deadline" type="datetime-local" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai (Angka)</label><input id="tugas_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Lampiran Tugas (Opsional)</label>
+                    <input type="file" id="tugas_lampiran" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-teal-50 file:text-teal-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2">
+                    <div id="existing_lampiran_wrapper" class="mt-2 text-sm text-slate-600 hidden">
+                        Lampiran saat ini: <a id="existing_lampiran_link" href="#" target="_blank" class="text-teal-600 underline">Download</a>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Tugas</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nilai Tugas -->
+    <div id="modalNilaiTugas" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Penilaian Tugas</h3>
+                <button onclick="tutupModal('modalNilaiTugas')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formNilaiTugas" class="p-5 space-y-4">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Nilai</label><input id="nilai_input" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="0 - 100" required></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Komentar Dosen</label><textarea id="komentar_input" rows="3" class="w-full border rounded-lg p-2 text-sm" placeholder="Berikan komentar atau catatan untuk mahasiswa..."></textarea></div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Nilai</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/dosen-tugas.js"></script>
+</body>
+</html>
