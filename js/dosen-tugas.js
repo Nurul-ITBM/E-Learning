@@ -201,29 +201,81 @@ document.getElementById('formNilaiTugas').addEventListener('submit', async funct
     }
 });
 
+// ... (kode-kode sebelumnya: loadKelasDropdown, loadProgressTugas, dll) ...
+
 // ==========================================
 // 5. TAMBAH TUGAS (Tombol +)
 // ==========================================
 document.getElementById('btnTambahTugas').addEventListener('click', function() {
     const idKelas = document.getElementById('filterKelasDosen').value;
-    // Pastikan pengguna sudah memilih mata kuliah
     if (!idKelas) { 
         alert('Pilih mata kuliah terlebih dahulu!'); 
         return; 
     }
-    
-    // Kosongkan form dan set id_kelas
     document.getElementById('tugas_id_kelas').value = idKelas;
     document.getElementById('tugas_id_tugas_edit').value = '';
     document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
     document.getElementById('formTambahTugas').reset();
     document.getElementById('existing_lampiran_wrapper').classList.add('hidden');
-    
-    // Munculkan modal
     document.getElementById('modalTambahTugas').classList.remove('hidden');
 });
 
-// Jangan lupa pastikan fungsi tutupModal ada di bagian bawah
 function tutupModal(id) { 
     document.getElementById(id).classList.add('hidden'); 
 }
+
+// ==========================================
+// 6. SIMPAN TUGAS (Event Listener Form - GANTI BAGIAN INI!)
+// ==========================================
+document.getElementById('formTambahTugas').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
+    btn.disabled = true;
+
+    const fileInput = document.getElementById('tugas_lampiran');
+    let base64File = null, fileName = null;
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar! Maksimal 10MB.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        fileName = file.name.replace(/\s+/g, '_');
+        base64File = await fileToBase64(file);
+    }
+
+    const data = {
+        action: 'tambah_tugas',
+        id_kelas: document.getElementById('tugas_id_kelas').value,
+        judul_tugas: document.getElementById('tugas_judul').value,
+        deskripsi_instruksi: document.getElementById('tugas_deskripsi').value,
+        tenggat_waktu: document.getElementById('tugas_deadline').value,
+        bobot_nilai: document.getElementById('tugas_bobot').value,
+        lampiran_base64: base64File,
+        lampiran_nama_file: fileName
+    };
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        if (!res.ok) throw new Error(`Server Error: ${res.status}`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            alert('✅ ' + result.message);
+            tutupModal('modalTambahTugas');
+            location.reload();
+        } else {
+            alert('❌ Gagal: ' + result.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error(error);
+        alert('❌ Error koneksi. Pastikan URL API benar dan backend sudah di-deploy.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
