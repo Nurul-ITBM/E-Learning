@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadKelasDropdown(id_dosen) {
-    // Deklarasikan variabel elemen HTML
+    // DEKLARASI VARIABEL INI WAJIB ADA!
     const select = document.getElementById('filterKelasDosen');
     const btnTambah = document.getElementById('btnTambahTugas');
     
@@ -41,19 +41,18 @@ async function loadKelasDropdown(id_dosen) {
                     html += `<option value="${k.id_kelas}">${k.nama_kelas}</option>`; 
                 });
                 select.innerHTML = html;
-                btnTambah.disabled = false;
                 
-                // Event saat ganti pilihan
+                // JANGAN LUPA: AKTIFKAN TOMBOL SETELAH DROPDOWN TERISI!
+                btnTambah.disabled = false; 
+                
                 select.addEventListener('change', async (e) => {
                     const idKelas = e.target.value;
                     if (idKelas) {
-                        document.getElementById('containerPengumpulanTugas').innerHTML = 
-                            '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
+                        document.getElementById('containerPengumpulanTugas').innerHTML = '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
                         document.getElementById('judulTugasTerpilih').innerText = '(Pilih tugas)';
                         await loadProgressTugas(idKelas);
                     } else {
-                        document.getElementById('containerProgressTugas').innerHTML = 
-                            '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
+                        document.getElementById('containerProgressTugas').innerHTML = '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
                         document.getElementById('containerPengumpulanTugas').innerHTML = '';
                     }
                 });
@@ -201,3 +200,30 @@ document.getElementById('formNilaiTugas').addEventListener('submit', async funct
         btn.disabled = false;
     }
 });
+
+// ==========================================
+// 5. TAMBAH TUGAS (Tombol +)
+// ==========================================
+document.getElementById('btnTambahTugas').addEventListener('click', function() {
+    const idKelas = document.getElementById('filterKelasDosen').value;
+    // Pastikan pengguna sudah memilih mata kuliah
+    if (!idKelas) { 
+        alert('Pilih mata kuliah terlebih dahulu!'); 
+        return; 
+    }
+    
+    // Kosongkan form dan set id_kelas
+    document.getElementById('tugas_id_kelas').value = idKelas;
+    document.getElementById('tugas_id_tugas_edit').value = '';
+    document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
+    document.getElementById('formTambahTugas').reset();
+    document.getElementById('existing_lampiran_wrapper').classList.add('hidden');
+    
+    // Munculkan modal
+    document.getElementById('modalTambahTugas').classList.remove('hidden');
+});
+
+// Jangan lupa pastikan fungsi tutupModal ada di bagian bawah
+function tutupModal(id) { 
+    document.getElementById(id).classList.add('hidden'); 
+}
