@@ -15,9 +15,19 @@
     <style>
         body {
             background-image: url('assets/images/background-index.png');
-            background-size: cover;
+            /* Ukuran background dibuat sedikit lebih kecil */
+            background-size: 70%;
+            background-repeat: no-repeat;
             background-position: center;
             background-attachment: fixed;
+        }
+        
+        /* Untuk layar kecil, kembalikan ke cover agar tampilan tetap rapi pada ponsel */
+        @media (max-width: 640px) {
+            body {
+                background-size: cover;
+                background-attachment: scroll;
+            }
         }
         
         main {
