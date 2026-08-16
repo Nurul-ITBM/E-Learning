@@ -167,7 +167,7 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
         });
         const result = await response.json();
 
-        if (result.status === 'success' && result.data.length > 0) {
+                if (result.status === 'success' && result.data.length > 0) {
             let html = `
                 <div class="flex justify-end mb-4">
                     <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
@@ -175,35 +175,52 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                     </button>
                 </div>
             `;
-            html += `
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex-1">
-                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
-                            <span class="text-sm text-slate-700 font-medium">${formatTanggal(pert.tanggal)}${jamTampil}</span>
+            
+            // Looping data pertemuan
+            result.data.forEach(pert => {
+                // Deklarasi variabel WAJIB dilakukan di sini
+                const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
+                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' ? pert.judul_materi : 'Judul Materi';
+                
+                let jamTampil = '';
+                if (pert.jam_mulai && pert.jam_selesai) {
+                    const jamMulai = formatJam(pert.jam_mulai);
+                    const jamSelesai = formatJam(pert.jam_selesai);
+                    jamTampil = ` · ${jamMulai} - ${jamSelesai}`;
+                }
+
+                html += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
+                                <span class="text-sm text-slate-700 font-medium">${formatTanggal(pert.tanggal)}${jamTampil}</span>
+                            </div>
+                            <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
+                            <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || '-'}</span></p>
                         </div>
-                        <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
-                        <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || '-'}</span></p>
-                    </div>
-                    
-                    <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
-                        ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
                         
-                        <!-- TAMBAHAN TOMBOL EDIT & HAPUS -->
-                        <div class="flex gap-1 w-full md:w-auto">
-                            <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button onclick="hapusPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+                            ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
+                            
+                            <!-- TAMBAHAN TOMBOL EDIT & HAPUS -->
+                            <div class="flex gap-1 w-full md:w-auto">
+                                <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="hapusPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
             });
+            
+            // Setelah loop selesai, masukkan ke container
             container.innerHTML = html;
         } else {
+            // Blok else jika tidak ada data (tetap memunculkan tombol tambah pertemuan)
             container.innerHTML = `
                 <div class="flex justify-end mb-4">
                     <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
