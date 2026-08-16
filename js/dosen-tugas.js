@@ -13,15 +13,64 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadKelasDropdown(id_dosen) {
-    // ... (sama seperti sebelumnya, tetapi ganti trigger change-nya) ...
-    select.addEventListener('change', async (e) => {
-        const idKelas = e.target.value;
-        if(idKelas) {
-            document.getElementById('containerPengumpulanTugas').innerHTML = '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
-            document.getElementById('judulTugasTerpilih').innerText = '(Pilih tugas)';
-            await loadProgressTugas(idKelas);
+    // Deklarasikan variabel elemen HTML
+    const select = document.getElementById('filterKelasDosen');
+    const btnTambah = document.getElementById('btnTambahTugas');
+    
+    if (!id_dosen) {
+        console.error("ID Dosen tidak ditemukan di session!");
+        return;
+    }
+
+    try {
+        console.log(">>> Mengambil kelas untuk ID Dosen:", id_dosen);
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'get_kelas_dosen', id_dosen: id_dosen }) 
+        });
+        
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        
+        const result = await res.json();
+        console.log(">>> Response Kelas Dosen:", result);
+
+        if (result.status === 'success') {
+            if (result.data.length > 0) {
+                let html = '<option value="">-- Pilih Mata Kuliah --</option>';
+                result.data.forEach(k => { 
+                    html += `<option value="${k.id_kelas}">${k.nama_kelas}</option>`; 
+                });
+                select.innerHTML = html;
+                btnTambah.disabled = false;
+                
+                // Event saat ganti pilihan
+                select.addEventListener('change', async (e) => {
+                    const idKelas = e.target.value;
+                    if (idKelas) {
+                        document.getElementById('containerPengumpulanTugas').innerHTML = 
+                            '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
+                        document.getElementById('judulTugasTerpilih').innerText = '(Pilih tugas)';
+                        await loadProgressTugas(idKelas);
+                    } else {
+                        document.getElementById('containerProgressTugas').innerHTML = 
+                            '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
+                        document.getElementById('containerPengumpulanTugas').innerHTML = '';
+                    }
+                });
+            } else {
+                select.innerHTML = '<option value="">Belum ada kelas yang diampu</option>';
+                btnTambah.disabled = true;
+            }
+        } else {
+            console.error("Gagal mengambil data kelas:", result.message);
+            select.innerHTML = `<option value="">Error: ${result.message}</option>`;
+            btnTambah.disabled = true;
         }
-    });
+    } catch (error) {
+        console.error("ERROR di loadKelasDropdown:", error);
+        select.innerHTML = `<option value="">Error load data</option>`;
+        btnTambah.disabled = true;
+    }
 }
 
 // ==========================================
