@@ -550,9 +550,21 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
     const originalText = btn.innerHTML;
     const idKelas = this.dataset.idKelas;
 
-    // 1. Tampilkan animasi loading & Nonaktifkan tombol
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Pertemuan...';
     btn.disabled = true;
+
+    // Ambil file yang diupload
+    const fileInput = document.getElementById('pt_file_materi');
+    let base64File = null, fileName = null;
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 10 * 1024 * 1024) { // > 10MB
+            alert('Ukuran file terlalu besar! Maksimal 10MB.');
+            btn.innerHTML = originalText; btn.disabled = false; return;
+        }
+        fileName = file.name;
+        base64File = await fileToBase64(file);
+    }
 
     const data = {
         action: 'tambah_pertemuan',
@@ -561,7 +573,9 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         jam_mulai: document.getElementById('pt_jam_mulai').value,
         jam_selesai: document.getElementById('pt_jam_selesai').value,
         judul_materi: document.getElementById('pt_judul').value,
-        ruang_atau_link: document.getElementById('pt_link').value
+        ruang_atau_link: document.getElementById('pt_link').value,
+        materi_base64: base64File,
+        materi_nama_file: fileName
     };
 
     try {
@@ -602,12 +616,30 @@ async function bukaModalEditPertemuan(id_pertemuan) {
         const result = await res.json();
         if(result.status === 'success') {
             const p = result.data;
+            // Isi form dengan data yang ada
             document.getElementById('edit_pt_id_pertemuan').value = p.id_pertemuan;
             document.getElementById('edit_pt_tanggal').value = p.tanggal;
             document.getElementById('edit_pt_jam_mulai').value = p.jam_mulai;
             document.getElementById('edit_pt_jam_selesai').value = p.jam_selesai;
             document.getElementById('edit_pt_judul').value = p.judul_materi;
             document.getElementById('edit_pt_link').value = p.ruang_atau_link;
+
+            // --- BAGIAN MENAMPILKAN FILE MATERI YANG SUDAH ADA ---
+            const linkMateriWrapper = document.getElementById('edit_existing_materi_wrapper');
+            const linkMateriAnchor = document.getElementById('edit_existing_materi_link');
+            
+            // Reset tampilan
+            linkMateriWrapper.classList.add('hidden');
+            linkMateriAnchor.href = '#';
+
+            // Jika ada link materi (dari backend), tampilkan
+            if (p.link_materi && p.link_materi.trim() !== '') {
+                linkMateriWrapper.classList.remove('hidden');
+                linkMateriAnchor.href = p.link_materi;
+                linkMateriAnchor.innerText = 'Download Materi Saat Ini';
+            }
+            // ----------------------------------------------------
+
         } else {
             alert('Gagal mengambil data pertemuan: ' + result.message);
         }
@@ -662,4 +694,13 @@ async function hapusPertemuan(id_pertemuan) {
     } else {
         alert('Gagal hapus: ' + result.message);
     }
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 }
