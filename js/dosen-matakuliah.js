@@ -574,7 +574,7 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
             alert('Ukuran file terlalu besar! Maksimal 10MB.');
             btn.innerHTML = originalText; btn.disabled = false; return;
         }
-        fileName = file.name;
+        ileName = file.name.replace(/\s+/g, '_'); // Mengubah semua spasi menjadi garis bawah
         base64File = await fileToBase64(file);
     }
 
