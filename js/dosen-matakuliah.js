@@ -312,11 +312,17 @@ function tutupModal(id) {
 }
 
 // Logic Simpan Mata Kuliah (GANTI DENGAN INI)
+// =========================================================
+// Logic Simpan Mata Kuliah (Dengan Animasi Loading & Anti-Double Click)
+// =========================================================
 document.getElementById('formTambahMatkul').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML; // Simpan teks asli tombol
     const session = JSON.parse(localStorage.getItem('user_session'));
     
-    // Ambil data mahasiswa yang dicentang (sesuai id yang ada di value checkbox)
+    // Ambil data mahasiswa yang dicentang
     const checkedBoxes = document.querySelectorAll('#mahasiswaContainer input[type="checkbox"]:checked');
     const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -325,6 +331,10 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
         return;
     }
 
+    // 1. Tampilkan animasi loading & Nonaktifkan tombol
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Data...';
+    btn.disabled = true;
+
     const data = {
         action: 'tambah_matakuliah',
         kode_mk: document.getElementById('mk_kode').value,
@@ -332,25 +342,46 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
         sks: document.getElementById('mk_sks').value,
         semester: document.getElementById('mk_semester').value,
         id_dosen: session.id_dosen,
-        mahasiswa_terpilih: mahasiswaTerpilih // <--- KIRIM ARRAY ID MAHASISWA
+        mahasiswa_terpilih: mahasiswaTerpilih
     };
     
-    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
-    const result = await res.json();
-    
-    if(result.status === 'success') {
-        alert(result.message);
-        tutupModal('modalTambahMatkul');
-        location.reload(); // Refresh halaman agar kartu baru dan data langsung terlihat
-    } else {
-        alert('Gagal: ' + result.message);
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        
+        if(result.status === 'success') {
+            alert(result.message);
+            // Sukses: reload halaman agar kartu baru muncul. (Tidak perlu mengembalikan tombol karena page berganti)
+            location.reload(); 
+        } else {
+            alert('Gagal: ' + result.message);
+            // 2. Jika gagal, kembalikan tombol ke semula agar bisa klik lagi
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Error simpan matkul:", error);
+        alert('Terjadi kesalahan jaringan.');
+        // 3. Jika error jaringan, kembalikan tombol ke semula
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 });
 
-// Logic Simpan Pertemuan
+// =========================================================
+// Logic Simpan Pertemuan (Dengan Animasi Loading & Anti-Double Click)
+// =========================================================
 document.getElementById('formTambahPertemuan').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
     const idKelas = this.dataset.idKelas;
+
+    // 1. Tampilkan animasi loading & Nonaktifkan tombol
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Pertemuan...';
+    btn.disabled = true;
+
     const data = {
         action: 'tambah_pertemuan',
         id_kelas: idKelas,
@@ -360,14 +391,27 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         judul_materi: document.getElementById('pt_judul').value,
         ruang_atau_link: document.getElementById('pt_link').value
     };
-    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
-    const result = await res.json();
-    if(result.status === 'success') {
-        alert('Pertemuan berhasil ditambahkan!');
-        tutupModal('modalTambahPertemuan');
-        // Refresh modal detail agar pertemuan baru muncul
-        location.reload();
-    } else {
-        alert('Gagal: ' + result.message);
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        
+        if(result.status === 'success') {
+            alert('Pertemuan berhasil ditambahkan!');
+            tutupModal('modalTambahPertemuan');
+            // Sukses: reload halaman agar daftar pertemuan terbaru muncul
+            location.reload();
+        } else {
+            alert('Gagal: ' + result.message);
+            // 2. Jika gagal, kembalikan tombol
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Error simpan pertemuan:", error);
+        alert('Terjadi kesalahan jaringan.');
+        // 3. Jika error, kembalikan tombol
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 });
