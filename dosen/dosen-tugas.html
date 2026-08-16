@@ -105,7 +105,7 @@
         </header>
 
         <div class="p-8 space-y-6">
-            <!-- Hero Banner -->
+            <!-- Hero Banner (tetap di atas) -->
             <div class="bg-banner-gradient rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
                 <div class="relative z-10">
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">Manajemen Tugas Kuliah 📝</h2>
@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            <!-- Filter Dropdown Kelas & Tombol Tambah -->
+            <!-- Filter Dropdown Kelas & Tombol Tambah (tetap di atas) -->
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="w-full md:w-1/3">
                     <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Mata Kuliah</label>
@@ -129,27 +129,34 @@
                 </button>
             </div>
 
-            <!-- Area Chart 1: Daftar Tugas & Progress -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-list-check text-teal-600 mr-2.5"></i> Daftar Tugas & Progress Kelas
-                </h3>
-                <div id="containerProgressTugas" class="space-y-4">
-                    <!-- List tugas diisi oleh JS -->
-                    <p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>
+            <!-- 🚀 BAGIAN INI DIUBAH MENJADI KIRI-KANAN (FLEX ROW) -->
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+                
+                <!-- CHART KIRI: Daftar Tugas & Progress -->
+                <div class="w-full lg:w-5/12 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 h-fit">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-list-check text-teal-600 mr-2.5"></i> Daftar Tugas & Progress
+                    </h3>
+                    <div id="containerProgressTugas" class="space-y-4">
+                        <p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Area Chart 2: Detail Pengumpulan & Penilaian -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-user-graduate text-teal-600 mr-2.5"></i> Pengumpulan & Penilaian
-                    <span id="judulTugasTerpilih" class="ml-auto text-sm font-normal text-slate-500 italic">(Pilih tugas di sebelah kiri)</span>
-                </h3>
-                <div id="containerPengumpulanTugas" class="overflow-x-auto">
-                    <p class="text-sm text-slate-500 italic text-center py-10">Klik kartu tugas di kiri untuk melihat detail pengumpulan.</p>
+                <!-- CHART KANAN: Pengumpulan & Penilaian -->
+                <div class="w-full lg:w-7/12 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[300px]">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-user-graduate text-teal-600 mr-2.5"></i> Pengumpulan & Penilaian
+                        </div>
+                        <span id="judulTugasTerpilih" class="text-sm font-normal text-slate-500 italic">(Pilih tugas di kiri)</span>
+                    </h3>
+                    <div id="containerPengumpulanTugas" class="overflow-x-auto">
+                        <p class="text-sm text-slate-500 italic text-center py-10">Klik kartu tugas di kiri untuk melihat detail.</p>
+                    </div>
                 </div>
+
             </div>
+            <!-- 🚀 END BAGIAN KIRI-KANAN -->
         </div>
     </main>
 
