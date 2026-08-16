@@ -196,6 +196,27 @@
         </div>
     </div>
 
+    <!-- Modal Edit Pertemuan -->
+    <div id="modalEditPertemuan" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Edit Pertemuan</h3>
+                <button onclick="tutupModal('modalEditPertemuan')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formEditPertemuan" class="p-5 space-y-4">
+                <input type="hidden" id="edit_pt_id_pertemuan">
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Tanggal</label><input id="edit_pt_tanggal" type="date" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Jam Mulai</label><input id="edit_pt_jam_mulai" type="time" class="w-full border rounded-lg p-2 text-sm" required></div>
+                    <div><label class="block text-xs font-bold text-slate-600 mb-1">Jam Selesai</label><input id="edit_pt_jam_selesai" type="time" class="w-full border rounded-lg p-2 text-sm" required></div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Materi</label><input id="edit_pt_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <div><label class="block text-xs font-bold text-slate-600 mb-1">Metode & Link Zoom</label><input id="edit_pt_link" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Update Pertemuan</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal Tambah Mata Kuliah -->
     <div id="modalTambahMatkul" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
