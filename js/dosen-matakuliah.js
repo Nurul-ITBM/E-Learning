@@ -714,7 +714,13 @@ function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        reader.onload = () => {
+            console.log(">>> fileToBase64 sukses, hasil:", reader.result.substring(0, 50) + "...");
+            resolve(reader.result);
+        };
+        reader.onerror = error => {
+            console.error(">>> fileToBase64 error:", error);
+            reject(error);
+        };
     });
 }
