@@ -160,14 +160,21 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                         
                         <!-- Tombol Aksi Kanan -->
                         <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+                            <!-- Tombol Zoom / Offline -->
                             ${isOnline ? 
                                 `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
                                 : 
                                 `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`
                             }
-                            <button onclick="alert('Fitur Lihat Materi per pertemuan belum diatur')" class="w-full md:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg text-sm font-bold text-center">
-                                <i class="fa-regular fa-folder-open mr-1.5"></i> Lihat Materi
-                            </button>
+                            
+                            <!-- TOMBOL MATERI (Ganti yang lama dengan ini) -->
+                            ${pert.link_materi ? 
+                                `<a href="${pert.link_materi}" target="_blank" class="w-full md:w-auto bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-600 px-4 py-2 rounded-lg text-sm font-bold text-center">
+                                    <i class="fa-solid fa-file-arrow-down mr-1.5"></i> Materi
+                                </a>` 
+                                : 
+                                `<span class="w-full md:w-auto text-slate-400 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-regular fa-folder-open mr-1.5"></i> Belum ada materi</span>`
+                            }
                         </div>
                     </div>
                 `;
