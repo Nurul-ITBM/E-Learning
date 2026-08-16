@@ -589,6 +589,8 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         materi_base64: base64File,
         materi_nama_file: fileName
     };
+    
+    console.log(">>> Data yang dikirim:", data); // Tambahkan ini
 
     try {
         const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
