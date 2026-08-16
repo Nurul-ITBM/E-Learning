@@ -4,14 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Tugas - EduLearn Dosen</title>
-    <!-- ... (copy semua CSS, Tailwind, FontAwesome, Style dari `dosen-matakuliah.html`) ... -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
     <style>
         /* Style persis seperti file dosen lainnya */
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .bg-brand-gradient { background: linear-gradient(135deg, #0d9488 0%, #0369a1 100%); }
+        .bg-banner-gradient { background: linear-gradient(to right, #ccfbf1, #e0f2fe); }
+        .sidebar-item-active { background-color: #f0fdf4; color: #0d9488; font-weight: 600; }
+        .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
+        .sidebar-item:hover { color: #0d9488; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
-    <!-- SIDEBAR DOSEN (copy persis dari file sebelumnya, aktifkan menu Kelola Tugas) -->
-    <!-- ... -->
+        <!-- SIDEBAR DOSEN -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
+        <div class="overflow-y-auto">
+            <div class="bg-brand-gradient p-6 text-white rounded-br-2xl">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-chalkboard-user text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
+                        <p class="text-xs text-teal-100 uppercase tracking-wider mt-0.5">Portal Dosen</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-6 text-sm">
+                <a href="dosen-dashboard.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg mb-6">
+                    <i class="fa-solid fa-house w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Akademik</p>
+                <nav class="space-y-1 mb-8">
+                    <!-- Menu Mata Kuliah Ampuan (Class aktif dipindahkan, jadi non-aktif di sini) -->
+                    <a href="dosen-matakuliah.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg">
+                        <i class="fa-solid fa-book-open-reader w-5 text-center"></i>
+                        <span>Mata Kuliah Ampuan</span>
+                    </a>
+                    
+                    <!-- Menu Kelola Tugas (AKTIF DI SINI) -->
+                    <a href="dosen-tugas.html" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl">
+                        <i class="fa-solid fa-file-pen w-5 text-center"></i>
+                        <span>Kelola Tugas</span>
+                    </a>
+                    
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Kelola Ujian</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-clipboard-user w-5 text-center"></i><span>Rekap Absensi</span></a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-square-poll-vertical w-5 text-center"></i><span>Input Nilai</span></a>
+                </nav>
+
+                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Sistem</p>
+                <nav class="space-y-1">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-user w-5 text-center"></i><span>Profil Dosen</span></a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-100">
+            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-3">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Keluar</span>
+            </button>
+            <div class="text-center text-xs text-slate-400">
+                <p>&copy; 2026 EduLearn</p>
+            </div>
+        </div>
+    </aside>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto flex flex-col">
