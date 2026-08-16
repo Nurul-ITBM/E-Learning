@@ -86,6 +86,7 @@ async function loadKelasDosen(id_dosen) {
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
                 
+                // --- KODE BARU (SALIN INI) ---
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
@@ -99,9 +100,16 @@ async function loadKelasDosen(id_dosen) {
                             <span class="text-xs font-bold text-teal-700 bg-white px-3 py-1 rounded-full border border-teal-200">${item.total_pertemuan || 0} Pertemuan</span>
                         </div>
                     </div>
-                    <div class="mt-5">
-                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
-                            <i class="fa-solid fa-door-open mr-1.5"></i> Lihat / Kelola Kelas
+                    
+                    <!-- BAGIAN TOMBOL BARU (2 TOMBOL) -->
+                    <div class="mt-5 flex gap-3">
+                        <!-- Tombol Lihat Kelas -->
+                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-door-open mr-1.5"></i> Lihat Kelas
+                        </button>
+                        <!-- Tombol Edit Kelas -->
+                        <button onclick="bukaModalEditMatkul('${item.id_kelas}')" class="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit
                         </button>
                     </div>
                 `;
