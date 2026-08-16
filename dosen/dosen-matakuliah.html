@@ -212,6 +212,14 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Materi</label><input id="edit_pt_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Metode & Link Zoom</label><input id="edit_pt_link" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Ganti Materi Kuliah (Opsional)</label>
+                    <div id="edit_existing_materi_wrapper" class="mb-2 text-sm text-slate-600 hidden">
+                        <span class="font-medium">Materi saat ini:</span> <a id="edit_existing_materi_link" href="#" target="_blank" class="text-teal-600 underline">Download</a>
+                    </div>
+                    <input type="file" id="edit_pt_file_materi" accept=".pdf,.docx,.pptx,.jpg,.png" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-teal-50 file:text-teal-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2">
+                    <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengganti file.</p>
+                </div>
                 <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Update Pertemuan</button>
             </form>
         </div>
@@ -280,6 +288,11 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Materi</label><input id="pt_judul" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: Pengantar Fisiologi" required></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Metode & Link Zoom</label><input id="pt_link" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Offline / Ruang 102 / https://..." required></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Upload Materi Kuliah (Opsional)</label>
+                    <input type="file" id="pt_file_materi" accept=".pdf,.docx,.pptx,.jpg,.png" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-teal-50 file:text-teal-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2">
+                    <p class="text-[10px] text-slate-400 mt-1">Maksimal 10MB. Format: PDF, Word, PPT, Gambar.</p>
+                </div>
                 <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Pertemuan</button>
             </form>
         </div>
