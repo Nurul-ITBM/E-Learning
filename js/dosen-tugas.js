@@ -133,10 +133,20 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
                 container.innerHTML = `<p class="text-center text-slate-500 py-10 italic">Belum ada mahasiswa yang mengumpulkan tugas ini.</p>`;
                 return;
             }
+            
+            // Tambahkan kolom KOMENTAR di tabel
             let html = `
-                <table class="w-full text-sm text-left text-slate-600">
+                <table class="w-full text-sm text-left text-slate-600 min-w-[700px]">
                     <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                        <tr><th class="px-4 py-3">NIM</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3 hidden md:table-cell">Waktu Kumpul</th><th class="px-4 py-3">File</th><th class="px-4 py-3 text-center">Nilai</th><th class="px-4 py-3 text-center">Aksi</th></tr>
+                        <tr>
+                            <th class="px-4 py-3">NIM</th>
+                            <th class="px-4 py-3">Nama</th>
+                            <th class="px-4 py-3 hidden md:table-cell">Waktu Kumpul</th>
+                            <th class="px-4 py-3">File</th>
+                            <th class="px-4 py-3 text-center">Nilai</th>
+                            <th class="px-4 py-3 hidden lg:table-cell w-1/4">Komentar</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
             `;
@@ -149,6 +159,12 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
                         <td class="px-4 py-3 hidden md:table-cell text-xs">${k.waktu_kumpul}</td>
                         <td class="px-4 py-3"><a href="${k.nama_file}" target="_blank" class="text-teal-600 hover:underline text-xs">📄 Lihat File</a></td>
                         <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBg}">${k.nilai || '-'}</span></td>
+                        
+                        <!-- KOLOM KOMENTAR (Dipenuhi dengan truncate jika komentar panjang) -->
+                        <td class="px-4 py-3 hidden lg:table-cell text-xs text-slate-500 truncate max-w-[200px]" title="${k.komentar_dosen || ''}">
+                            ${k.komentar_dosen || '-'}
+                        </td>
+
                         <td class="px-4 py-3 text-center">
                             <button onclick="bukaModalNilai('${k.id_pengumpulan}', ${k.nilai || 0}, '${k.komentar_dosen || ''}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1 rounded border border-indigo-200">Nilai</button>
                         </td>
