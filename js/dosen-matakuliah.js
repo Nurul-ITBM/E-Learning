@@ -337,6 +337,152 @@ function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
 
+// --- FUNGSI EDIT MATA KULIAH (TAMBAHKAN DI SINI) ---
+
+async function bukaModalEditMatkul(id_kelas) {
+    console.log(">>> Tombol Edit diklik! ID Kelas:", id_kelas);
+
+    const modal = document.getElementById('modalEditMatkul');
+    const container = document.getElementById('editMahasiswaContainer');
+    
+    if (!modal) {
+        alert("Error: Modal Edit tidak ditemukan di HTML!");
+        return;
+    }
+
+    modal.classList.remove('hidden');
+    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat data...</p>';
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_detail_kelas', id_kelas: id_kelas })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Gagal connect ke server (HTTP ${response.status})`);
+        }
+
+        const result = await response.json();
+        console.log(">>> Data detail kelas dari backend:", result);
+
+        if (result.status === 'success') {
+            const data = result.data;
+            
+            // Isi form input
+            document.getElementById('edit_id_kelas').value = id_kelas;
+            document.getElementById('edit_id_matkul').value = data.kelas.id_matkul;
+            document.getElementById('edit_mk_kode').value = data.matkul.kode_mk;
+            document.getElementById('edit_mk_nama').value = data.matkul.nama_mk;
+            document.getElementById('edit_mk_sks').value = data.matkul.sks;
+            document.getElementById('edit_mk_semester').value = data.matkul.semester;
+
+            // Load semua mahasiswa dan centang yang sudah terdaftar
+            const resMhs = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'get_list_mahasiswa' })
+            });
+            const listMhs = await resMhs.json();
+
+            if (listMhs.status === 'success' && listMhs.data.length > 0) {
+                let html = '';
+                listMhs.data.forEach(mhs => {
+                    const isChecked = data.mahasiswa_terdaftar.includes(mhs.id_mahasiswa) ? 'checked' : '';
+                    
+                    html += `
+                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200 search-item-edit">
+                            <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500" ${isChecked}>
+                            <span class="text-sm text-slate-700 flex-1">
+                                <span class="font-semibold">${mhs.nim || '-'}</span> - ${mhs.nama_mahasiswa || '-'}
+                                <span class="block text-xs text-slate-400">${mhs.program_studi || '-'} | Angkatan ${mhs.angkatan || '-'}</span>
+                            </span>
+                        </label>
+                    `;
+                });
+                container.innerHTML = html;
+
+                // Fungsi Search untuk Modal Edit
+                const searchInput = document.getElementById('edit_searchMahasiswa');
+                if (searchInput) {
+                    searchInput.oninput = function() {
+                        const keyword = this.value.toLowerCase().trim();
+                        const items = container.querySelectorAll('.search-item-edit');
+                        if (keyword === '') {
+                            items.forEach(el => el.style.display = 'flex');
+                            return;
+                        }
+                        items.forEach(item => {
+                            item.style.display = item.textContent.toLowerCase().includes(keyword) ? 'flex' : 'none';
+                        });
+                    };
+                }
+            } else {
+                container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa di sistem.</p>`;
+            }
+        } else {
+            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error: ${result.message || 'Terjadi kesalahan'}</p>`;
+        }
+    } catch (error) {
+        console.error("ERROR di bukaModalEditMatkul:", error);
+        container.innerHTML = `
+            <p class="text-center text-sm text-red-500 py-4">
+                Gagal memuat data edit. <br>
+                <span class="text-xs block mt-1">${error.message}</span>
+            </p>
+        `;
+    }
+}
+
+// Logic Simpan Perubahan Edit Matakuliah
+document.getElementById('formEditMatkul').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    
+    // Ambil data mahasiswa terpilih
+    const checkedBoxes = document.querySelectorAll('#editMahasiswaContainer input[type="checkbox"]:checked');
+    const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (mahasiswaTerpilih.length === 0) {
+        alert('Minimal 1 mahasiswa harus dipilih!');
+        return;
+    }
+
+    // Loading state
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
+    btn.disabled = true;
+
+    const data = {
+        action: 'update_matakuliah',
+        id_kelas: document.getElementById('edit_id_kelas').value,
+        id_matkul: document.getElementById('edit_id_matkul').value,
+        kode_mk: document.getElementById('edit_mk_kode').value,
+        nama_mk: document.getElementById('edit_mk_nama').value,
+        sks: document.getElementById('edit_mk_sks').value,
+        semester: document.getElementById('edit_mk_semester').value,
+        mahasiswa_terpilih: mahasiswaTerpilih
+    };
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        if(result.status === 'success') {
+            alert(result.message);
+            tutupModal('modalEditMatkul');
+            location.reload(); // Refresh agar kartu menampilkan data terbaru
+        } else {
+            alert('Gagal: ' + result.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Kesalahan jaringan.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
 // Logic Simpan Mata Kuliah (GANTI DENGAN INI)
 // =========================================================
 // Logic Simpan Mata Kuliah (Dengan Animasi Loading & Anti-Double Click)
