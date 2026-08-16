@@ -175,31 +175,32 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                     </button>
                 </div>
             `;
-            result.data.forEach(pert => {
-                const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
-                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' ? pert.judul_materi : 'Judul Materi';
-                let jamTampil = '';
-                if (pert.jam_mulai && pert.jam_selesai) {
-                    const jamMulai = formatJam(pert.jam_mulai);
-                    const jamSelesai = formatJam(pert.jam_selesai);
-                    jamTampil = ` · ${jamMulai} - ${jamSelesai}`;
-                }
-
-                html += `
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
-                                <span class="text-sm text-slate-700 font-medium">${formatTanggal(pert.tanggal)}${jamTampil}</span>
-                            </div>
-                            <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
-                            <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || '-'}</span></p>
+            html += `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
+                            <span class="text-sm text-slate-700 font-medium">${formatTanggal(pert.tanggal)}${jamTampil}</span>
                         </div>
-                        <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
-                            ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
+                        <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
+                        <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || '-'}</span></p>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+                        ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
+                        
+                        <!-- TAMBAHAN TOMBOL EDIT & HAPUS -->
+                        <div class="flex gap-1 w-full md:w-auto">
+                            <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="hapusPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
             });
             container.innerHTML = html;
         } else {
@@ -423,3 +424,79 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         btn.disabled = false;
     }
 });
+
+// --- FUNGSI EDIT & HAPUS PERTEMUAN ---
+
+async function bukaModalEditPertemuan(id_pertemuan) {
+    const modal = document.getElementById('modalEditPertemuan');
+    modal.classList.remove('hidden');
+
+    try {
+        const res = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_detail_pertemuan', id_pertemuan: id_pertemuan })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            const p = result.data;
+            document.getElementById('edit_pt_id_pertemuan').value = p.id_pertemuan;
+            document.getElementById('edit_pt_tanggal').value = p.tanggal;
+            document.getElementById('edit_pt_jam_mulai').value = p.jam_mulai;
+            document.getElementById('edit_pt_jam_selesai').value = p.jam_selesai;
+            document.getElementById('edit_pt_judul').value = p.judul_materi;
+            document.getElementById('edit_pt_link').value = p.ruang_atau_link;
+        } else {
+            alert('Gagal mengambil data pertemuan: ' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Koneksi error');
+    }
+}
+
+document.getElementById('formEditPertemuan').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
+    btn.disabled = true;
+
+    const data = {
+        action: 'update_pertemuan',
+        id_pertemuan: document.getElementById('edit_pt_id_pertemuan').value,
+        tanggal: document.getElementById('edit_pt_tanggal').value,
+        jam_mulai: document.getElementById('edit_pt_jam_mulai').value,
+        jam_selesai: document.getElementById('edit_pt_jam_selesai').value,
+        judul_materi: document.getElementById('edit_pt_judul').value,
+        ruang_atau_link: document.getElementById('edit_pt_link').value,
+        jenis_kuliah: 'Online' // bisa disesuaikan atau diinput manual
+    };
+
+    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+    const result = await res.json();
+    if(result.status === 'success') {
+        alert(result.message);
+        tutupModal('modalEditPertemuan');
+        location.reload(); // Reload modal detail
+    } else {
+        alert('Gagal: ' + result.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+async function hapusPertemuan(id_pertemuan) {
+    if(!confirm('Apakah Anda yakin ingin menghapus pertemuan ini?')) return;
+
+    const res = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete_pertemuan', id_pertemuan: id_pertemuan })
+    });
+    const result = await res.json();
+    if(result.status === 'success') {
+        alert(result.message);
+        location.reload();
+    } else {
+        alert('Gagal hapus: ' + result.message);
+    }
+}
