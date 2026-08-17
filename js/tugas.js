@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 3. Muat Data Tugas (Kirim id_user untuk backend mencari id_mahasiswa)
-    if (user.id_user) {
-        await loadTugas(user.id_user);
+    if (user.id_mahasiswa) {
+        await loadTugas(user.id_mahasiswa);
     } else {
         document.getElementById('containerTugas').innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: Sesi tidak valid.</p>';
     }
