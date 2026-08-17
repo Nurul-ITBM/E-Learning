@@ -1,21 +1,18 @@
-// js/tugas.js - Menarik dan menampilkan data Tugas Mahasiswa
+// js/tugas.js - Halaman Tugas Mahasiswa
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const sessionData = localStorage.getItem('user_session');
-    
-    // 1. Set Judul Halaman di Header Komponen
+    // 1. Set Judul Halaman Header
     const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) pageTitle.innerText = 'Tugas Saya';
+    if (pageTitle) pageTitle.innerText = 'Tugas';
 
-    // 2. Cek apakah ada sesi login
+    const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
         window.location.href = '../login.html';
         return;
     }
-
     const user = JSON.parse(sessionData);
 
-    // 3. Logout dengan Event Delegation (Karena tombol ada di komponen dinamis)
+    // 2. Event Logout (Delegasi untuk tombol di sidebar komponen)
     document.addEventListener('click', function(e) {
         const logoutBtn = e.target.closest('#btnLogout');
         if (logoutBtn) {
@@ -24,73 +21,153 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 4. Panggil data tugas
-    if (user.id_mahasiswa) {
-        await loadTugasMahasiswa(user.id_mahasiswa);
+    // 3. Muat Data Tugas (Kirim id_user untuk backend mencari id_mahasiswa)
+    if (user.id_user) {
+        await loadTugas(user.id_user);
     } else {
-        const container = document.getElementById('containerTugas');
-        if (container) container.innerHTML = '<p class="text-red-500 text-center py-10">Error: ID Mahasiswa tidak ditemukan.</p>';
+        document.getElementById('containerTugas').innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: Sesi tidak valid.</p>';
     }
 });
 
-async function loadTugasMahasiswa(id_mahasiswa) {
+async function loadTugas(id_user) {
     const container = document.getElementById('containerTugas');
-    container.innerHTML = '<p class="text-center py-10 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat tugas...</p>';
-
+    container.innerHTML = '<p class="text-center text-slate-400 py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat tugas...</p>';
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'get_tugas', id_mahasiswa: id_mahasiswa })
+            body: JSON.stringify({ action: 'get_tugas', id_user: id_user })
         });
         const result = await response.json();
 
         if (result.status === 'success') {
             container.innerHTML = '';
-            if (!result.data || result.data.length === 0) {
-                container.innerHTML = '<p class="text-center py-10 text-slate-500">Belum ada tugas yang diberikan.</p>';
+            if (result.data.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 col-span-3 text-center py-10">Belum ada tugas untuk mata kuliah Anda.</p>';
                 return;
             }
 
-            result.data.forEach(tugas => {
+            result.data.forEach(t => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-md transition-all flex flex-col justify-between";
                 
-                // Tentukan status dan warna badge berdasarkan status pengumpulan
-                let statusText = tugas.sudah_kumpul ? 'Sudah Dikumpulkan' : 'Belum Dikumpulkan';
-                let statusColor = tugas.sudah_kumpul ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-
-                // Jika sudah dinilai, tampilkan nilainya
-                let nilaiDisplay = '';
-                if (tugas.nilai && tugas.nilai > 0) {
-                    nilaiDisplay = `<span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full ml-2">Nilai: ${tugas.nilai}</span>`;
+                // Jika sudah kumpul, tampilkan status, jika belum tampilkan tombol upload
+                let actionHTML = '';
+                if (t.sudah_kumpul) {
+                    actionHTML = `
+                        <div class="text-center text-xs text-green-600 bg-green-50 p-2 rounded-lg">
+                            <i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikumpulkan
+                            ${t.nilai ? `<br><span class="font-bold text-slate-800">Nilai: ${t.nilai}</span>` : ''}
+                            ${t.komentar_dosen ? `<br><span class="text-slate-500">Komentar: ${t.komentar_dosen}</span>` : ''}
+                        </div>
+                    `;
+                } else {
+                    actionHTML = `
+                        <button onclick="bukaModalUploadTugas('${t.id_tugas}', '${t.judul_tugas}')" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-bold transition-colors">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Tugas
+                        </button>
+                    `;
                 }
 
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="text-xs font-semibold text-slate-400">${tugas.mata_kuliah || 'Mata Kuliah'}</span>
-                            <span class="text-xs font-bold text-slate-400">${tugas.bobot_nilai || '-'} SKS</span>
+                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100">${t.mata_kuliah}</span>
+                            <span class="text-xs font-semibold text-slate-400">Bobot: ${t.bobot_nilai}</span>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${tugas.judul_tugas}</h3>
-                        <p class="text-sm text-slate-500 mb-3 line-clamp-2">${tugas.deskripsi_instruksi || 'Tidak ada deskripsi.'}</p>
-                        <div class="flex items-center justify-between text-xs text-slate-500">
-                            <span><i class="fa-regular fa-clock mr-1"></i> Deadline: ${tugas.tenggat_waktu || '-'}</span>
-                            <span class="${statusColor} px-2 py-1 rounded-full font-medium">${statusText}</span>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${t.judul_tugas}</h3>
+                        <p class="text-sm text-slate-500 line-clamp-2">${t.deskripsi_instruksi}</p>
+                        <div class="mt-3 text-xs text-slate-500 flex items-center">
+                            <i class="fa-regular fa-clock mr-1"></i> Deadline: ${t.tenggat_waktu.replace('T', ' ')}
                         </div>
-                        ${nilaiDisplay ? `<div class="mt-2 text-xs text-right">${nilaiDisplay}</div>` : ''}
+                        ${t.link_lampiran ? `<div class="mt-2 text-xs"><a href="${t.link_lampiran}" target="_blank" class="text-indigo-600 underline">📎 Lihat Lampiran Tugas</a></div>` : ''}
                     </div>
-                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center gap-3">
-                        ${tugas.link_lampiran ? `<a href="${tugas.link_lampiran}" target="_blank" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition">📎 Lihat Lampiran</a>` : '<span class="text-xs text-slate-400">Tidak ada lampiran</span>'}
-                        <button onclick="alert('Fitur upload tugas belum diimplementasikan')" class="text-xs bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition" ${tugas.sudah_kumpul ? 'disabled' : ''}>${tugas.sudah_kumpul ? 'Sudah Dikumpulkan' : 'Kumpulkan'}</button>
+                    <div class="mt-5 pt-4 border-t border-slate-100">
+                        ${actionHTML}
                     </div>
                 `;
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `<p class="text-red-500 text-center py-10">${result.message || 'Gagal memuat data'}</p>`;
+            container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">Error: ${result.message}</p>`;
         }
     } catch (error) {
-        console.error('Error loading tugas:', error);
-        container.innerHTML = `<p class="text-red-500 text-center py-10">❌ Gagal terhubung ke server.<br><small>${error.message}</small></p>`;
+        console.error(error);
+        container.innerHTML = `<p class="text-red-500 col-span-3 text-center py-10">❌ Gagal terhubung ke server.</p>`;
     }
 }
+
+// ==========================================
+// FUNGSI UPLOAD TUGAS MAHASISWA
+// ==========================================
+function bukaModalUploadTugas(id_tugas, judul_tugas) {
+    document.getElementById('upload_id_tugas').value = id_tugas;
+    document.getElementById('modalUploadTugasTitle').innerText = `Upload: ${judul_tugas}`;
+    document.getElementById('formUploadTugas').reset();
+    document.getElementById('modalUploadTugas').classList.remove('hidden');
+}
+
+function tutupModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+// Helper: Ubah file ke Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+document.getElementById('formUploadTugas').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const sessionData = localStorage.getItem('user_session');
+    if (!sessionData) return;
+    const user = JSON.parse(sessionData);
+
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengirim...';
+    btn.disabled = true;
+
+    const fileInput = document.getElementById('upload_file');
+    let base64File = null, fileName = null;
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar! Maksimal 10MB.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+        fileName = file.name;
+        base64File = await fileToBase64(file);
+    }
+
+    const data = {
+        action: 'tambah_pengumpulan_tugas',
+        id_tugas: document.getElementById('upload_id_tugas').value,
+        id_mahasiswa: user.id_mahasiswa,
+        file_base64: base64File,
+        file_nama: fileName
+    };
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        if (result.status === 'success') {
+            alert('✅ ' + result.message);
+            tutupModal('modalUploadTugas');
+            location.reload(); // Refresh halaman agar status tugas berubah
+        } else {
+            alert('❌ Gagal: ' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('❌ Terjadi kesalahan koneksi.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
