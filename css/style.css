@@ -73,3 +73,23 @@
 aside {
     min-height: 100vh; /* Memaksa sidebar memenuhi tinggi layar */
 }
+
+/* ========================================== */
+/* SIDEBAR MAHASISWA - WARNA INDIGO (BIRU)     */
+/* ========================================== */
+
+body.role-mahasiswa .sidebar-nav-link:hover {
+    color: #4f46e5 !important; /* indigo-600 */
+    background-color: #f8fafc;
+}
+
+body.role-mahasiswa .sidebar-nav-link.active {
+    background-color: #eff6ff !important; /* indigo-50 */
+    color: #4f46e5 !important; /* indigo-600 */
+    font-weight: 600 !important;
+    border-radius: 0.75rem !important;
+}
+
+body.role-mahasiswa .bg-brand-gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); /* Indigo ke Purple */
+}
