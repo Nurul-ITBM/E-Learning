@@ -12,10 +12,6 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .bg-brand-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .sidebar-item-active { background-color: #eff6ff; color: #4f46e5; font-weight: 600; }
-        .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
-        .sidebar-item:hover { color: #4f46e5; background-color: #f8fafc; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -23,73 +19,14 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-    <!-- SIDEBAR (Sama seperti dashboard, tapi "Mata Kuliah" yang aktif) -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
-        <div class="overflow-y-auto">
-            <div class="bg-brand-gradient p-6 text-white rounded-br-2xl">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                        <i class="fa-solid fa-graduation-cap text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
-                        <p class="text-xs text-indigo-100 uppercase tracking-wider mt-0.5">Sistem Pembelajaran</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-4 py-6 text-sm">
-                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg mb-6">
-                    <i class="fa-solid fa-house w-5 text-center"></i>
-                    <span>Dashboard</span>
-                </a>
-
-                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Menu Utama</p>
-                <nav class="space-y-1 mb-8">
-                    <!-- Menu Mata Kuliah Aktif di sini -->
-                    <a href="matakuliah.html" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl">
-                        <i class="fa-solid fa-book w-5 text-center"></i>
-                        <span>Mata Kuliah</span>
-                    </a>
-                    <a href="tugas.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-file-pen w-5 text-center"></i><span>Tugas</span></a>
-                    <a href="ujian.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Ujian</span></a>
-                    <a href="absensi.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-user-check w-5 text-center"></i><span>Absensi</span></a>
-                    <a href="nilai.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-chart-simple w-5 text-center"></i><span>Nilai</span></a>
-                    <a href="pengumuman.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Pengumuman</span></a>
-                </nav>
-                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Akun</p>
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-user w-5 text-center"></i><span>Profil Saya</span></a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-gear w-5 text-center"></i><span>Pengaturan</span></a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="p-4 border-t border-slate-100">
-            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-3">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Keluar</span>
-            </button>
-        </div>
-    </aside>
+    <!-- TEMPAT PENAMPUNG SIDEBAR (Diisi oleh JS) -->
+    <div id="sidebar-container"></div>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto flex flex-col">
         
-        <!-- Header -->
-        <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-            <h2 class="text-lg font-bold text-slate-800">Daftar Mata Kuliah</h2>
-            
-            <div class="flex items-center space-x-6">
-                <div class="flex items-center space-x-3 border-l border-slate-200 pl-6 cursor-pointer">
-                    <img src="https://ui-avatars.com/api/?name=Andi+P&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-10 h-10 rounded-full border border-slate-200">
-                    <div class="hidden md:block leading-tight">
-                        <p class="text-sm font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Mahasiswa</p>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <!-- TEMPAT PENAMPUNG HEADER (Diisi oleh JS) -->
+        <div id="header-container"></div>
 
         <!-- Content Area -->
         <div class="p-8">
@@ -99,7 +36,7 @@
                     <p class="text-sm text-slate-500 mt-1">Pilih mata kuliah untuk melihat modul, materi, dan tugas.</p>
                 </div>
  
-                <!-- Search Bar untuk filter (Opsional/UI saja saat ini) -->
+                <!-- Search Bar untuk filter -->
                 <div class="relative hidden md:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
                     <input type="text" placeholder="Cari mata kuliah..." class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm w-72 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300">
@@ -108,7 +45,7 @@
 
             <!-- Grid Kontainer Mata Kuliah -->
             <div id="containerMataKuliah" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Animasi Loading (Akan hilang jika data berhasil ditarik) -->
+                <!-- Animasi Loading -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between animate-pulse h-48">
                     <div>
                         <div class="w-12 h-12 rounded-xl bg-slate-200 mb-4"></div>
@@ -120,27 +57,6 @@
         </div>
     </main>
 
-    <script src="../js/config.js"></script>
-    <script src="../js/matakuliah.js"></script>
-    <script>  
-        document.addEventListener('DOMContentLoaded', () => {
-            const sessionData = localStorage.getItem('user_session');
-            if (sessionData) {
-                const user = JSON.parse(sessionData);
-                
-                // Mengambil langsung dari kolom 'nama_mahasiswa' di sheet Anda
-                const namaUser = user.nama_mahasiswa || 'Mahasiswa'; 
-                
-                // Memasukkan ke elemen tampilan
-                if(document.getElementById('userNameDisplay')) {
-                    document.getElementById('userNameDisplay').innerText = namaUser;
-                }
-                if(document.getElementById('bannerNameDisplay')) {
-                    document.getElementById('bannerNameDisplay').innerText = namaUser;
-                }
-            }
-        });
-    </script>
     <!-- MODAL DETAIL PERTEMUAN (POPUP) -->
     <div id="modalDetailKelas" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
@@ -155,9 +71,9 @@
                 </button>
             </div>
     
-            <!-- Body Modal (List Pertemuan) -->
+            <!-- Body Modal -->
             <div id="modalContainerPertemuan" class="flex-1 overflow-y-auto p-5 bg-slate-50 space-y-3">
-                <!-- Data pertemuan akan di-load oleh JS di sini -->
+                <!-- Data pertemuan akan di-load oleh JS -->
                 <div class="text-center py-10 text-slate-400">
                     <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
                     <p>Memuat jadwal pertemuan...</p>
@@ -172,5 +88,10 @@
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/mahasiswa-load-components.js"></script>
+    <script src="../js/matakuliah.js"></script>
 </body>
 </html>
