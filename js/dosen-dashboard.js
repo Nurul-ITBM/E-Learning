@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (sessionData) {
         const user = JSON.parse(sessionData);
+
+        // --- TAMBAHKAN DI SINI ---
+        // Set Judul Halaman untuk Header Komponen
+        const pageTitle = document.getElementById('pageTitle');
+        if (pageTitle) pageTitle.innerText = 'Dashboard Dosen';
+        // -------------------------
         
         // 1. Validasi Role (jika bukan dosen, lempar ke login)
         if (user.role && user.role !== 'dosen') {
