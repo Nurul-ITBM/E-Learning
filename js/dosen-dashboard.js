@@ -1,4 +1,4 @@
-// js/dosen.js - Dashboard Dosen
+// js/dosen-dashboard.js - Dashboard Dosen
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
@@ -6,11 +6,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sessionData) {
         const user = JSON.parse(sessionData);
 
-        // --- TAMBAHKAN DI SINI ---
         // Set Judul Halaman untuk Header Komponen
         const pageTitle = document.getElementById('pageTitle');
         if (pageTitle) pageTitle.innerText = 'Dashboard Dosen';
-        // -------------------------
         
         // 1. Validasi Role (jika bukan dosen, lempar ke login)
         if (user.role && user.role !== 'dosen') {
@@ -32,8 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const bannerName = document.getElementById('bannerDosenName');
         if (bannerName) bannerName.innerText = namaDosen;
 
-        // 3. Load Data Statistik Dashboard (Jumlah Kelas, Tugas Masuk, dll)
-        // Pastikan user.id_dosen ada (dari login)
+        // 3. Load Data Statistik Dashboard (Jumlah Kelas)
         if (user.id_dosen) {
             await loadStatistikDosen(user.id_dosen);
         } else {
@@ -41,28 +38,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
     } else {
-        // Jika tidak ada sesi login, arahkan kembali ke halaman login utama
         window.location.href = 'login.html';
-    }
-
-    // 4. Tombol Keluar (Logout)
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            localStorage.removeItem('user_session');
-            window.location.href = 'login.html';
-        });
     }
 });
 
-// 5. Fungsi Memuat Statistik Dashboard (Opsional, jika ingin dinamis)
+// 4. Event Delegation untuk Tombol Keluar (Logout)
+// Ini akan bekerja meskipun tombol dimuat secara dinamis oleh komponen
+document.addEventListener('click', function(e) {
+    // Cek apakah elemen yang diklik adalah tombol dengan id btnLogout atau berada di dalamnya
+    const logoutBtn = e.target.closest('#btnLogout');
+    if (logoutBtn) {
+        localStorage.removeItem('user_session');
+        window.location.href = 'login.html';
+    }
+});
+
+// 5. Fungsi Memuat Statistik Dashboard
 async function loadStatistikDosen(id_dosen) {
     try {
-        // Contoh: Ambil data jumlah kelas yang diampu
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({ 
-                action: 'get_matakuliah_ampuan', // Fungsi backend yang sudah dibuat
+                action: 'get_matakuliah_ampuan',
                 id_dosen: id_dosen 
             })
         });
@@ -77,6 +74,5 @@ async function loadStatistikDosen(id_dosen) {
         }
     } catch (error) {
         console.error("Gagal memuat statistik dashboard:", error);
-        // Jika gagal, angka statistik tetap seperti default (3, 42, 5, 120)
     }
 }
