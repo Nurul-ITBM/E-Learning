@@ -1,19 +1,29 @@
 // js/dosen-tugas.js
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
-    if (!sessionData) { window.location.href = '../login.html'; return; }
+    if (!sessionData) {
+        window.location.href = '../login.html';
+        return;
+    }
     const user = JSON.parse(sessionData);
-    if (user.role !== 'dosen') { alert('Anda bukan dosen!'); window.location.href = '../login.html'; return; }
+    if (user.role !== 'dosen') {
+        alert('Anda bukan dosen!');
+        window.location.href = '../login.html';
+        return;
+    }
 
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('user_session'); window.location.href = '../login.html';
-    });
+    // 1. Set Judul Halaman di Header Komponen
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.innerText = 'Kelola Tugas';
 
+    // 2. Load dropdown kelas
     await loadKelasDropdown(user.id_dosen);
 });
 
+// ==========================================
+// 1. LOAD DROPDOWN KELAS
+// ==========================================
 async function loadKelasDropdown(id_dosen) {
-    // DEKLARASI VARIABEL INI WAJIB ADA!
     const select = document.getElementById('filterKelasDosen');
     const btnTambah = document.getElementById('btnTambahTugas');
     
@@ -41,18 +51,18 @@ async function loadKelasDropdown(id_dosen) {
                     html += `<option value="${k.id_kelas}">${k.nama_kelas}</option>`; 
                 });
                 select.innerHTML = html;
-                
-                // JANGAN LUPA: AKTIFKAN TOMBOL SETELAH DROPDOWN TERISI!
-                btnTambah.disabled = false; 
+                btnTambah.disabled = false;
                 
                 select.addEventListener('change', async (e) => {
                     const idKelas = e.target.value;
                     if (idKelas) {
-                        document.getElementById('containerPengumpulanTugas').innerHTML = '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
+                        document.getElementById('containerPengumpulanTugas').innerHTML = 
+                            '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
                         document.getElementById('judulTugasTerpilih').innerText = '(Pilih tugas)';
                         await loadProgressTugas(idKelas);
                     } else {
-                        document.getElementById('containerProgressTugas').innerHTML = '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
+                        document.getElementById('containerProgressTugas').innerHTML = 
+                            '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
                         document.getElementById('containerPengumpulanTugas').innerHTML = '';
                     }
                 });
@@ -73,20 +83,23 @@ async function loadKelasDropdown(id_dosen) {
 }
 
 // ==========================================
-// LOGIKA CHART 1: PROGRESS TUGAS
+// 2. LOAD PROGRESS TUGAS (CHART KIRI)
 // ==========================================
-let dataProgressTugas = []; // Simpan global agar bisa diakses saat klik
+let dataProgressTugas = [];
 
 async function loadProgressTugas(id_kelas) {
     const container = document.getElementById('containerProgressTugas');
     container.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat progress...</p>';
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_progress_tugas', id_kelas: id_kelas }) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'get_progress_tugas', id_kelas: id_kelas }) 
+        });
         const result = await res.json();
-        if(result.status === 'success') {
+        if (result.status === 'success') {
             dataProgressTugas = result.data;
             container.innerHTML = ''; 
-            if(result.data.length === 0) {
+            if (result.data.length === 0) {
                 container.innerHTML = `<p class="text-slate-500 text-center py-4">Belum ada tugas untuk kelas ini.</p>`;
                 return;
             }
@@ -94,19 +107,15 @@ async function loadProgressTugas(id_kelas) {
                 const persentase = tugas.total_mahasiswa > 0 ? Math.round((tugas.sudah_kumpul / tugas.total_mahasiswa) * 100) : 0;
                 const card = document.createElement('div');
                 card.className = "bg-slate-50 hover:bg-white border border-slate-200 hover:border-teal-300 rounded-xl p-4 cursor-pointer transition-all shadow-sm relative";
-                // Beri event click untuk memuat Chart 2
                 card.onclick = () => loadPengumpulanTugas(tugas.id_tugas, tugas.judul_tugas);
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <!-- Info Pertemuan -->
                             <div class="text-[10px] text-slate-500 mb-1">
                                 <i class="fa-regular fa-calendar mr-1"></i> Pertemuan ke-${tugas.pertemuan_ke || '-'}
                             </div>
-                            <!-- Judul Tugas -->
                             <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${tugas.judul_tugas}</h4>
                         </div>
-                        <!-- Bobot Nilai -->
                         <span class="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tugas.bobot_nilai}</span>
                     </div>
                     <div class="flex justify-between text-[10px] text-slate-500 mb-1">
@@ -124,25 +133,23 @@ async function loadProgressTugas(id_kelas) {
 }
 
 // ==========================================
-// LOGIKA CHART 2: PENGUMPULAN & PENILAIAN
+// 3. LOAD PENGUMPULAN & PENILAIAN (CHART KANAN)
 // ==========================================
-let idPengumpulanTerpilih = null;
-
 async function loadPengumpulanTugas(id_tugas, judul_tugas) {
     document.getElementById('judulTugasTerpilih').innerText = ` (${judul_tugas})`;
     const container = document.getElementById('containerPengumpulanTugas');
     container.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data kumpul...</p>';
-
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'get_pengumpulan_tugas', id_tugas: id_tugas }) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'get_pengumpulan_tugas', id_tugas: id_tugas }) 
+        });
         const result = await res.json();
-        if(result.status === 'success') {
-            if(result.data.length === 0) {
+        if (result.status === 'success') {
+            if (result.data.length === 0) {
                 container.innerHTML = `<p class="text-center text-slate-500 py-10 italic">Belum ada mahasiswa yang mengumpulkan tugas ini.</p>`;
                 return;
             }
-            
-            // Tambahkan kolom KOMENTAR di tabel
             let html = `
                 <table class="w-full text-sm text-left text-slate-600 min-w-[700px]">
                     <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
@@ -167,12 +174,9 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
                         <td class="px-4 py-3 hidden md:table-cell text-xs">${k.waktu_kumpul}</td>
                         <td class="px-4 py-3"><a href="${k.nama_file}" target="_blank" class="text-teal-600 hover:underline text-xs">📄 Lihat File</a></td>
                         <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBg}">${k.nilai || '-'}</span></td>
-                        
-                        <!-- KOLOM KOMENTAR (Dipenuhi dengan truncate jika komentar panjang) -->
                         <td class="px-4 py-3 hidden lg:table-cell text-xs text-slate-500 truncate max-w-[200px]" title="${k.komentar_dosen || ''}">
                             ${k.komentar_dosen || '-'}
                         </td>
-
                         <td class="px-4 py-3 text-center">
                             <button onclick="bukaModalNilai('${k.id_pengumpulan}', ${k.nilai || 0}, '${k.komentar_dosen || ''}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1 rounded border border-indigo-200">Nilai</button>
                         </td>
@@ -186,8 +190,10 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
 }
 
 // ==========================================
-// MODAL PENILAIAN TUGAS
+// 4. MODAL PENILAIAN
 // ==========================================
+let idPengumpulanTerpilih = null;
+
 function bukaModalNilai(id_pengumpulan, nilai_sekarang, komentar_sekarang) {
     idPengumpulanTerpilih = id_pengumpulan;
     document.getElementById('nilai_input').value = nilai_sekarang || '';
@@ -212,12 +218,12 @@ document.getElementById('formNilaiTugas').addEventListener('submit', async funct
     };
     const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
     const result = await res.json();
-    if(result.status === 'success') {
+    if (result.status === 'success') {
         alert(result.message);
         tutupModal('modalNilaiTugas');
-        // Reload Chart 2 tanpa reload halaman
+        // Reload data di chart kanan
         const selectedTaskId = dataProgressTugas.find(t => t.judul_tugas === document.getElementById('judulTugasTerpilih').innerText.replace(/[()]/g, '').trim())?.id_tugas;
-        if(selectedTaskId) loadPengumpulanTugas(selectedTaskId, document.getElementById('judulTugasTerpilih').innerText.replace(/[()]/g, '').trim());
+        if (selectedTaskId) loadPengumpulanTugas(selectedTaskId, document.getElementById('judulTugasTerpilih').innerText.replace(/[()]/g, '').trim());
     } else {
         alert('Gagal: ' + result.message);
         btn.innerHTML = original;
@@ -225,17 +231,12 @@ document.getElementById('formNilaiTugas').addEventListener('submit', async funct
     }
 });
 
-// ... (kode-kode sebelumnya: loadKelasDropdown, loadProgressTugas, dll) ...
-
 // ==========================================
 // 5. TAMBAH TUGAS (Tombol +)
 // ==========================================
 document.getElementById('btnTambahTugas').addEventListener('click', function() {
     const idKelas = document.getElementById('filterKelasDosen').value;
-    if (!idKelas) { 
-        alert('Pilih mata kuliah terlebih dahulu!'); 
-        return; 
-    }
+    if (!idKelas) { alert('Pilih mata kuliah terlebih dahulu!'); return; }
     document.getElementById('tugas_id_kelas').value = idKelas;
     document.getElementById('tugas_id_tugas_edit').value = '';
     document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
@@ -244,12 +245,19 @@ document.getElementById('btnTambahTugas').addEventListener('click', function() {
     document.getElementById('modalTambahTugas').classList.remove('hidden');
 });
 
-function tutupModal(id) { 
-    document.getElementById(id).classList.add('hidden'); 
-}
+// ==========================================
+// 6. LOGOUT (Event Delegation)
+// ==========================================
+document.addEventListener('click', function(e) {
+    const logoutBtn = e.target.closest('#btnLogout');
+    if (logoutBtn) {
+        localStorage.removeItem('user_session');
+        window.location.href = '../login.html';
+    }
+});
 
 // ==========================================
-// 6. SIMPAN TUGAS (Event Listener Form - GANTI BAGIAN INI!)
+// 7. SIMPAN TUGAS (Event Listener Form)
 // ==========================================
 document.getElementById('formTambahTugas').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -304,3 +312,13 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
         btn.disabled = false;
     }
 });
+
+// Fungsi helper fileToBase64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
