@@ -47,6 +47,28 @@
         </div>
     </main>
 
+    <!-- ============================================== -->
+    <!-- MODAL UPLOAD TUGAS MAHASISWA                  -->
+    <!-- ============================================== -->
+    <div id="modalUploadTugas" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800" id="modalUploadTugasTitle">Upload Tugas</h3>
+                <button onclick="tutupModal('modalUploadTugas')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formUploadTugas" class="p-5 space-y-4">
+                <input type="hidden" id="upload_id_tugas">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">File Jawaban</label>
+                    <input type="file" id="upload_file" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-indigo-50 file:text-indigo-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2" required>
+                    <p class="text-[10px] text-slate-400 mt-1">Maksimal 10MB. Format: PDF, DOCX, ZIP, Gambar.</p>
+                </div>
+                <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded-lg">Kumpulkan Tugas</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
     <script src="../js/tugas.js"></script>
