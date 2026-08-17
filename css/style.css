@@ -66,3 +66,10 @@
     padding: 1rem 1.5rem 2rem 1.5rem !important; /* Beri jarak bawah agar tidak mepet copyright */
     border-top: 1px solid #e2e8f0;
 }
+
+/* ========================================== */
+/* AGAR SIDEBAR MEMANJANG SAMPAI BAWAH LAYAR   */
+/* ========================================== */
+aside {
+    min-height: 100vh; /* Memaksa sidebar memenuhi tinggi layar */
+}
