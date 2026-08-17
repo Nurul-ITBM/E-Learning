@@ -98,8 +98,16 @@ async function loadProgressTugas(id_kelas) {
                 card.onclick = () => loadPengumpulanTugas(tugas.id_tugas, tugas.judul_tugas);
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
-                        <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${tugas.judul_tugas}</h4>
-                        <span class="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tugas.bobot_nilai} SKS</span>
+                        <div>
+                            <!-- Info Pertemuan -->
+                            <div class="text-[10px] text-slate-500 mb-1">
+                                <i class="fa-regular fa-calendar mr-1"></i> Pertemuan ke-${tugas.pertemuan_ke || '-'}
+                            </div>
+                            <!-- Judul Tugas -->
+                            <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${tugas.judul_tugas}</h4>
+                        </div>
+                        <!-- Bobot Nilai -->
+                        <span class="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tugas.bobot_nilai}</span>
                     </div>
                     <div class="flex justify-between text-[10px] text-slate-500 mb-1">
                         <span>Deadline: ${tugas.tenggat_waktu.replace('T', ' ')}</span>
@@ -267,6 +275,7 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
     const data = {
         action: 'tambah_tugas',
         id_kelas: document.getElementById('tugas_id_kelas').value,
+        pertemuan_ke: document.getElementById('tugas_pertemuan_ke').value,
         judul_tugas: document.getElementById('tugas_judul').value,
         deskripsi_instruksi: document.getElementById('tugas_deskripsi').value,
         tenggat_waktu: document.getElementById('tugas_deadline').value,
