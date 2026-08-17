@@ -1,4 +1,5 @@
-// js/dosen-tugas.js
+// js/dosen-matakuliah.js - Data Kelas Ampuan Dosen (Lengkap dengan CRUD)
+
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
@@ -12,225 +13,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Set Judul Halaman di Header Komponen
+    // 1. Set Judul Halaman di Header Komponen
     const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) pageTitle.innerText = 'Kelola Tugas';
+    if (pageTitle) pageTitle.innerText = 'Mata Kuliah Ampuan';
 
-    // Load dropdown kelas
-    await loadKelasDropdown(user.id_dosen);
-});
-
-// ==========================================
-// 1. LOAD DROPDOWN KELAS
-// ==========================================
-async function loadKelasDropdown(id_dosen) {
-    const select = document.getElementById('filterKelasDosen');
-    const btnTambah = document.getElementById('btnTambahTugas');
-    
-    if (!id_dosen) {
-        console.error("ID Dosen tidak ditemukan di session!");
-        return;
-    }
-
-    try {
-        console.log(">>> Mengambil kelas untuk ID Dosen:", id_dosen);
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'get_kelas_dosen', id_dosen: id_dosen }) 
-        });
-        
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        
-        const result = await res.json();
-        console.log(">>> Response Kelas Dosen:", result);
-
-        if (result.status === 'success') {
-            if (result.data.length > 0) {
-                let html = '<option value="">-- Pilih Mata Kuliah --</option>';
-                result.data.forEach(k => { 
-                    html += `<option value="${k.id_kelas}">${k.nama_kelas}</option>`; 
-                });
-                select.innerHTML = html;
-                btnTambah.disabled = false;
-                
-                // Event saat ganti pilihan
-                select.addEventListener('change', (e) => {
-                    const idKelas = e.target.value;
-                    if (idKelas) {
-                        document.getElementById('containerPengumpulanTugas').innerHTML = 
-                            '<p class="text-sm text-slate-500 italic text-center py-10">Pilih tugas di sebelah kiri.</p>';
-                        document.getElementById('judulTugasTerpilih').innerText = '(Pilih tugas)';
-                        loadProgressTugas(idKelas);
-                    } else {
-                        document.getElementById('containerProgressTugas').innerHTML = 
-                            '<p class="text-sm text-slate-500 italic text-center py-6">Silakan pilih mata kuliah di dropdown atas.</p>';
-                        document.getElementById('containerPengumpulanTugas').innerHTML = '';
-                    }
-                });
-            } else {
-                select.innerHTML = '<option value="">Belum ada kelas yang diampu</option>';
-                btnTambah.disabled = true;
-            }
-        } else {
-            console.error("Gagal mengambil data kelas:", result.message);
-            select.innerHTML = `<option value="">Error: ${result.message}</option>`;
-        }
-    } catch (error) {
-        console.error("ERROR di loadKelasDropdown:", error);
-        select.innerHTML = `<option value="">Error load data</option>`;
-        btnTambah.disabled = true;
-    }
-}
-
-// ==========================================
-// 2. LOAD PROGRESS TUGAS (CHART KIRI)
-// ==========================================
-let dataProgressTugas = [];
-
-async function loadProgressTugas(id_kelas) {
-    const container = document.getElementById('containerProgressTugas');
-    container.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat progress...</p>';
-    try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'get_progress_tugas', id_kelas: id_kelas }) 
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-            dataProgressTugas = result.data;
-            container.innerHTML = ''; 
-            if (result.data.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 text-center py-4">Belum ada tugas untuk kelas ini.</p>`;
-                return;
-            }
-            result.data.forEach(tugas => {
-                const persentase = tugas.total_mahasiswa > 0 ? Math.round((tugas.sudah_kumpul / tugas.total_mahasiswa) * 100) : 0;
-                const card = document.createElement('div');
-                card.className = "bg-slate-50 hover:bg-white border border-slate-200 hover:border-teal-300 rounded-xl p-4 cursor-pointer transition-all shadow-sm relative";
-                card.onclick = () => loadPengumpulanTugas(tugas.id_tugas, tugas.judul_tugas);
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${tugas.judul_tugas}</h4>
-                        <span class="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tugas.bobot_nilai} SKS</span>
-                    </div>
-                    <div class="flex justify-between text-[10px] text-slate-500 mb-1">
-                        <span>Deadline: ${tugas.tenggat_waktu.replace('T', ' ')}</span>
-                        <span>${tugas.sudah_kumpul}/${tugas.total_mahasiswa} Kumpul</span>
-                    </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2">
-                        <div class="bg-teal-600 h-2 rounded-full transition-all duration-500" style="width: ${persentase}%"></div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-    } catch (error) { console.error(error); }
-}
-
-// ==========================================
-// 3. LOAD PENGUMPULAN & PENILAIAN (CHART KANAN)
-// ==========================================
-async function loadPengumpulanTugas(id_tugas, judul_tugas) {
-    document.getElementById('judulTugasTerpilih').innerText = ` (${judul_tugas})`;
-    const container = document.getElementById('containerPengumpulanTugas');
-    container.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data kumpul...</p>';
-    try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: 'get_pengumpulan_tugas', id_tugas: id_tugas }) 
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-            if (result.data.length === 0) {
-                container.innerHTML = `<p class="text-center text-slate-500 py-10 italic">Belum ada mahasiswa yang mengumpulkan tugas ini.</p>`;
-                return;
-            }
-            let html = `
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                        <tr><th class="px-4 py-3">NIM</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3 hidden md:table-cell">Waktu Kumpul</th><th class="px-4 py-3">File</th><th class="px-4 py-3 text-center">Nilai</th><th class="px-4 py-3 text-center">Aksi</th></tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-            `;
-            result.data.forEach(k => {
-                const statusBg = k.nilai > 0 ? 'bg-green-50 text-green-700' : (k.status === 'Tepat Waktu' ? 'bg-slate-50' : 'bg-red-50 text-red-700');
-                html += `
-                    <tr class="hover:bg-slate-50/50">
-                        <td class="px-4 py-3 font-medium">${k.nim}</td>
-                        <td class="px-4 py-3">${k.nama_mahasiswa}</td>
-                        <td class="px-4 py-3 hidden md:table-cell text-xs">${k.waktu_kumpul}</td>
-                        <td class="px-4 py-3"><a href="${k.nama_file}" target="_blank" class="text-teal-600 hover:underline text-xs">📄 Lihat File</a></td>
-                        <td class="px-4 py-3 text-center"><span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBg}">${k.nilai || '-'}</span></td>
-                        <td class="px-4 py-3 text-center">
-                            <button onclick="bukaModalNilai('${k.id_pengumpulan}', ${k.nilai || 0}, '${k.komentar_dosen || ''}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1 rounded border border-indigo-200">Nilai</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            container.innerHTML = html;
-        }
-    } catch (error) { console.error(error); }
-}
-
-// ==========================================
-// 4. MODAL PENILAIAN
-// ==========================================
-let idPengumpulanTerpilih = null;
-
-function bukaModalNilai(id_pengumpulan, nilai_sekarang, komentar_sekarang) {
-    idPengumpulanTerpilih = id_pengumpulan;
-    document.getElementById('nilai_input').value = nilai_sekarang || '';
-    document.getElementById('komentar_input').value = komentar_sekarang || '';
-    document.getElementById('modalNilaiTugas').classList.remove('hidden');
-}
-
-function tutupModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-document.getElementById('formNilaiTugas').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = this.querySelector('button');
-    const original = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
-    btn.disabled = true;
-
-    const data = {
-        action: 'nilai_tugas',
-        id_pengumpulan: idPengumpulanTerpilih,
-        nilai: document.getElementById('nilai_input').value,
-        komentar: document.getElementById('komentar_input').value
-    };
-    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
-    const result = await res.json();
-    if (result.status === 'success') {
-        alert(result.message);
-        tutupModal('modalNilaiTugas');
-        // Reload data di chart kanan
-        const selectedTaskId = dataProgressTugas.find(t => t.judul_tugas === document.getElementById('judulTugasTerpilih').innerText.replace(/[()]/g, '').trim())?.id_tugas;
-        if (selectedTaskId) loadPengumpulanTugas(selectedTaskId, document.getElementById('judulTugasTerpilih').innerText.replace(/[()]/g, '').trim());
+    // 2. Panggil data mata kuliah
+    if (user.id_dosen) {
+        await loadKelasDosen(user.id_dosen);
     } else {
-        alert('Gagal: ' + result.message);
-        btn.innerHTML = original;
-        btn.disabled = false;
+        const container = document.getElementById('containerMatkulDosen');
+        if (container) container.innerHTML = '<p class="text-red-500 col-span-3 text-center py-10">Error: ID Dosen tidak ditemukan.</p>';
     }
 });
 
 // ==========================================
-// 5. TAMBAH TUGAS (Tombol +)
-// ==========================================
-document.getElementById('btnTambahTugas').addEventListener('click', function() {
-    const idKelas = document.getElementById('filterKelasDosen').value;
-    if (!idKelas) { alert('Pilih mata kuliah terlebih dahulu!'); return; }
-    document.getElementById('tugas_id_kelas').value = idKelas;
-    document.getElementById('tugas_id_tugas_edit').value = '';
-    document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
-    document.getElementById('formTambahTugas').reset();
-    document.getElementById('existing_lampiran_wrapper').classList.add('hidden');
-    document.getElementById('modalTambahTugas').classList.remove('hidden');
-});
-
-// ==========================================
-// 6. LOGOUT (Event Delegation)
+// 3. LOGOUT (Event Delegation)
 // ==========================================
 document.addEventListener('click', function(e) {
     const logoutBtn = e.target.closest('#btnLogout');
@@ -240,42 +37,647 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ==========================================
-// 7. SIMPAN TUGAS (Event Listener Form)
-// ==========================================
-document.getElementById('formTambahTugas').addEventListener('submit', async function(e) {
+async function loadKelasDosen(id_dosen) {
+    const container = document.getElementById('containerMatkulDosen');
+    // Tampilkan loading
+    container.innerHTML = '<p class="text-center text-slate-400 py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Sedang memuat data...</p>';
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'get_matakuliah_ampuan',
+                id_dosen: id_dosen 
+            })
+        });
+        
+        // Cek apakah response HTTP berhasil (200)
+        if (!response.ok) {
+            throw new Error(`HTTP Error ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("DATA DARI SERVER:", result); // Lihat di Console (F12)
+
+        if (result.status === 'success') {
+            container.innerHTML = ''; 
+            if (!result.data || result.data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg text-center">
+                        <i class="fa-solid fa-circle-exclamation mr-2"></i>
+                        Belum ada kelas yang diampu oleh dosen dengan ID <b>${id_dosen}</b>.<br>
+                        <span class="text-xs">Pastikan di sheet <b>Kelas</b> di Google Sheets sudah ada baris dengan id_dosen ini.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // RENDER KARTU (Kode kartu Anda yang sudah ada)
+            result.data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
+                
+                // --- KODE BARU (SALIN INI) ---
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">Semester ${item.semester || '-'}</span>
+                            <span class="text-xs font-semibold text-slate-400">${item.kode_mk || '-'} - ${item.sks || '-'} SKS</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah || 'Mata Kuliah'}</h3>
+                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu || 'Dosen Pengampu'}</p>
+                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-teal-700"><i class="fa-solid fa-list-check mr-2"></i> Rekap Kelas</span>
+                            <span class="text-xs font-bold text-teal-700 bg-white px-3 py-1 rounded-full border border-teal-200">${item.total_pertemuan || 0} Pertemuan</span>
+                        </div>
+                    </div>
+                    
+                    <!-- BAGIAN TOMBOL BARU (2 TOMBOL) -->
+                    <div class="mt-5 flex gap-3">
+                        <!-- Tombol Lihat Kelas -->
+                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-door-open mr-1.5"></i> Lihat Kelas
+                        </button>
+                        <!-- Tombol Edit Kelas -->
+                        <button onclick="bukaModalEditMatkul('${item.id_kelas}')" class="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } else {
+            container.innerHTML = `<p class="text-red-500 text-center">Server Error: ${result.message || 'Terjadi kesalahan'}</p>`;
+        }
+    } catch (error) {
+        console.error("ERROR FETCH:", error);
+        container.innerHTML = `
+            <div class="col-span-full bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-center">
+                <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                Gagal memuat data. Kemungkinan:<br>
+                1. URL API di js/config.js salah.<br>
+                2. Apps Script belum di-deploy ulang.<br>
+                3. Backend crash (Cek Logs Apps Script).<br>
+                <span class="text-xs block mt-1">Detail error: ${error.message}</span>
+            </div>
+        `;
+    }
+}
+
+// --- FUNGSI MODAL DETAIL PERTEMUAN ---
+function formatTanggal(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatJam(isoString) {
+    if (!isoString || typeof isoString !== 'string') return '';
+    if (!isoString.includes('T')) return isoString;
+    const parts = isoString.split('T');
+    if (parts.length < 2) return '';
+    return parts[1].slice(0, 5);
+}
+
+async function bukaModalDetail(id_kelas, nama_matkul) {
+    const modal = document.getElementById('modalDetailKelas');
+    const judul = document.getElementById('modalJudulKelas');
+    const container = document.getElementById('modalContainerPertemuan');
+
+    judul.innerText = nama_matkul;
+    container.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><p>Memuat jadwal pertemuan...</p></div>`;
+    modal.classList.remove('hidden');
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'get_jadwal_pertemuan',
+                id_kelas: id_kelas 
+            })
+        });
+        const result = await response.json();
+
+                if (result.status === 'success' && result.data.length > 0) {
+            let html = `
+                <div class="flex justify-end mb-4">
+                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Pertemuan Baru
+                    </button>
+                </div>
+            `;
+            
+            // Looping data pertemuan
+            result.data.forEach(pert => {
+                // Deklarasi variabel WAJIB dilakukan di sini
+                const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
+                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' ? pert.judul_materi : 'Judul Materi';
+                
+                let jamTampil = '';
+                if (pert.jam_mulai && pert.jam_selesai) {
+                    const jamMulai = formatJam(pert.jam_mulai);
+                    const jamSelesai = formatJam(pert.jam_selesai);
+                    jamTampil = ` · ${jamMulai} - ${jamSelesai}`;
+                }
+
+                html += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-full">Pertemuan ke-${pert.pertemuan_ke}</span>
+                                <span class="text-sm text-slate-700 font-medium">${formatTanggal(pert.tanggal)}${jamTampil}</span>
+                            </div>
+                            <p class="text-sm font-bold text-slate-800 mb-1">${judulMateri}</p>
+                            <p class="text-sm text-slate-500">Jenis: <span class="font-semibold text-slate-700">${pert.jenis_kuliah || '-'}</span></p>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+                            <!-- Tombol Zoom / Offline -->
+                            ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
+                            : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
+                            
+                            <!-- Grup Tombol Aksi (Materi, Edit, Hapus) -->
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <!-- TOMBOL LIHAT MATERI (Hanya muncul jika link_materi tidak kosong) -->
+                                ${pert.link_materi ? `
+                                    <a href="${pert.link_materi}" target="_blank" class="flex-1 md:w-auto bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-600 px-3 py-2 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1">
+                                        <i class="fa-solid fa-file-arrow-down"></i> Materi
+                                    </a>
+                                ` : ''}
+                        
+                                <!-- Tombol Edit -->
+                                <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                        
+                                <!-- Tombol Hapus -->
+                                <button onclick="hapusPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Setelah loop selesai, masukkan ke container
+            container.innerHTML = html;
+        } else {
+            // Blok else jika tidak ada data (tetap memunculkan tombol tambah pertemuan)
+            container.innerHTML = `
+                <div class="flex justify-end mb-4">
+                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Pertemuan Baru
+                    </button>
+                </div>
+                <p class="text-center text-slate-500 py-10">Belum ada data pertemuan untuk kelas ini.</p>
+            `;
+        }
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Gagal memuat data pertemuan.</p>`;
+    }
+}
+
+function tutupModalDetail() {
+    document.getElementById('modalDetailKelas').classList.add('hidden');
+    document.getElementById('modalContainerPertemuan').innerHTML = '';
+}
+
+// Membuka Modal Tambah Matkul + Load Data Mahasiswa (GANTI DENGAN INI)
+async function bukaModalTambahMatkul() {
+    const modal = document.getElementById('modalTambahMatkul');
+    modal.classList.remove('hidden');
+
+    const container = document.getElementById('mahasiswaContainer');
+    const searchInput = document.getElementById('searchMahasiswa');
+
+    // Reset pencarian saat modal dibuka
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.style.display = 'block';
+    }
+
+    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>';
+
+    try {
+        console.log(">>> Mengambil data mahasiswa dari server...");
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_list_mahasiswa' })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log(">>> Response dari Backend:", result);
+
+        if (result.status === 'success') {
+            if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(mhs => {
+                    html += `
+                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200 search-item">
+                            <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
+                            <span class="text-sm text-slate-700 flex-1">
+                                <span class="font-semibold">${mhs.nim || '-'}</span> - ${mhs.nama_mahasiswa || '-'}
+                                <span class="block text-xs text-slate-400">${mhs.program_studi || '-'} | Angkatan ${mhs.angkatan || '-'}</span>
+                            </span>
+                        </label>
+                    `;
+                });
+                container.innerHTML = html;
+
+                // --- FITUR SEARCH BAR DINAMIS (DIPERBAIKI) ---
+                if (searchInput) {
+                    searchInput.oninput = function() {
+                        const keyword = this.value.toLowerCase().trim();
+                        const items = container.querySelectorAll('.search-item');
+                        
+                        if (keyword === '') {
+                            items.forEach(el => el.style.display = 'flex');
+                            return;
+                        }
+
+                        items.forEach(item => {
+                            const textContent = item.textContent.toLowerCase();
+                            // Jika teks di dalam label mengandung keyword, tampilkan. Jika tidak, sembunyikan.
+                            item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
+                        });
+                    };
+                } else {
+                    // Jika elemen searchInput tidak ditemukan di HTML, beri peringatan di console
+                    console.warn("Peringatan: Elemen input dengan id 'searchMahasiswa' tidak ditemukan di HTML. Fitur pencarian tidak aktif.");
+                }
+                // --- AKHIR FITUR SEARCH ---
+
+            } else {
+                container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa yang terdaftar di sistem.</p>`;
+                if (searchInput) searchInput.style.display = 'none';
+            }
+        } else {
+            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error dari server: ${result.message || 'Terjadi kesalahan'}</p>`;
+            if (searchInput) searchInput.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("ERROR di bukaModalTambahMatkul:", error);
+        container.innerHTML = `
+            <p class="text-center text-sm text-red-500 py-4">
+                Gagal memuat mahasiswa. <br>
+                <span class="text-xs block mt-1">Cek Console (F12) untuk detail: ${error.message}</span>
+            </p>
+        `;
+        if (searchInput) searchInput.style.display = 'none';
+    }
+}
+function bukaModalTambahPertemuan(id_kelas) {
+    document.getElementById('modalTambahPertemuan').classList.remove('hidden');
+    document.getElementById('formTambahPertemuan').dataset.idKelas = id_kelas;
+}
+function tutupModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+// --- FUNGSI EDIT MATA KULIAH (TAMBAHKAN DI SINI) ---
+
+async function bukaModalEditMatkul(id_kelas) {
+    console.log(">>> Tombol Edit diklik! ID Kelas:", id_kelas);
+
+    const modal = document.getElementById('modalEditMatkul');
+    const container = document.getElementById('editMahasiswaContainer');
+    
+    if (!modal) {
+        alert("Error: Modal Edit tidak ditemukan di HTML!");
+        return;
+    }
+
+    modal.classList.remove('hidden');
+    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat data...</p>';
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_detail_kelas', id_kelas: id_kelas })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Gagal connect ke server (HTTP ${response.status})`);
+        }
+
+        const result = await response.json();
+        console.log(">>> Data detail kelas dari backend:", result);
+
+        if (result.status === 'success') {
+            const data = result.data;
+            
+            // Isi form input
+            document.getElementById('edit_id_kelas').value = id_kelas;
+            document.getElementById('edit_id_matkul').value = data.kelas.id_matkul;
+            document.getElementById('edit_mk_kode').value = data.matkul.kode_mk;
+            document.getElementById('edit_mk_nama').value = data.matkul.nama_mk;
+            document.getElementById('edit_mk_sks').value = data.matkul.sks;
+            document.getElementById('edit_mk_semester').value = data.matkul.semester;
+
+            // Load semua mahasiswa dan centang yang sudah terdaftar
+            const resMhs = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'get_list_mahasiswa' })
+            });
+            const listMhs = await resMhs.json();
+
+            if (listMhs.status === 'success' && listMhs.data.length > 0) {
+                let html = '';
+                listMhs.data.forEach(mhs => {
+                    const isChecked = data.mahasiswa_terdaftar.includes(mhs.id_mahasiswa) ? 'checked' : '';
+                    
+                    html += `
+                        <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200 search-item-edit">
+                            <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500" ${isChecked}>
+                            <span class="text-sm text-slate-700 flex-1">
+                                <span class="font-semibold">${mhs.nim || '-'}</span> - ${mhs.nama_mahasiswa || '-'}
+                                <span class="block text-xs text-slate-400">${mhs.program_studi || '-'} | Angkatan ${mhs.angkatan || '-'}</span>
+                            </span>
+                        </label>
+                    `;
+                });
+                container.innerHTML = html;
+
+                // Fungsi Search untuk Modal Edit
+                const searchInput = document.getElementById('edit_searchMahasiswa');
+                if (searchInput) {
+                    searchInput.oninput = function() {
+                        const keyword = this.value.toLowerCase().trim();
+                        const items = container.querySelectorAll('.search-item-edit');
+                        if (keyword === '') {
+                            items.forEach(el => el.style.display = 'flex');
+                            return;
+                        }
+                        items.forEach(item => {
+                            item.style.display = item.textContent.toLowerCase().includes(keyword) ? 'flex' : 'none';
+                        });
+                    };
+                }
+            } else {
+                container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa di sistem.</p>`;
+            }
+        } else {
+            container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error: ${result.message || 'Terjadi kesalahan'}</p>`;
+        }
+    } catch (error) {
+        console.error("ERROR di bukaModalEditMatkul:", error);
+        container.innerHTML = `
+            <p class="text-center text-sm text-red-500 py-4">
+                Gagal memuat data edit. <br>
+                <span class="text-xs block mt-1">${error.message}</span>
+            </p>
+        `;
+    }
+}
+
+// Logic Simpan Perubahan Edit Matakuliah
+document.getElementById('formEditMatkul').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const btn = this.querySelector('button');
+    const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
+    
+    // Ambil data mahasiswa terpilih
+    const checkedBoxes = document.querySelectorAll('#editMahasiswaContainer input[type="checkbox"]:checked');
+    const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (mahasiswaTerpilih.length === 0) {
+        alert('Minimal 1 mahasiswa harus dipilih!');
+        return;
+    }
+
+    // Loading state
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
     btn.disabled = true;
 
-    const fileInput = document.getElementById('tugas_lampiran');
+    const data = {
+        action: 'update_matakuliah',
+        id_kelas: document.getElementById('edit_id_kelas').value,
+        id_matkul: document.getElementById('edit_id_matkul').value,
+        kode_mk: document.getElementById('edit_mk_kode').value,
+        nama_mk: document.getElementById('edit_mk_nama').value,
+        sks: document.getElementById('edit_mk_sks').value,
+        semester: document.getElementById('edit_mk_semester').value,
+        mahasiswa_terpilih: mahasiswaTerpilih
+    };
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        if(result.status === 'success') {
+            alert(result.message);
+            tutupModal('modalEditMatkul');
+            location.reload(); // Refresh agar kartu menampilkan data terbaru
+        } else {
+            alert('Gagal: ' + result.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Kesalahan jaringan.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// Logic Simpan Mata Kuliah (GANTI DENGAN INI)
+// =========================================================
+// Logic Simpan Mata Kuliah (Dengan Animasi Loading & Anti-Double Click)
+// =========================================================
+document.getElementById('formTambahMatkul').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML; // Simpan teks asli tombol
+    const session = JSON.parse(localStorage.getItem('user_session'));
+    
+    // Ambil data mahasiswa yang dicentang
+    const checkedBoxes = document.querySelectorAll('#mahasiswaContainer input[type="checkbox"]:checked');
+    const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (mahasiswaTerpilih.length === 0) {
+        alert('Anda harus memilih minimal 1 mahasiswa untuk kelas ini!');
+        return;
+    }
+
+    // 1. Tampilkan animasi loading & Nonaktifkan tombol
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Data...';
+    btn.disabled = true;
+
+    const data = {
+        action: 'tambah_matakuliah',
+        kode_mk: document.getElementById('mk_kode').value,
+        nama_mk: document.getElementById('mk_nama').value,
+        sks: document.getElementById('mk_sks').value,
+        semester: document.getElementById('mk_semester').value,
+        id_dosen: session.id_dosen,
+        mahasiswa_terpilih: mahasiswaTerpilih
+    };
+    
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        
+        if(result.status === 'success') {
+            alert(result.message);
+            // Sukses: reload halaman agar kartu baru muncul. (Tidak perlu mengembalikan tombol karena page berganti)
+            location.reload(); 
+        } else {
+            alert('Gagal: ' + result.message);
+            // 2. Jika gagal, kembalikan tombol ke semula agar bisa klik lagi
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Error simpan matkul:", error);
+        alert('Terjadi kesalahan jaringan.');
+        // 3. Jika error jaringan, kembalikan tombol ke semula
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// =========================================================
+// Logic Simpan Pertemuan (Dengan Animasi Loading & Anti-Double Click)
+// =========================================================
+document.getElementById('formTambahPertemuan').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    const idKelas = this.dataset.idKelas;
+
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Pertemuan...';
+    btn.disabled = true;
+
+    // Ambil file yang diupload
+    const fileInput = document.getElementById('pt_file_materi');
     let base64File = null, fileName = null;
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        if (file.size > 10 * 1024 * 1024) { alert('Maks 10MB'); btn.innerHTML = originalText; btn.disabled = false; return; }
+        if (file.size > 10 * 1024 * 1024) { // > 10MB
+            alert('Ukuran file terlalu besar! Maksimal 10MB.');
+            btn.innerHTML = originalText; btn.disabled = false; return;
+        }
         fileName = file.name.replace(/\s+/g, '_');
         base64File = await fileToBase64(file);
     }
 
     const data = {
-        action: 'tambah_tugas',
-        id_kelas: document.getElementById('tugas_id_kelas').value,
-        judul_tugas: document.getElementById('tugas_judul').value,
-        deskripsi_instruksi: document.getElementById('tugas_deskripsi').value,
-        tenggat_waktu: document.getElementById('tugas_deadline').value,
-        bobot_nilai: document.getElementById('tugas_bobot').value,
-        lampiran_base64: base64File,
-        lampiran_nama_file: fileName
+        action: 'tambah_pertemuan',
+        id_kelas: idKelas,
+        tanggal: document.getElementById('pt_tanggal').value,
+        jam_mulai: document.getElementById('pt_jam_mulai').value,
+        jam_selesai: document.getElementById('pt_jam_selesai').value,
+        judul_materi: document.getElementById('pt_judul').value,
+        ruang_atau_link: document.getElementById('pt_link').value,
+        materi_base64: base64File,
+        materi_nama_file: fileName
+    };
+    
+    console.log(">>> Data yang dikirim:", data); // Tambahkan ini
+
+    try {
+        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const result = await res.json();
+        
+        if(result.status === 'success') {
+            alert('Pertemuan berhasil ditambahkan!');
+            tutupModal('modalTambahPertemuan');
+            // Sukses: reload halaman agar daftar pertemuan terbaru muncul
+            location.reload();
+        } else {
+            alert('Gagal: ' + result.message);
+            // 2. Jika gagal, kembalikan tombol
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Error simpan pertemuan:", error);
+        alert('Terjadi kesalahan jaringan.');
+        // 3. Jika error, kembalikan tombol
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// --- FUNGSI EDIT & HAPUS PERTEMUAN ---
+
+async function bukaModalEditPertemuan(id_pertemuan) {
+    const modal = document.getElementById('modalEditPertemuan');
+    modal.classList.remove('hidden');
+
+    try {
+        const res = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'get_detail_pertemuan', id_pertemuan: id_pertemuan })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            const p = result.data;
+            // Isi form dengan data yang ada
+            document.getElementById('edit_pt_id_pertemuan').value = p.id_pertemuan;
+            document.getElementById('edit_pt_tanggal').value = p.tanggal;
+            document.getElementById('edit_pt_jam_mulai').value = p.jam_mulai;
+            document.getElementById('edit_pt_jam_selesai').value = p.jam_selesai;
+            document.getElementById('edit_pt_judul').value = p.judul_materi;
+            document.getElementById('edit_pt_link').value = p.ruang_atau_link;
+
+            // --- BAGIAN MENAMPILKAN FILE MATERI YANG SUDAH ADA ---
+            const linkMateriWrapper = document.getElementById('edit_existing_materi_wrapper');
+            const linkMateriAnchor = document.getElementById('edit_existing_materi_link');
+            
+            // Reset tampilan
+            linkMateriWrapper.classList.add('hidden');
+            linkMateriAnchor.href = '#';
+
+            // Jika ada link materi (dari backend), tampilkan
+            if (p.link_materi && p.link_materi.trim() !== '') {
+                linkMateriWrapper.classList.remove('hidden');
+                linkMateriAnchor.href = p.link_materi;
+                linkMateriAnchor.innerText = 'Download Materi Saat Ini';
+            }
+            // ----------------------------------------------------
+
+        } else {
+            alert('Gagal mengambil data pertemuan: ' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Koneksi error');
+    }
+}
+
+document.getElementById('formEditPertemuan').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
+    btn.disabled = true;
+
+    const data = {
+        action: 'update_pertemuan',
+        id_pertemuan: document.getElementById('edit_pt_id_pertemuan').value,
+        tanggal: document.getElementById('edit_pt_tanggal').value,
+        jam_mulai: document.getElementById('edit_pt_jam_mulai').value,
+        jam_selesai: document.getElementById('edit_pt_jam_selesai').value,
+        judul_materi: document.getElementById('edit_pt_judul').value,
+        ruang_atau_link: document.getElementById('edit_pt_link').value,
+        jenis_kuliah: 'Online' // bisa disesuaikan atau diinput manual
     };
 
     const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
     const result = await res.json();
-    if (result.status === 'success') {
+    if(result.status === 'success') {
         alert(result.message);
-        tutupModal('modalTambahTugas');
-        location.reload();
+        tutupModal('modalEditPertemuan');
+        location.reload(); // Reload modal detail
     } else {
         alert('Gagal: ' + result.message);
         btn.innerHTML = originalText;
@@ -283,12 +685,33 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
     }
 });
 
-// Fungsi helper fileToBase64 (sama seperti sebelumnya)
+async function hapusPertemuan(id_pertemuan) {
+    if(!confirm('Apakah Anda yakin ingin menghapus pertemuan ini?')) return;
+
+    const res = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete_pertemuan', id_pertemuan: id_pertemuan })
+    });
+    const result = await res.json();
+    if(result.status === 'success') {
+        alert(result.message);
+        location.reload();
+    } else {
+        alert('Gagal hapus: ' + result.message);
+    }
+}
+
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        reader.onload = () => {
+            console.log(">>> fileToBase64 sukses, hasil:", reader.result.substring(0, 50) + "...");
+            resolve(reader.result);
+        };
+        reader.onerror = error => {
+            console.error(">>> fileToBase64 error:", error);
+            reject(error);
+        };
     });
 }
