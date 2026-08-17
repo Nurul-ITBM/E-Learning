@@ -12,16 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Logout
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('user_session');
-        window.location.href = '../login.html';
-    });
-
-    // Tampilkan nama dosen di header (opsional, jika ada elemen)
-    const namaDosen = user.nama_dosen || 'Dosen';
-    const el = document.getElementById('dosenNameDisplay');
-    if (el) el.innerText = namaDosen;
+    // Set Judul Halaman di Header Komponen
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.innerText = 'Kelola Tugas';
 
     // Load dropdown kelas
     await loadKelasDropdown(user.id_dosen);
@@ -236,7 +229,20 @@ document.getElementById('btnTambahTugas').addEventListener('click', function() {
     document.getElementById('modalTambahTugas').classList.remove('hidden');
 });
 
-// Event listener untuk form tambah tugas (Sama seperti upload pertemuan)
+// ==========================================
+// 6. LOGOUT (Event Delegation)
+// ==========================================
+document.addEventListener('click', function(e) {
+    const logoutBtn = e.target.closest('#btnLogout');
+    if (logoutBtn) {
+        localStorage.removeItem('user_session');
+        window.location.href = '../login.html';
+    }
+});
+
+// ==========================================
+// 7. SIMPAN TUGAS (Event Listener Form)
+// ==========================================
 document.getElementById('formTambahTugas').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = this.querySelector('button');
