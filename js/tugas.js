@@ -150,7 +150,8 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
         id_tugas: document.getElementById('upload_id_tugas').value,
         id_mahasiswa: user.id_mahasiswa,
         file_base64: base64File,
-        file_nama: fileName
+        file_nama: fileName,
+        folderType: 'pengumpulan_mahasiswa'  // <--- TAMBAHKAN BARIS INI
     };
 
     try {
