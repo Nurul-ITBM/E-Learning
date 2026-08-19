@@ -153,6 +153,7 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
         file_nama: fileName,
         folderType: 'pengumpulan_mahasiswa'  // <--- TAMBAHKAN BARIS INI
     };
+    console.log(">>> DATA YANG AKAN DIKIRIM:", data); // <-- Tambahkan ini
 
     try {
         const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
