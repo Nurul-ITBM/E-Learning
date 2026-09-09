@@ -72,5 +72,25 @@
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
     <script src="../js/tugas.js"></script>
+    <!-- ========================================== -->
+    <!-- VALIDASI UKURAN FILE (TAMBAHAN)             -->
+    <!-- ========================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('upload_file');
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.size > 5 * 1024 * 1024) { // 5MB
+                        alert('File terlalu besar! Maksimal 5MB.');
+                        this.value = ''; // Reset input
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>
