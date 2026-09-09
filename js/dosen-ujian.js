@@ -108,18 +108,18 @@ async function loadDaftarUjian(idKelas) {
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100">${ujian.status}</span>
+                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">${ujian.status}</span>
                             <span class="text-xs font-bold text-slate-400">Bobot: ${ujian.bobot}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${ujian.judul}</h3>
                         <p class="text-xs text-slate-500 mb-4 line-clamp-2">${ujian.deskripsi}</p>
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
-                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-indigo-500 mr-1.5"></i> Mulai: ${ujian.mulai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-teal-500 mr-1.5"></i> Mulai: ${ujian.mulai}</div>
                             <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${ujian.selesai}</div>
                         </div>
                     </div>
                     <div class="mt-4 flex gap-2">
-                        <button onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul}')" class="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul}')" class="flex-1 bg-teal-50 text-teal-600 hover:bg-teal-100 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-list-check mr-1"></i> Soal
                         </button>
                         <button onclick="editUjian('${ujian.id_ujian}')" class="flex-1 bg-slate-50 text-slate-600 hover:bg-slate-100 py-2 rounded-lg text-xs font-bold transition">
@@ -274,11 +274,11 @@ async function loadDaftarSoal(idUjian) {
                                 <p>B. ${soal.opsi_b}</p>
                                 <p>C. ${soal.opsi_c}</p>
                                 <p>D. ${soal.opsi_d}</p>
-                                <p class="text-green-600 font-bold mt-1">Jawaban: ${soal.jawaban_benar}</p>
+                                <p class="text-teal-600 font-bold mt-1">Jawaban: ${soal.jawaban_benar}</p>
                             </div>
                         </div>
                         <div class="flex gap-2 ml-4">
-                            <button onclick="editSoal('${soal.id_soal}')" class="text-indigo-600 hover:text-indigo-800"><i class="fa-solid fa-edit"></i></button>
+                            <button onclick="editSoal('${soal.id_soal}')" class="text-teal-600 hover:text-teal-800"><i class="fa-solid fa-edit"></i></button>
                             <button onclick="hapusSoal('${soal.id_soal}')" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
