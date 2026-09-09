@@ -66,26 +66,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Load dropdown kelas dosen
 async function loadKelasDosen(idDosen) {
+    const select = document.getElementById('filterKelasUjian');
+    
     try {
+        console.log("Loading kelas untuk dosen:", idDosen);
+        
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'get_kelas_dosen_ujian', id_dosen: idDosen })
         });
+        
         const result = await response.json();
+        console.log("Response kelas:", result);
         
         if (result.status === 'success') {
-            const select = document.getElementById('filterKelasUjian');
             select.innerHTML = '<option value="">-- Pilih Mata Kuliah --</option>';
+            
+            if (result.data.length === 0) {
+                select.innerHTML = '<option value="">-- Tidak ada mata kuliah --</option>';
+                return;
+            }
             
             result.data.forEach(kelas => {
                 const option = document.createElement('option');
                 option.value = kelas.id_kelas;
-                option.textContent = kelas.nama_kelas;
+                option.textContent = kelas.nama_kelas + ' (' + kelas.id_kelas + ')';
                 select.appendChild(option);
             });
+        } else {
+            console.error('Error dari server:', result.message);
+            select.innerHTML = '<option value="">-- Error memuat data --</option>';
         }
     } catch (error) {
         console.error('Error loading kelas:', error);
+        select.innerHTML = '<option value="">-- Error koneksi --</option>';
     }
 }
 
