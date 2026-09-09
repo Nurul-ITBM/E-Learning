@@ -17,6 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadSidebarDosen();
     loadHeaderDosen(user);
     
+    // Event listener untuk tombol logout (delegasi)
+    document.addEventListener('click', function(e) {
+        const logoutBtn = e.target.closest('#btnLogout');
+        if (logoutBtn) {
+            localStorage.removeItem('user_session');
+            window.location.href = '../login.html';
+        }
+    });
+    
     // Load dropdown kelas
     await loadKelasDosen(user.id_dosen);
     
@@ -108,7 +117,7 @@ async function loadDaftarUjian(idKelas) {
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">${ujian.status}</span>
+                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">Aktif</span>
                             <span class="text-xs font-bold text-slate-400">Bobot: ${ujian.bobot}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${ujian.judul}</h3>
@@ -146,7 +155,6 @@ async function simpanUjian() {
     btn.disabled = true;
     
     try {
-        const user = JSON.parse(localStorage.getItem('user_session'));
         const idEdit = document.getElementById('ujian_id_ujian_edit').value;
         
         const data = {
@@ -158,7 +166,7 @@ async function simpanUjian() {
             mulai: document.getElementById('ujian_mulai').value,
             selesai: document.getElementById('ujian_selesai').value,
             bobot: document.getElementById('ujian_bobot').value,
-            status: document.getElementById('ujian_status').value
+            link: document.getElementById('ujian_link').value || '-'
         };
         
         const response = await fetch(CONFIG.API_URL, {
@@ -201,7 +209,7 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_mulai').value = ujian.mulai;
             document.getElementById('ujian_selesai').value = ujian.selesai;
             document.getElementById('ujian_bobot').value = ujian.bobot;
-            document.getElementById('ujian_status').value = ujian.status;
+            document.getElementById('ujian_link').value = ujian.link || '';
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
             document.getElementById('modalTambahUjian').classList.remove('hidden');
         }
@@ -318,8 +326,7 @@ async function simpanSoal() {
             opsi_b: document.getElementById('soal_opsi_b').value,
             opsi_c: document.getElementById('soal_opsi_c').value,
             opsi_d: document.getElementById('soal_opsi_d').value,
-            jawaban_benar: document.getElementById('soal_jawaban_benar').value,
-            bobot: document.getElementById('soal_bobot').value
+            jawaban_benar: document.getElementById('soal_jawaban_benar').value
         };
         
         const response = await fetch(CONFIG.API_URL, {
