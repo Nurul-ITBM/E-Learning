@@ -266,6 +266,80 @@ async function selesaiUjian() {
     }
 }
 
+// ==========================================
+// VARIABEL GLOBAL TIMER
+// ==========================================
+let timerInterval = null;
+let sisaWaktuDetik = 0;
+let totalWaktuDetik = 0;
+
+// ==========================================
+// FUNGSI TIMER COUNTDOWN
+// ==========================================
+
+// Mulai timer dengan durasi tertentu (menit)
+function mulaiTimer(durasiMenit = 60) {
+    // Hentikan timer lama jika ada
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    
+    totalWaktuDetik = durasiMenit * 60;
+    sisaWaktuDetik = totalWaktuDetik;
+    
+    updateTampilanTimer();
+    
+    timerInterval = setInterval(() => {
+        sisaWaktuDetik--;
+        updateTampilanTimer();
+        
+        if (sisaWaktuDetik <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            waktuHabis();
+        }
+    }, 1000);
+}
+
+// Update tampilan timer di header
+function updateTampilanTimer() {
+    const timerEl = document.getElementById('timerCountdown');
+    if (!timerEl) return;
+    
+    const jam = Math.floor(sisaWaktuDetik / 3600);
+    const menit = Math.floor((sisaWaktuDetik % 3600) / 60);
+    const detik = sisaWaktuDetik % 60;
+    
+    const format = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
+    timerEl.innerText = format;
+    
+    // Ubah warna jika waktu hampir habis (< 5 menit)
+    const parentDiv = timerEl.closest('div');
+    if (parentDiv) {
+        if (sisaWaktuDetik < 300) {
+            // Merah tebal
+            parentDiv.className = 'bg-red-100 text-red-700 border border-red-300 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-2 animate-pulse';
+        } else if (sisaWaktuDetik < 600) {
+            // Kuning (< 10 menit)
+            parentDiv.className = 'bg-amber-50 text-amber-600 border border-amber-200 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-2';
+        }
+    }
+}
+
+// Waktu habis - otomatis kumpulkan
+function waktuHabis() {
+    alert('⏰ Waktu ujian habis! Jawaban Anda akan otomatis dikumpulkan.');
+    selesaiUjian();
+}
+
+// Hentikan timer
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
 // 7. Tandai Ragu-ragu
 function toggleRaguRagu(checkbox) {
     if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
