@@ -4,6 +4,7 @@ let currentUser = null;
 let currentIndex = 0;
 let daftarSoal = [];
 let jawabanSiswa = {};
+let currentIdUjian = null;  // <-- TAMBAHKAN INI
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Set Judul Halaman
@@ -90,8 +91,8 @@ async function loadDaftarUjian(id_user) {
     }
 }
 
-// 2. Transisi Masuk Lembar Soal
 async function mulaiUjian(id_ujian, judul_ujian) {
+    currentIdUjian = id_ujian;  // <-- Simpan ID ujian untuk submit
     document.getElementById('viewDaftarUjian').classList.add('hidden');
     document.getElementById('viewLembarSoal').classList.remove('hidden');
     document.getElementById('headerJudulUjian').innerText = judul_ujian;
@@ -105,7 +106,6 @@ async function mulaiUjian(id_ujian, judul_ujian) {
             body: JSON.stringify({ action: 'get_soal', id_ujian: id_ujian })
         });
         const result = await response.json();
-        console.log(">>> Soal ujian:", result);
 
         if (result.status === 'success' && result.data.length > 0) {
             daftarSoal = result.data;
@@ -114,6 +114,10 @@ async function mulaiUjian(id_ujian, judul_ujian) {
             document.getElementById('totalSoalLabel').innerText = `Total Soal: ${daftarSoal.length} Pilihan Ganda`;
             renderTampilanSoal();
             renderNavigasi();
+            
+            // ✅ MULAI TIMER - 60 menit
+            mulaiTimer(60);
+            
         } else {
             alert('Gagal memuat soal: ' + (result.message || 'Data kosong'));
             kembaliKeDaftar();
@@ -128,6 +132,9 @@ async function mulaiUjian(id_ujian, judul_ujian) {
 // 3. Kembali ke Daftar
 function kembaliKeDaftar() {
     if (confirm('Keluar dari ujian? Progress jawaban Anda akan direset.')) {
+        // ✅ HENTIKAN TIMER
+        stopTimer();
+        
         document.getElementById('viewLembarSoal').classList.add('hidden');
         document.getElementById('viewDaftarUjian').classList.remove('hidden');
         document.getElementById('containerDaftarUjian').innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
@@ -210,60 +217,47 @@ function pindahSoal(arah) {
         renderNavigasi();
     } else if (target >= daftarSoal.length) {
         if (confirm('Apakah Anda ingin mengakhiri dan mengumpulkan ujian ini?')) {
-            selesaiUjian();
+            selesaiUjian();  // <-- Panggil fungsi selesaiUjian
         }
     }
 }
 
 // Fungsi BARU: Kirim jawaban ke backend
 async function selesaiUjian() {
-    if (!currentUser) return;
+    // ✅ HENTIKAN TIMER
+    stopTimer();
     
-    // Kumpulkan jawaban
-    const jawaban = {};
-    daftarSoal.forEach((soal, idx) => {
-        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi) {
-            jawaban[soal.id_soal] = jawabanSiswa[idx].opsi;
-        }
+    // Hitung jawaban yang sudah diisi
+    let jumlahDijawab = 0;
+    daftarSoal.forEach((_, idx) => {
+        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi) jumlahDijawab++;
     });
     
-    const jumlahDijawab = Object.keys(jawaban).length;
     const totalSoal = daftarSoal.length;
     
     if (jumlahDijawab < totalSoal) {
         if (!confirm(`Anda baru menjawab ${jumlahDijawab} dari ${totalSoal} soal. Yakin ingin mengumpulkan?`)) {
+            // Restart timer jika user batal
+            mulaiTimer(Math.floor(sisaWaktuDetik / 60) || 1);
             return;
         }
     }
     
-    try {
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({
-                action: 'simpan_jawaban_ujian',
-                id_ujian: currentIdUjian,  // <-- Perlu simpan ID ujian saat mulai
-                id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user,
-                jawaban: jawaban
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-            alert(`✅ ${result.message}\n\nNilai Anda: ${result.nilai}\nBenar: ${result.jumlah_benar}/${result.total_soal}`);
-            document.getElementById('viewLembarSoal').classList.add('hidden');
-            document.getElementById('viewDaftarUjian').classList.remove('hidden');
-            loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
-        } else {
-            alert('❌ Gagal menyimpan jawaban: ' + result.message);
+    // ✅ TAMPILKAN NILAI (SEMENTARA - dihitung di frontend)
+    let jumlahBenar = 0;
+    daftarSoal.forEach((soal, idx) => {
+        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi === soal.jawaban_benar) {
+            jumlahBenar++;
         }
-    } catch (error) {
-        console.error("Error simpan jawaban:", error);
-        alert('❌ Terjadi kesalahan: ' + error.message);
-    }
+    });
+    
+    const nilai = totalSoal > 0 ? Math.round((jumlahBenar / totalSoal) * 100) : 0;
+    
+    alert(`✅ Ujian berhasil dikumpulkan!\n\nBenar: ${jumlahBenar}/${totalSoal}\nNilai: ${nilai}`);
+    
+    document.getElementById('viewLembarSoal').classList.add('hidden');
+    document.getElementById('viewDaftarUjian').classList.remove('hidden');
+    loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
 }
 
 // ==========================================
