@@ -201,7 +201,7 @@ function renderNavigasi() {
     });
 }
 
-// 6. Navigasi Tombol Sebelumnya / Berikutnya
+// Ganti fungsi pindahSoal
 function pindahSoal(arah) {
     const target = currentIndex + arah;
     if (target >= 0 && target < daftarSoal.length) {
@@ -210,11 +210,59 @@ function pindahSoal(arah) {
         renderNavigasi();
     } else if (target >= daftarSoal.length) {
         if (confirm('Apakah Anda ingin mengakhiri dan mengumpulkan ujian ini?')) {
-            alert('Ujian berhasil dikumpulkan!');
+            selesaiUjian();
+        }
+    }
+}
+
+// Fungsi BARU: Kirim jawaban ke backend
+async function selesaiUjian() {
+    if (!currentUser) return;
+    
+    // Kumpulkan jawaban
+    const jawaban = {};
+    daftarSoal.forEach((soal, idx) => {
+        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi) {
+            jawaban[soal.id_soal] = jawabanSiswa[idx].opsi;
+        }
+    });
+    
+    const jumlahDijawab = Object.keys(jawaban).length;
+    const totalSoal = daftarSoal.length;
+    
+    if (jumlahDijawab < totalSoal) {
+        if (!confirm(`Anda baru menjawab ${jumlahDijawab} dari ${totalSoal} soal. Yakin ingin mengumpulkan?`)) {
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({
+                action: 'simpan_jawaban_ujian',
+                id_ujian: currentIdUjian,  // <-- Perlu simpan ID ujian saat mulai
+                id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user,
+                jawaban: jawaban
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert(`✅ ${result.message}\n\nNilai Anda: ${result.nilai}\nBenar: ${result.jumlah_benar}/${result.total_soal}`);
             document.getElementById('viewLembarSoal').classList.add('hidden');
             document.getElementById('viewDaftarUjian').classList.remove('hidden');
             loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+        } else {
+            alert('❌ Gagal menyimpan jawaban: ' + result.message);
         }
+    } catch (error) {
+        console.error("Error simpan jawaban:", error);
+        alert('❌ Terjadi kesalahan: ' + error.message);
     }
 }
 
