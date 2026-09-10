@@ -13,9 +13,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const user = JSON.parse(sessionData);
     
-    // Load sidebar & header
-    loadSidebarDosen();
-    loadHeaderDosen(user);
+    // ==========================================
+    // HAPUS 2 BARIS INI:
+    // loadSidebarDosen();
+    // loadHeaderDosen(user);
+    // ==========================================
+    // Sidebar dan header sudah di-load otomatis
+    // oleh dosen-load-components.js
     
     // Event listener untuk tombol logout (delegasi)
     document.addEventListener('click', function(e) {
@@ -26,17 +30,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    // Load dropdown kelas
-    await loadKelasDosen(user.id_dosen);
+    // Load dropdown kelas - TAMBAHKAN PENGECEKAN
+    if (user.id_dosen) {
+        await loadKelasDosen(user.id_dosen);
+    } else {
+        console.error('id_dosen tidak ditemukan di session!');
+        document.getElementById('filterKelasUjian').innerHTML = 
+            '<option value="">-- Error: ID Dosen tidak ditemukan --</option>';
+    }
     
-    // Event listener
+    // Event listener dropdown
     document.getElementById('filterKelasUjian').addEventListener('change', async (e) => {
         const idKelas = e.target.value;
         if (idKelas) {
             await loadDaftarUjian(idKelas);
             document.getElementById('btnTambahUjian').disabled = false;
         } else {
-            document.getElementById('containerDaftarUjian').innerHTML = '<p class="text-slate-500 col-span-full text-center py-10">Silakan pilih mata kuliah.</p>';
+            document.getElementById('containerDaftarUjian').innerHTML = 
+                '<p class="text-slate-500 col-span-full text-center py-10">Silakan pilih mata kuliah.</p>';
             document.getElementById('btnTambahUjian').disabled = true;
         }
     });
