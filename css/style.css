@@ -1,14 +1,52 @@
 /* ========================================== */
-/* PERBAIKAN SIDEBAR DINAMIS (Menggantikan Tailwind yang Hilang) */
+/* PRIMARY BUTTON - TOMBOL UTAMA (LOGIN, DLL)  */
 /* ========================================== */
 
-/* Pembungkus Menu Sidebar - UBAH PADDING ATASNYA */
+.bg-primary-btn {
+    background-color: #4f46e5 !important; /* Indigo 600 */
+    color: #ffffff !important;
+    border: none;
+}
+
+.bg-primary-btn:hover {
+    background-color: #4338ca !important; /* Indigo 700 */
+}
+
+.bg-primary-btn:active {
+    background-color: #3730a3 !important; /* Indigo 800 */
+}
+
+.bg-primary-btn:disabled {
+    background-color: #a5b4fc !important; /* Indigo 300 */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ========================================== */
+/* TEXT NAVY - WARNA TEKS UTAMA                */
+/* ========================================== */
+
+.text-navy {
+    color: #1e293b !important; /* Slate 800 */
+}
+
+/* ========================================== */
+/* FONT FAMILY GLOBAL                          */
+/* ========================================== */
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ========================================== */
+/* PERBAIKAN SIDEBAR DINAMIS                   */
+/* ========================================== */
+
 .sidebar-menu-wrap {
-    padding: 1.5rem 1rem 0.5rem 1rem; /* tambahkan 1.5rem di atas agar tidak mepet */
+    padding: 1.5rem 1rem 0.5rem 1rem;
     font-size: 0.875rem;
 }
 
-/* Daftar Menu Link */
 .sidebar-nav-link {
     display: flex !important;
     align-items: center !important;
@@ -22,20 +60,17 @@
     width: 100%;
 }
 
-/* Ikon Menu */
 .sidebar-nav-link i {
     width: 1.25rem;
     text-align: center;
     margin-right: 0.75rem;
 }
 
-/* Hover Menu */
 .sidebar-nav-link:hover {
     color: #0d9488;
     background-color: #f8fafc;
 }
 
-/* Menu Aktif */
 .sidebar-nav-link.active {
     background-color: #f0fdf4 !important;
     color: #0d9488 !important;
@@ -43,7 +78,6 @@
     border-radius: 0.75rem !important;
 }
 
-/* Judul Grup (AKADEMIK, SISTEM) */
 .sidebar-section-title {
     padding: 0 1rem;
     margin-top: 1.5rem;
@@ -55,23 +89,18 @@
     text-transform: uppercase;
 }
 
-/* Margin khusus untuk Dashboard */
 .sidebar-nav-link.dashboard-link {
     margin-bottom: 1.5rem;
 }
 
-/* --- PERBAIKAN TOMBOL LOGOUT AGAR DI BAWAH --- */
 .sidebar-logout-wrap {
-    margin-top: auto !important; /* Ini akan mendorong tombol ke bagian paling bawah sidebar */
-    padding: 1rem 1.5rem 2rem 1.5rem !important; /* Beri jarak bawah agar tidak mepet copyright */
+    margin-top: auto !important;
+    padding: 1rem 1.5rem 2rem 1.5rem !important;
     border-top: 1px solid #e2e8f0;
 }
 
-/* ========================================== */
-/* AGAR SIDEBAR MEMANJANG SAMPAI BAWAH LAYAR   */
-/* ========================================== */
 aside {
-    min-height: 100vh; /* Memaksa sidebar memenuhi tinggi layar */
+    min-height: 100vh;
 }
 
 /* ========================================== */
@@ -79,17 +108,17 @@ aside {
 /* ========================================== */
 
 body.role-mahasiswa .sidebar-nav-link:hover {
-    color: #4f46e5 !important; /* indigo-600 */
+    color: #4f46e5 !important;
     background-color: #f8fafc;
 }
 
 body.role-mahasiswa .sidebar-nav-link.active {
-    background-color: #eff6ff !important; /* indigo-50 */
-    color: #4f46e5 !important; /* indigo-600 */
+    background-color: #eff6ff !important;
+    color: #4f46e5 !important;
     font-weight: 600 !important;
     border-radius: 0.75rem !important;
 }
 
 body.role-mahasiswa .bg-brand-gradient {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); /* Indigo ke Purple */
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
 }
