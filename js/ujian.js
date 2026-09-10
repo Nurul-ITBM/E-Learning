@@ -1,76 +1,160 @@
-// js/ujian.js - Logika Interaktif Ujian CBT & Navigasi Soal
+// js/ujian.js - Logika Ujian CBT Mahasiswa
 
+let currentUser = null;
 let currentIndex = 0;
 let daftarSoal = [];
-let jawabanSiswa = {}; // Menyimpan jawaban: { indexSoal: { opsi: 'A', ragu: false } }
+let jawabanSiswa = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Menangkap id_ujian dari URL (contoh: ujian_soal.html?id_ujian=U001)
-    const urlParams = new URLSearchParams(window.location.search);
-    const idUjian = urlParams.get('id_ujian') || 'U001'; // Default ke U001 jika kosong
-    
-    // PERBAIKAN: Gunakan variabel idUjian, bukan string 'U001' langsung
-    await loadSoalUjian(idUjian);
+    // 1. Set Judul Halaman
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.innerText = 'Ujian';
 
-    // Event listener untuk pilihan ganda agar langsung tersimpan saat diklik
+    // 2. Ambil Session
+    const sessionData = localStorage.getItem('user_session');
+    if (!sessionData) { 
+        window.location.href = '../login.html'; 
+        return; 
+    }
+    
+    currentUser = JSON.parse(sessionData);
+
+    // 3. Load daftar ujian
+    await loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+
+    // 4. Listener pilihan ganda
     document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
         input.addEventListener('change', (e) => {
             if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
             jawabanSiswa[currentIndex].opsi = e.target.value;
-            
             renderNavigasi();
             renderTampilanSoal();
         });
     });
 });
 
-async function loadSoalUjian(id_ujian) {
+// 1. Ambil Daftar Ujian
+async function loadDaftarUjian(id_user) {
+    const container = document.getElementById('containerDaftarUjian');
+    container.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
+    
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({ action: 'get_ujian', id_mahasiswa: id_user })
+        });
+        const result = await response.json();
+        console.log(">>> Daftar ujian:", result);
+
+        if (result.status === 'success') {
+            container.innerHTML = '';
+            if (result.data.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 col-span-full text-center py-10">Belum ada jadwal ujian saat ini.</p>';
+                return;
+            }
+
+            result.data.forEach(u => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">UJIAN</span>
+                            <span class="text-xs font-bold text-slate-400">Bobot: ${u.bobot}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">${u.judul}</h3>
+                        <p class="text-xs text-indigo-600 font-semibold mb-3">${u.mata_kuliah}</p>
+                        <p class="text-xs text-slate-500 mb-4 line-clamp-2">${u.deskripsi}</p>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
+                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-red-500 mr-1.5"></i> Mulai: ${u.mulai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${u.selesai}</div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
+                            <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } else {
+            container.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">${result.message}</p>`;
+        }
+    } catch (err) {
+        console.error("Error loadDaftarUjian:", err);
+        container.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">Gagal terhubung ke server.</p>`;
+    }
+}
+
+// 2. Transisi Masuk Lembar Soal
+async function mulaiUjian(id_ujian, judul_ujian) {
+    document.getElementById('viewDaftarUjian').classList.add('hidden');
+    document.getElementById('viewLembarSoal').classList.remove('hidden');
+    document.getElementById('headerJudulUjian').innerText = judul_ujian;
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'get_soal', id_ujian: id_ujian })
         });
         const result = await response.json();
+        console.log(">>> Soal ujian:", result);
 
         if (result.status === 'success' && result.data.length > 0) {
             daftarSoal = result.data;
+            currentIndex = 0;
+            jawabanSiswa = {};
             document.getElementById('totalSoalLabel').innerText = `Total Soal: ${daftarSoal.length} Pilihan Ganda`;
             renderTampilanSoal();
             renderNavigasi();
         } else {
-            alert('Gagal memuat soal ujian: ' + (result.message || 'Data kosong'));
+            alert('Gagal memuat soal: ' + (result.message || 'Data kosong'));
+            kembaliKeDaftar();
         }
     } catch (error) {
-        console.error(error);
-        alert('Terjadi kesalahan koneksi saat memuat soal.');
+        console.error("Error mulaiUjian:", error);
+        alert('Terjadi kesalahan koneksi.');
+        kembaliKeDaftar();
     }
 }
 
+// 3. Kembali ke Daftar
+function kembaliKeDaftar() {
+    if (confirm('Keluar dari ujian? Progress jawaban Anda akan direset.')) {
+        document.getElementById('viewLembarSoal').classList.add('hidden');
+        document.getElementById('viewDaftarUjian').classList.remove('hidden');
+        document.getElementById('containerDaftarUjian').innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
+        loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+    }
+}
+
+// 4. Render Tampilan Soal Aktif
 function renderTampilanSoal() {
     if (daftarSoal.length === 0) return;
-
     const soal = daftarSoal[currentIndex];
 
-    // Header Soal
     document.getElementById('nomorSoalHeader').innerText = `Soal ${currentIndex + 1} dari ${daftarSoal.length}`;
-    
-    // Pertanyaan
     document.getElementById('teksPertanyaan').innerText = soal.pertanyaan;
-
-    // Opsi Jawaban
     document.getElementById('teksOpsiA').innerText = soal.opsi_a;
     document.getElementById('teksOpsiB').innerText = soal.opsi_b;
     document.getElementById('teksOpsiC').innerText = soal.opsi_c;
     document.getElementById('teksOpsiD').innerText = soal.opsi_d;
 
-    // Reset pilihan radio button terlebih dahulu
+    // Reset semua radio
     document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
         input.checked = false;
         input.parentElement.classList.remove('border-2', 'border-indigo-600', 'bg-indigo-50/50', 'shadow-sm');
         input.parentElement.classList.add('border', 'border-slate-200');
     });
 
-    // Jika siswa sudah pernah menjawab soal ini, tandai pilihan radionya
+    // Tandai jawaban yang sudah dipilih
     if (jawabanSiswa[currentIndex] && jawabanSiswa[currentIndex].opsi) {
         const pilihan = jawabanSiswa[currentIndex].opsi;
         const targetInput = document.querySelector(`input[name="opsiJawaban"][value="${pilihan}"]`);
@@ -81,15 +165,12 @@ function renderTampilanSoal() {
         }
     }
 
-    // Checkbox Ragu-ragu
-    const checkRagu = document.getElementById('checkRagu');
-    checkRagu.checked = jawabanSiswa[currentIndex] ? jawabanSiswa[currentIndex].ragu : false;
-
-    // Atur Status Tombol Sebelumnya / Berikutnya
+    document.getElementById('checkRagu').checked = jawabanSiswa[currentIndex] ? jawabanSiswa[currentIndex].ragu : false;
     document.getElementById('btnSebelumnya').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
     document.getElementById('btnBerikutnya').innerText = currentIndex === daftarSoal.length - 1 ? 'Selesai' : 'Berikutnya ';
 }
 
+// 5. Render Navigasi Nomor
 function renderNavigasi() {
     const container = document.getElementById('gridNavigasi');
     container.innerHTML = '';
@@ -98,36 +179,29 @@ function renderNavigasi() {
         const btn = document.createElement('button');
         btn.innerText = idx + 1;
         
-        // Warna Default (Belum dijawab)
         let kelasWarna = "bg-slate-100 text-slate-600 hover:bg-slate-200";
-
         const status = jawabanSiswa[idx];
         if (status) {
-            if (status.ragu) {
-                kelasWarna = "bg-amber-500 text-white shadow-sm"; // Kuning Ragu-ragu
-            } else if (status.opsi) {
-                kelasWarna = "bg-emerald-500 text-white shadow-sm"; // Hijau Sudah Dijawab
-            }
+            if (status.ragu) kelasWarna = "bg-amber-500 text-white shadow-sm";
+            else if (status.opsi) kelasWarna = "bg-emerald-500 text-white shadow-sm";
         }
 
-        // Jika sedang aktif (dibuka sekarang)
         if (idx === currentIndex) {
-            btn.className = `w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center bg-indigo-600 text-white ring-4 ring-indigo-100 shadow-md`;
+            btn.className = "w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center bg-indigo-600 text-white ring-4 ring-indigo-100 shadow-md";
         } else {
             btn.className = `w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center ${kelasWarna}`;
         }
 
-        // Ketika nomor soal diklik, langsung lompat ke soal tersebut
         btn.onclick = () => {
             currentIndex = idx;
             renderTampilanSoal();
             renderNavigasi();
         };
-
         container.appendChild(btn);
     });
 }
 
+// 6. Navigasi Tombol Sebelumnya / Berikutnya
 function pindahSoal(arah) {
     const target = currentIndex + arah;
     if (target >= 0 && target < daftarSoal.length) {
@@ -136,11 +210,15 @@ function pindahSoal(arah) {
         renderNavigasi();
     } else if (target >= daftarSoal.length) {
         if (confirm('Apakah Anda ingin mengakhiri dan mengumpulkan ujian ini?')) {
-            window.location.href = 'dashboard.html';
+            alert('Ujian berhasil dikumpulkan!');
+            document.getElementById('viewLembarSoal').classList.add('hidden');
+            document.getElementById('viewDaftarUjian').classList.remove('hidden');
+            loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
         }
     }
 }
 
+// 7. Tandai Ragu-ragu
 function toggleRaguRagu(checkbox) {
     if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
     jawabanSiswa[currentIndex].ragu = checkbox.checked;
