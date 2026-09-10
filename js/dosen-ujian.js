@@ -1,10 +1,12 @@
+// ==========================================
 // js/dosen-ujian.js - Logika Kelola Ujian Dosen
+// ==========================================
 
 let daftarUjian = [];
 let currentIdUjian = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Ambil session
+    // 1. Ambil session
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
         window.location.href = '../login.html';
@@ -12,16 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     const user = JSON.parse(sessionData);
+    console.log(">>> User session:", user);
     
-    // ==========================================
-    // HAPUS 2 BARIS INI:
-    // loadSidebarDosen();
-    // loadHeaderDosen(user);
-    // ==========================================
-    // Sidebar dan header sudah di-load otomatis
-    // oleh dosen-load-components.js
-    
-    // Event listener untuk tombol logout (delegasi)
+    // 2. Event listener untuk tombol logout (delegasi)
     document.addEventListener('click', function(e) {
         const logoutBtn = e.target.closest('#btnLogout');
         if (logoutBtn) {
@@ -30,29 +25,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    // Load dropdown kelas - TAMBAHKAN PENGECEKAN
+    // 3. Load dropdown kelas - dengan pengamanan
     if (user.id_dosen) {
         await loadKelasDosen(user.id_dosen);
     } else {
-        console.error('id_dosen tidak ditemukan di session!');
-        document.getElementById('filterKelasUjian').innerHTML = 
-            '<option value="">-- Error: ID Dosen tidak ditemukan --</option>';
+        console.error('❌ id_dosen tidak ditemukan di session!');
+        const select = document.getElementById('filterKelasUjian');
+        if (select) {
+            select.innerHTML = '<option value="">-- Error: ID Dosen tidak ditemukan --</option>';
+        }
     }
     
-    // Event listener dropdown
-    document.getElementById('filterKelasUjian').addEventListener('change', async (e) => {
-        const idKelas = e.target.value;
-        if (idKelas) {
-            await loadDaftarUjian(idKelas);
-            document.getElementById('btnTambahUjian').disabled = false;
-        } else {
-            document.getElementById('containerDaftarUjian').innerHTML = 
-                '<p class="text-slate-500 col-span-full text-center py-10">Silakan pilih mata kuliah.</p>';
-            document.getElementById('btnTambahUjian').disabled = true;
-        }
-    });
+    // 4. Event listener dropdown
+    const filterKelas = document.getElementById('filterKelasUjian');
+    if (filterKelas) {
+        filterKelas.addEventListener('change', async (e) => {
+            const idKelas = e.target.value;
+            if (idKelas) {
+                await loadDaftarUjian(idKelas);
+                document.getElementById('btnTambahUjian').disabled = false;
+            } else {
+                document.getElementById('containerDaftarUjian').innerHTML = 
+                    '<p class="text-slate-500 col-span-full text-center py-10">Silakan pilih mata kuliah.</p>';
+                document.getElementById('btnTambahUjian').disabled = true;
+            }
+        });
+    }
     
-    // Tombol tambah ujian
+    // 5. Tombol tambah ujian
     document.getElementById('btnTambahUjian').addEventListener('click', () => {
         const idKelas = document.getElementById('filterKelasUjian').value;
         document.getElementById('ujian_id_kelas').value = idKelas;
@@ -62,22 +62,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('modalTambahUjian').classList.remove('hidden');
     });
     
-    // Submit form ujian
+    // 6. Submit form ujian
     document.getElementById('formTambahUjian').addEventListener('submit', async (e) => {
         e.preventDefault();
         await simpanUjian();
     });
     
-    // Submit form soal
+    // 7. Submit form soal
     document.getElementById('formTambahSoal').addEventListener('submit', async (e) => {
         e.preventDefault();
         await simpanSoal();
     });
 });
 
+// ==========================================
 // Load dropdown kelas dosen
+// ==========================================
 async function loadKelasDosen(idDosen) {
     const select = document.getElementById('filterKelasUjian');
+    if (!select) return;
     
     console.log(">>> Loading kelas untuk dosen:", idDosen);
     
@@ -93,10 +96,8 @@ async function loadKelasDosen(idDosen) {
             })
         });
         
-        console.log(">>> Response status:", response.status);
-        
         const result = await response.json();
-        console.log(">>> Response data:", JSON.stringify(result));
+        console.log(">>> Response kelas:", result);
         
         if (result.status === 'success') {
             select.innerHTML = '<option value="">-- Pilih Mata Kuliah --</option>';
@@ -124,7 +125,9 @@ async function loadKelasDosen(idDosen) {
     }
 }
 
-// Load daftar ujian
+// ==========================================
+// Load daftar ujian berdasarkan kelas
+// ==========================================
 async function loadDaftarUjian(idKelas) {
     const container = document.getElementById('containerDaftarUjian');
     container.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
@@ -133,9 +136,16 @@ async function loadDaftarUjian(idKelas) {
         const user = JSON.parse(localStorage.getItem('user_session'));
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'get_ujian_dosen', id_dosen: user.id_dosen })
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({ 
+                action: 'get_ujian_dosen', 
+                id_dosen: user.id_dosen 
+            })
         });
         const result = await response.json();
+        console.log(">>> Daftar ujian:", result);
         
         if (result.status === 'success') {
             container.innerHTML = '';
@@ -163,7 +173,7 @@ async function loadDaftarUjian(idKelas) {
                         </div>
                     </div>
                     <div class="mt-4 flex gap-2">
-                        <button onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul}')" class="flex-1 bg-teal-50 text-teal-600 hover:bg-teal-100 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul.replace(/'/g, "\\'")}')" class="flex-1 bg-teal-50 text-teal-600 hover:bg-teal-100 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-list-check mr-1"></i> Soal
                         </button>
                         <button onclick="editUjian('${ujian.id_ujian}')" class="flex-1 bg-slate-50 text-slate-600 hover:bg-slate-100 py-2 rounded-lg text-xs font-bold transition">
@@ -176,13 +186,18 @@ async function loadDaftarUjian(idKelas) {
                 `;
                 container.appendChild(card);
             });
+        } else {
+            container.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Error: ' + result.message + '</p>';
         }
     } catch (error) {
+        console.error("Error loadDaftarUjian:", error);
         container.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Gagal terhubung ke server.</p>';
     }
 }
 
+// ==========================================
 // Simpan ujian (tambah/edit)
+// ==========================================
 async function simpanUjian() {
     const btn = document.querySelector('#formTambahUjian button[type="submit"]');
     const originalText = btn.innerHTML;
@@ -201,14 +216,20 @@ async function simpanUjian() {
             mulai: document.getElementById('ujian_mulai').value,
             selesai: document.getElementById('ujian_selesai').value,
             bobot: document.getElementById('ujian_bobot').value,
-            link: document.getElementById('ujian_link').value || '-'
+            link: '-'
         };
+        
+        console.log(">>> Data ujian yang dikirim:", data);
         
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify(data)
         });
         const result = await response.json();
+        console.log(">>> Response simpan ujian:", result);
         
         if (result.status === 'success') {
             alert('✅ ' + result.message);
@@ -219,6 +240,7 @@ async function simpanUjian() {
             alert('❌ ' + result.message);
         }
     } catch (error) {
+        console.error("Error simpanUjian:", error);
         alert('❌ Terjadi kesalahan: ' + error.message);
     } finally {
         btn.innerHTML = originalText;
@@ -226,11 +248,16 @@ async function simpanUjian() {
     }
 }
 
+// ==========================================
 // Edit ujian
+// ==========================================
 async function editUjian(idUjian) {
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'get_detail_ujian', id_ujian: idUjian })
         });
         const result = await response.json();
@@ -244,22 +271,27 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_mulai').value = ujian.mulai;
             document.getElementById('ujian_selesai').value = ujian.selesai;
             document.getElementById('ujian_bobot').value = ujian.bobot;
-            document.getElementById('ujian_link').value = ujian.link || '';
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
             document.getElementById('modalTambahUjian').classList.remove('hidden');
         }
     } catch (error) {
+        console.error("Error editUjian:", error);
         alert('❌ Gagal memuat data ujian');
     }
 }
 
+// ==========================================
 // Hapus ujian
+// ==========================================
 async function hapusUjian(idUjian) {
     if (!confirm('Apakah Anda yakin ingin menghapus ujian ini?')) return;
     
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'delete_ujian', id_ujian: idUjian })
         });
         const result = await response.json();
@@ -272,11 +304,14 @@ async function hapusUjian(idUjian) {
             alert('❌ ' + result.message);
         }
     } catch (error) {
+        console.error("Error hapusUjian:", error);
         alert('❌ Terjadi kesalahan');
     }
 }
 
-// Kelola soal
+// ==========================================
+// Kelola soal - Buka modal
+// ==========================================
 async function kelolaSoal(idUjian, judulUjian) {
     currentIdUjian = idUjian;
     document.getElementById('modalSoalTitle').innerText = `Kelola Soal: ${judulUjian}`;
@@ -285,7 +320,9 @@ async function kelolaSoal(idUjian, judulUjian) {
     await loadDaftarSoal(idUjian);
 }
 
+// ==========================================
 // Load daftar soal
+// ==========================================
 async function loadDaftarSoal(idUjian) {
     const container = document.getElementById('containerDaftarSoal');
     container.innerHTML = '<p class="text-slate-400 text-center py-6"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat soal...</p>';
@@ -293,9 +330,13 @@ async function loadDaftarSoal(idUjian) {
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'get_soal_ujian', id_ujian: idUjian })
         });
         const result = await response.json();
+        console.log(">>> Daftar soal:", result);
         
         if (result.status === 'success') {
             container.innerHTML = '';
@@ -309,7 +350,7 @@ async function loadDaftarSoal(idUjian) {
                 div.className = "bg-slate-50 p-4 rounded-lg border border-slate-200";
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <div>
+                        <div class="flex-1">
                             <p class="text-xs font-bold text-slate-500 mb-1">Soal ${index + 1}</p>
                             <p class="text-sm font-semibold text-slate-700">${soal.pertanyaan}</p>
                             <div class="mt-2 text-xs text-slate-500 space-y-0.5">
@@ -321,29 +362,38 @@ async function loadDaftarSoal(idUjian) {
                             </div>
                         </div>
                         <div class="flex gap-2 ml-4">
-                            <button onclick="editSoal('${soal.id_soal}')" class="text-teal-600 hover:text-teal-800"><i class="fa-solid fa-edit"></i></button>
-                            <button onclick="hapusSoal('${soal.id_soal}')" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="hapusSoal('${soal.id_soal}')" class="text-red-600 hover:text-red-800">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 `;
                 container.appendChild(div);
             });
+        } else {
+            container.innerHTML = '<p class="text-red-500 text-center py-6">Error: ' + result.message + '</p>';
         }
     } catch (error) {
+        console.error("Error loadDaftarSoal:", error);
         container.innerHTML = '<p class="text-red-500 text-center py-6">Gagal memuat soal.</p>';
     }
 }
 
+// ==========================================
 // Tampilkan form tambah soal
+// ==========================================
 function tampilkanFormTambahSoal() {
     document.getElementById('soal_id_ujian').value = currentIdUjian;
     document.getElementById('soal_id_soal_edit').value = '';
     document.getElementById('modalTambahSoalTitle').innerText = 'Tambah Soal';
     document.getElementById('formTambahSoal').reset();
+    document.getElementById('soal_id_ujian').value = currentIdUjian;
     document.getElementById('modalTambahSoal').classList.remove('hidden');
 }
 
+// ==========================================
 // Simpan soal
+// ==========================================
 async function simpanSoal() {
     const btn = document.querySelector('#formTambahSoal button[type="submit"]');
     const originalText = btn.innerHTML;
@@ -364,11 +414,17 @@ async function simpanSoal() {
             jawaban_benar: document.getElementById('soal_jawaban_benar').value
         };
         
+        console.log(">>> Data soal yang dikirim:", data);
+        
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify(data)
         });
         const result = await response.json();
+        console.log(">>> Response simpan soal:", result);
         
         if (result.status === 'success') {
             alert('✅ ' + result.message);
@@ -378,6 +434,7 @@ async function simpanSoal() {
             alert('❌ ' + result.message);
         }
     } catch (error) {
+        console.error("Error simpanSoal:", error);
         alert('❌ Terjadi kesalahan: ' + error.message);
     } finally {
         btn.innerHTML = originalText;
@@ -385,19 +442,18 @@ async function simpanSoal() {
     }
 }
 
-// Edit soal
-async function editSoal(idSoal) {
-    // Implementasi edit soal (bisa ditambahkan nanti)
-    alert('Fitur edit soal akan segera tersedia!');
-}
-
+// ==========================================
 // Hapus soal
+// ==========================================
 async function hapusSoal(idSoal) {
     if (!confirm('Apakah Anda yakin ingin menghapus soal ini?')) return;
     
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ action: 'delete_soal', id_soal: idSoal })
         });
         const result = await response.json();
@@ -409,11 +465,14 @@ async function hapusSoal(idSoal) {
             alert('❌ ' + result.message);
         }
     } catch (error) {
+        console.error("Error hapusSoal:", error);
         alert('❌ Terjadi kesalahan');
     }
 }
 
+// ==========================================
 // Tutup modal
+// ==========================================
 function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
