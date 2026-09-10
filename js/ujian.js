@@ -1,11 +1,20 @@
-// js/ujian.js - Logika Ujian CBT Mahasiswa
+// js/ujian.js - Logika Ujian CBT Mahasiswa (FINAL)
 
+// ==========================================
+// VARIABEL GLOBAL
+// ==========================================
 let currentUser = null;
 let currentIndex = 0;
 let daftarSoal = [];
 let jawabanSiswa = {};
-let currentIdUjian = null;  // <-- TAMBAHKAN INI
+let currentIdUjian = null;
+let timerInterval = null;
+let sisaWaktuDetik = 0;
+let totalWaktuDetik = 0;
 
+// ==========================================
+// INISIALISASI HALAMAN
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Set Judul Halaman
     const pageTitle = document.getElementById('pageTitle');
@@ -19,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     currentUser = JSON.parse(sessionData);
+    console.log(">>> User session:", currentUser);
 
     // 3. Load daftar ujian
     await loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
@@ -34,7 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// 1. Ambil Daftar Ujian
+// ==========================================
+// 1. AMBIL DAFTAR UJIAN
+// ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
     container.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
@@ -91,8 +103,11 @@ async function loadDaftarUjian(id_user) {
     }
 }
 
+// ==========================================
+// 2. MULAI UJIAN
+// ==========================================
 async function mulaiUjian(id_ujian, judul_ujian) {
-    currentIdUjian = id_ujian;  // <-- Simpan ID ujian untuk submit
+    currentIdUjian = id_ujian;
     document.getElementById('viewDaftarUjian').classList.add('hidden');
     document.getElementById('viewLembarSoal').classList.remove('hidden');
     document.getElementById('headerJudulUjian').innerText = judul_ujian;
@@ -106,6 +121,7 @@ async function mulaiUjian(id_ujian, judul_ujian) {
             body: JSON.stringify({ action: 'get_soal', id_ujian: id_ujian })
         });
         const result = await response.json();
+        console.log(">>> Soal ujian:", result);
 
         if (result.status === 'success' && result.data.length > 0) {
             daftarSoal = result.data;
@@ -115,7 +131,7 @@ async function mulaiUjian(id_ujian, judul_ujian) {
             renderTampilanSoal();
             renderNavigasi();
             
-            // ✅ MULAI TIMER - 60 menit
+            // Mulai timer 60 menit
             mulaiTimer(60);
             
         } else {
@@ -129,10 +145,11 @@ async function mulaiUjian(id_ujian, judul_ujian) {
     }
 }
 
-// 3. Kembali ke Daftar
+// ==========================================
+// 3. KEMBALI KE DAFTAR
+// ==========================================
 function kembaliKeDaftar() {
     if (confirm('Keluar dari ujian? Progress jawaban Anda akan direset.')) {
-        // ✅ HENTIKAN TIMER
         stopTimer();
         
         document.getElementById('viewLembarSoal').classList.add('hidden');
@@ -142,7 +159,9 @@ function kembaliKeDaftar() {
     }
 }
 
-// 4. Render Tampilan Soal Aktif
+// ==========================================
+// 4. RENDER TAMPILAN SOAL
+// ==========================================
 function renderTampilanSoal() {
     if (daftarSoal.length === 0) return;
     const soal = daftarSoal[currentIndex];
@@ -177,7 +196,9 @@ function renderTampilanSoal() {
     document.getElementById('btnBerikutnya').innerText = currentIndex === daftarSoal.length - 1 ? 'Selesai' : 'Berikutnya ';
 }
 
-// 5. Render Navigasi Nomor
+// ==========================================
+// 5. RENDER NAVIGASI NOMOR
+// ==========================================
 function renderNavigasi() {
     const container = document.getElementById('gridNavigasi');
     container.innerHTML = '';
@@ -208,7 +229,9 @@ function renderNavigasi() {
     });
 }
 
-// Ganti fungsi pindahSoal
+// ==========================================
+// 6. NAVIGASI SOAL
+// ==========================================
 function pindahSoal(arah) {
     const target = currentIndex + arah;
     if (target >= 0 && target < daftarSoal.length) {
@@ -217,70 +240,100 @@ function pindahSoal(arah) {
         renderNavigasi();
     } else if (target >= daftarSoal.length) {
         if (confirm('Apakah Anda ingin mengakhiri dan mengumpulkan ujian ini?')) {
-            selesaiUjian();  // <-- Panggil fungsi selesaiUjian
+            selesaiUjian();
         }
     }
 }
 
-// Fungsi BARU: Kirim jawaban ke backend
+// ==========================================
+// 7. SELESAI UJIAN - KIRIM JAWABAN KE BACKEND
+// ==========================================
 async function selesaiUjian() {
-    // ✅ HENTIKAN TIMER
     stopTimer();
     
-    // Hitung jawaban yang sudah diisi
-    let jumlahDijawab = 0;
-    daftarSoal.forEach((_, idx) => {
-        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi) jumlahDijawab++;
+    if (!currentUser) {
+        alert('Sesi tidak valid. Silakan login ulang.');
+        return;
+    }
+    
+    // Kumpulkan jawaban
+    const jawaban = {};
+    daftarSoal.forEach((soal, idx) => {
+        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi) {
+            jawaban[soal.id_soal] = jawabanSiswa[idx].opsi;
+        }
     });
     
+    const jumlahDijawab = Object.keys(jawaban).length;
     const totalSoal = daftarSoal.length;
     
     if (jumlahDijawab < totalSoal) {
         if (!confirm(`Anda baru menjawab ${jumlahDijawab} dari ${totalSoal} soal. Yakin ingin mengumpulkan?`)) {
-            // Restart timer jika user batal
-            mulaiTimer(Math.floor(sisaWaktuDetik / 60) || 1);
+            // Restart timer dengan sisa waktu
+            if (sisaWaktuDetik > 0) {
+                mulaiTimerDenganSisa(sisaWaktuDetik);
+            }
             return;
         }
     }
     
-    // ✅ TAMPILKAN NILAI (SEMENTARA - dihitung di frontend)
-    let jumlahBenar = 0;
-    daftarSoal.forEach((soal, idx) => {
-        if (jawabanSiswa[idx] && jawabanSiswa[idx].opsi === soal.jawaban_benar) {
-            jumlahBenar++;
+    // Tampilkan loading
+    const btnBerikutnya = document.getElementById('btnBerikutnya');
+    if (btnBerikutnya) {
+        btnBerikutnya.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mengirim...';
+        btnBerikutnya.disabled = true;
+    }
+    
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({
+                action: 'simpan_jawaban_ujian',
+                id_ujian: currentIdUjian,
+                id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user,
+                jawaban: jawaban
+            })
+        });
+        
+        const result = await response.json();
+        console.log(">>> Response simpan jawaban:", result);
+        
+        if (result.status === 'success') {
+            alert(`✅ ${result.message}\n\nBenar: ${result.jumlah_benar}/${result.total_soal}\nNilai: ${result.nilai}`);
+            
+            document.getElementById('viewLembarSoal').classList.add('hidden');
+            document.getElementById('viewDaftarUjian').classList.remove('hidden');
+            loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+        } else {
+            alert('❌ Gagal menyimpan jawaban: ' + result.message);
+            
+            if (btnBerikutnya) {
+                btnBerikutnya.innerHTML = 'Selesai';
+                btnBerikutnya.disabled = false;
+            }
         }
-    });
-    
-    const nilai = totalSoal > 0 ? Math.round((jumlahBenar / totalSoal) * 100) : 0;
-    
-    alert(`✅ Ujian berhasil dikumpulkan!\n\nBenar: ${jumlahBenar}/${totalSoal}\nNilai: ${nilai}`);
-    
-    document.getElementById('viewLembarSoal').classList.add('hidden');
-    document.getElementById('viewDaftarUjian').classList.remove('hidden');
-    loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+    } catch (error) {
+        console.error("Error simpan jawaban:", error);
+        alert('❌ Terjadi kesalahan: ' + error.message);
+        
+        if (btnBerikutnya) {
+            btnBerikutnya.innerHTML = 'Selesai';
+            btnBerikutnya.disabled = false;
+        }
+    }
 }
 
 // ==========================================
-// VARIABEL GLOBAL TIMER
+// 8. FUNGSI TIMER
 // ==========================================
-let timerInterval = null;
-let sisaWaktuDetik = 0;
-let totalWaktuDetik = 0;
-
-// ==========================================
-// FUNGSI TIMER COUNTDOWN
-// ==========================================
-
-// Mulai timer dengan durasi tertentu (menit)
 function mulaiTimer(durasiMenit = 60) {
-    // Hentikan timer lama jika ada
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
+    if (timerInterval) clearInterval(timerInterval);
     
-    totalWaktuDetik = durasiMenit * 60;
-    sisaWaktuDetik = totalWaktuDetik;
-    
+    sisaWaktuDetik = durasiMenit * 60;
+    totalWaktuDetik = sisaWaktuDetik;
     updateTampilanTimer();
     
     timerInterval = setInterval(() => {
@@ -290,12 +343,31 @@ function mulaiTimer(durasiMenit = 60) {
         if (sisaWaktuDetik <= 0) {
             clearInterval(timerInterval);
             timerInterval = null;
-            waktuHabis();
+            alert('⏰ Waktu ujian habis! Jawaban akan otomatis dikumpulkan.');
+            selesaiUjian();
         }
     }, 1000);
 }
 
-// Update tampilan timer di header
+function mulaiTimerDenganSisa(detikTersisa) {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    sisaWaktuDetik = detikTersisa;
+    updateTampilanTimer();
+    
+    timerInterval = setInterval(() => {
+        sisaWaktuDetik--;
+        updateTampilanTimer();
+        
+        if (sisaWaktuDetik <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert('⏰ Waktu ujian habis! Jawaban akan otomatis dikumpulkan.');
+            selesaiUjian();
+        }
+    }, 1000);
+}
+
 function updateTampilanTimer() {
     const timerEl = document.getElementById('timerCountdown');
     if (!timerEl) return;
@@ -304,29 +376,21 @@ function updateTampilanTimer() {
     const menit = Math.floor((sisaWaktuDetik % 3600) / 60);
     const detik = sisaWaktuDetik % 60;
     
-    const format = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
-    timerEl.innerText = format;
+    timerEl.innerText = `${jam.toString().padStart(2, '0')}:${menit.toString().padStart(2, '0')}:${detik.toString().padStart(2, '0')}`;
     
-    // Ubah warna jika waktu hampir habis (< 5 menit)
+    // Ubah warna jika waktu hampir habis
     const parentDiv = timerEl.closest('div');
     if (parentDiv) {
         if (sisaWaktuDetik < 300) {
-            // Merah tebal
+            // < 5 menit: merah tebal + animasi
             parentDiv.className = 'bg-red-100 text-red-700 border border-red-300 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-2 animate-pulse';
         } else if (sisaWaktuDetik < 600) {
-            // Kuning (< 10 menit)
+            // < 10 menit: kuning
             parentDiv.className = 'bg-amber-50 text-amber-600 border border-amber-200 px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-2';
         }
     }
 }
 
-// Waktu habis - otomatis kumpulkan
-function waktuHabis() {
-    alert('⏰ Waktu ujian habis! Jawaban Anda akan otomatis dikumpulkan.');
-    selesaiUjian();
-}
-
-// Hentikan timer
 function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -334,7 +398,9 @@ function stopTimer() {
     }
 }
 
-// 7. Tandai Ragu-ragu
+// ==========================================
+// 9. TANDAI RAGU-RAGU
+// ==========================================
 function toggleRaguRagu(checkbox) {
     if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
     jawabanSiswa[currentIndex].ragu = checkbox.checked;
