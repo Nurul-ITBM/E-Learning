@@ -204,16 +204,36 @@ function setButtonLoading(buttonId, isLoading, loadingText = 'Memuat...') {
     if (!btn) return;
     
     if (isLoading) {
-        btn.dataset.originalHtml = btn.innerHTML;
+        // Simpan HTML asli jika belum disimpan
+        if (!btn.dataset.originalHtml) {
+            btn.dataset.originalHtml = btn.innerHTML;
+        }
         btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
         btn.disabled = true;
         btn.classList.add('opacity-70', 'cursor-not-allowed');
     } else {
+        // Kembalikan HTML asli
         if (btn.dataset.originalHtml) {
             btn.innerHTML = btn.dataset.originalHtml;
+            delete btn.dataset.originalHtml;
         }
         btn.disabled = false;
         btn.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+}
+
+// ==========================================
+// HELPER: Hanya Disable Tombol (Tanpa Ubah Teks)
+// ==========================================
+function setButtonDisabled(buttonId, isDisabled) {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+    
+    btn.disabled = isDisabled;
+    if (isDisabled) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 }
 
@@ -271,15 +291,15 @@ async function simpanUjian() {
 }
 
 // ==========================================
-// Edit ujian - DENGAN LOADING STATE
+// Edit ujian - HANYA TOMBOL EDIT YANG LOADING
 // ==========================================
 async function editUjian(idUjian) {
-    // Tampilkan loading pada tombol Edit
+    // Hanya tombol Edit yang menampilkan loading
     setButtonLoading(`btnEdit-${idUjian}`, true, 'Memuat...');
     
-    // Disable tombol lain sementara
-    setButtonLoading(`btnSoal-${idUjian}`, true);
-    setButtonLoading(`btnHapus-${idUjian}`, true);
+    // Tombol lain hanya di-disable (teks tidak berubah)
+    setButtonDisabled(`btnSoal-${idUjian}`, true);
+    setButtonDisabled(`btnHapus-${idUjian}`, true);
     
     try {
         const response = await fetch(CONFIG.API_URL, {
@@ -310,25 +330,25 @@ async function editUjian(idUjian) {
         console.error("Error editUjian:", error);
         alert('❌ Gagal memuat data ujian: ' + error.message);
     } finally {
-        // Kembalikan tombol ke keadaan semula
+        // Kembalikan semua tombol ke keadaan semula
         setButtonLoading(`btnEdit-${idUjian}`, false);
-        setButtonLoading(`btnSoal-${idUjian}`, false);
-        setButtonLoading(`btnHapus-${idUjian}`, false);
+        setButtonDisabled(`btnSoal-${idUjian}`, false);
+        setButtonDisabled(`btnHapus-${idUjian}`, false);
     }
 }
 
 // ==========================================
-// Hapus ujian - DENGAN LOADING STATE
+// Hapus ujian - HANYA TOMBOL HAPUS YANG LOADING
 // ==========================================
 async function hapusUjian(idUjian) {
     if (!confirm('Apakah Anda yakin ingin menghapus ujian ini?')) return;
     
-    // Tampilkan loading pada tombol Hapus
+    // Hanya tombol Hapus yang menampilkan loading
     setButtonLoading(`btnHapus-${idUjian}`, true, 'Menghapus...');
     
-    // Disable tombol lain sementara
-    setButtonLoading(`btnSoal-${idUjian}`, true);
-    setButtonLoading(`btnEdit-${idUjian}`, true);
+    // Tombol lain hanya di-disable
+    setButtonDisabled(`btnSoal-${idUjian}`, true);
+    setButtonDisabled(`btnEdit-${idUjian}`, true);
     
     try {
         const response = await fetch(CONFIG.API_URL, {
@@ -348,27 +368,31 @@ async function hapusUjian(idUjian) {
             alert('❌ ' + result.message);
             // Kembalikan tombol jika gagal
             setButtonLoading(`btnHapus-${idUjian}`, false);
-            setButtonLoading(`btnSoal-${idUjian}`, false);
-            setButtonLoading(`btnEdit-${idUjian}`, false);
+            setButtonDisabled(`btnSoal-${idUjian}`, false);
+            setButtonDisabled(`btnEdit-${idUjian}`, false);
         }
     } catch (error) {
         console.error("Error hapusUjian:", error);
         alert('❌ Terjadi kesalahan');
         // Kembalikan tombol jika gagal
         setButtonLoading(`btnHapus-${idUjian}`, false);
-        setButtonLoading(`btnSoal-${idUjian}`, false);
-        setButtonLoading(`btnEdit-${idUjian}`, false);
+        setButtonDisabled(`btnSoal-${idUjian}`, false);
+        setButtonDisabled(`btnEdit-${idUjian}`, false);
     }
 }
 
 // ==========================================
-// Kelola soal - Buka modal - DENGAN LOADING STATE
+// Kelola soal - HANYA TOMBOL SOAL YANG LOADING
 // ==========================================
 async function kelolaSoal(idUjian, judulUjian) {
     currentIdUjian = idUjian;
     
-    // Tampilkan loading pada tombol Soal
+    // Hanya tombol Soal yang menampilkan loading
     setButtonLoading(`btnSoal-${idUjian}`, true, 'Memuat...');
+    
+    // Tombol lain di-disable
+    setButtonDisabled(`btnEdit-${idUjian}`, true);
+    setButtonDisabled(`btnHapus-${idUjian}`, true);
     
     document.getElementById('modalSoalTitle').innerText = `Kelola Soal: ${judulUjian}`;
     document.getElementById('modalKelolaSoal').classList.remove('hidden');
@@ -377,6 +401,8 @@ async function kelolaSoal(idUjian, judulUjian) {
         await loadDaftarSoal(idUjian);
     } finally {
         setButtonLoading(`btnSoal-${idUjian}`, false);
+        setButtonDisabled(`btnEdit-${idUjian}`, false);
+        setButtonDisabled(`btnHapus-${idUjian}`, false);
     }
 }
 
