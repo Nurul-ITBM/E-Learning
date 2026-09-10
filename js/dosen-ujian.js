@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
     
-    // 3. Load dropdown kelas - dengan pengamanan
+    // 3. Load dropdown kelas
     if (user.id_dosen) {
         await loadKelasDosen(user.id_dosen);
     } else {
@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('ujian_id_ujian_edit').value = '';
         document.getElementById('modalUjianTitle').innerText = 'Tambah Ujian Baru';
         document.getElementById('formTambahUjian').reset();
+        document.getElementById('ujian_id_kelas').value = idKelas;
         document.getElementById('modalTambahUjian').classList.remove('hidden');
     });
     
@@ -173,14 +174,14 @@ async function loadDaftarUjian(idKelas) {
                         </div>
                     </div>
                     <div class="mt-4 flex gap-2">
-                        <button onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul.replace(/'/g, "\\'")}')" class="flex-1 bg-teal-50 text-teal-600 hover:bg-teal-100 py-2 rounded-lg text-xs font-bold transition">
-                            <i class="fa-solid fa-list-check mr-1"></i> Soal
+                        <button id="btnSoal-${ujian.id_ujian}" onclick="kelolaSoal('${ujian.id_ujian}', '${ujian.judul.replace(/'/g, "\\'")}')" class="flex-1 bg-teal-50 text-teal-600 hover:bg-teal-100 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-list-check"></i> Soal
                         </button>
-                        <button onclick="editUjian('${ujian.id_ujian}')" class="flex-1 bg-slate-50 text-slate-600 hover:bg-slate-100 py-2 rounded-lg text-xs font-bold transition">
-                            <i class="fa-solid fa-edit mr-1"></i> Edit
+                        <button id="btnEdit-${ujian.id_ujian}" onclick="editUjian('${ujian.id_ujian}')" class="flex-1 bg-slate-50 text-slate-600 hover:bg-slate-100 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-edit"></i> Edit
                         </button>
-                        <button onclick="hapusUjian('${ujian.id_ujian}')" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-xs font-bold transition">
-                            <i class="fa-solid fa-trash mr-1"></i> Hapus
+                        <button id="btnHapus-${ujian.id_ujian}" onclick="hapusUjian('${ujian.id_ujian}')" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-trash"></i> Hapus
                         </button>
                     </div>
                 `;
@@ -192,6 +193,27 @@ async function loadDaftarUjian(idKelas) {
     } catch (error) {
         console.error("Error loadDaftarUjian:", error);
         container.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Gagal terhubung ke server.</p>';
+    }
+}
+
+// ==========================================
+// HELPER: Set Loading pada Tombol
+// ==========================================
+function setButtonLoading(buttonId, isLoading, loadingText = 'Memuat...') {
+    const btn = document.getElementById(buttonId);
+    if (!btn) return;
+    
+    if (isLoading) {
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${loadingText}`;
+        btn.disabled = true;
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+    } else {
+        if (btn.dataset.originalHtml) {
+            btn.innerHTML = btn.dataset.originalHtml;
+        }
+        btn.disabled = false;
+        btn.classList.remove('opacity-70', 'cursor-not-allowed');
     }
 }
 
@@ -249,9 +271,16 @@ async function simpanUjian() {
 }
 
 // ==========================================
-// Edit ujian
+// Edit ujian - DENGAN LOADING STATE
 // ==========================================
 async function editUjian(idUjian) {
+    // Tampilkan loading pada tombol Edit
+    setButtonLoading(`btnEdit-${idUjian}`, true, 'Memuat...');
+    
+    // Disable tombol lain sementara
+    setButtonLoading(`btnSoal-${idUjian}`, true);
+    setButtonLoading(`btnHapus-${idUjian}`, true);
+    
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
@@ -261,6 +290,7 @@ async function editUjian(idUjian) {
             body: JSON.stringify({ action: 'get_detail_ujian', id_ujian: idUjian })
         });
         const result = await response.json();
+        console.log(">>> Detail ujian:", result);
         
         if (result.status === 'success') {
             const ujian = result.data;
@@ -273,18 +303,32 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_bobot').value = ujian.bobot;
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
             document.getElementById('modalTambahUjian').classList.remove('hidden');
+        } else {
+            alert('❌ ' + result.message);
         }
     } catch (error) {
         console.error("Error editUjian:", error);
-        alert('❌ Gagal memuat data ujian');
+        alert('❌ Gagal memuat data ujian: ' + error.message);
+    } finally {
+        // Kembalikan tombol ke keadaan semula
+        setButtonLoading(`btnEdit-${idUjian}`, false);
+        setButtonLoading(`btnSoal-${idUjian}`, false);
+        setButtonLoading(`btnHapus-${idUjian}`, false);
     }
 }
 
 // ==========================================
-// Hapus ujian
+// Hapus ujian - DENGAN LOADING STATE
 // ==========================================
 async function hapusUjian(idUjian) {
     if (!confirm('Apakah Anda yakin ingin menghapus ujian ini?')) return;
+    
+    // Tampilkan loading pada tombol Hapus
+    setButtonLoading(`btnHapus-${idUjian}`, true, 'Menghapus...');
+    
+    // Disable tombol lain sementara
+    setButtonLoading(`btnSoal-${idUjian}`, true);
+    setButtonLoading(`btnEdit-${idUjian}`, true);
     
     try {
         const response = await fetch(CONFIG.API_URL, {
@@ -302,22 +346,38 @@ async function hapusUjian(idUjian) {
             await loadDaftarUjian(idKelas);
         } else {
             alert('❌ ' + result.message);
+            // Kembalikan tombol jika gagal
+            setButtonLoading(`btnHapus-${idUjian}`, false);
+            setButtonLoading(`btnSoal-${idUjian}`, false);
+            setButtonLoading(`btnEdit-${idUjian}`, false);
         }
     } catch (error) {
         console.error("Error hapusUjian:", error);
         alert('❌ Terjadi kesalahan');
+        // Kembalikan tombol jika gagal
+        setButtonLoading(`btnHapus-${idUjian}`, false);
+        setButtonLoading(`btnSoal-${idUjian}`, false);
+        setButtonLoading(`btnEdit-${idUjian}`, false);
     }
 }
 
 // ==========================================
-// Kelola soal - Buka modal
+// Kelola soal - Buka modal - DENGAN LOADING STATE
 // ==========================================
 async function kelolaSoal(idUjian, judulUjian) {
     currentIdUjian = idUjian;
+    
+    // Tampilkan loading pada tombol Soal
+    setButtonLoading(`btnSoal-${idUjian}`, true, 'Memuat...');
+    
     document.getElementById('modalSoalTitle').innerText = `Kelola Soal: ${judulUjian}`;
     document.getElementById('modalKelolaSoal').classList.remove('hidden');
     
-    await loadDaftarSoal(idUjian);
+    try {
+        await loadDaftarSoal(idUjian);
+    } finally {
+        setButtonLoading(`btnSoal-${idUjian}`, false);
+    }
 }
 
 // ==========================================
@@ -341,7 +401,6 @@ async function loadDaftarSoal(idUjian) {
         if (result.status === 'success') {
             container.innerHTML = '';
             
-            // Debug: cek struktur data
             console.log(">>> Jumlah soal:", result.data.length);
             if (result.data.length > 0) {
                 console.log(">>> Contoh soal:", JSON.stringify(result.data[0]));
@@ -353,13 +412,12 @@ async function loadDaftarSoal(idUjian) {
             }
             
             result.data.forEach((soal, index) => {
-                // Tangani berbagai kemungkinan nama field
-                const pertanyaan = soal.pertanyaan || soal.pertanyaan_soal || '-';
-                const opsiA = soal.opsi_a || soal.opsiA || '-';
-                const opsiB = soal.opsi_b || soal.opsiB || '-';
-                const opsiC = soal.opsi_c || soal.opsiC || '-';
-                const opsiD = soal.opsi_d || soal.opsiD || '-';
-                const jawaban = soal.jawaban_benar || soal.kunci_jawaban || soal.jawaban || '-';
+                const pertanyaan = soal.pertanyaan || '-';
+                const opsiA = soal.opsi_a || '-';
+                const opsiB = soal.opsi_b || '-';
+                const opsiC = soal.opsi_c || '-';
+                const opsiD = soal.opsi_d || '-';
+                const jawaban = soal.jawaban_benar || soal.kunci_jawaban || '-';
                 
                 const div = document.createElement('div');
                 div.className = "bg-slate-50 p-4 rounded-lg border border-slate-200";
