@@ -340,25 +340,40 @@ async function loadDaftarSoal(idUjian) {
         
         if (result.status === 'success') {
             container.innerHTML = '';
+            
+            // Debug: cek struktur data
+            console.log(">>> Jumlah soal:", result.data.length);
+            if (result.data.length > 0) {
+                console.log(">>> Contoh soal:", JSON.stringify(result.data[0]));
+            }
+            
             if (result.data.length === 0) {
                 container.innerHTML = '<p class="text-slate-500 text-center py-6">Belum ada soal untuk ujian ini.</p>';
                 return;
             }
             
             result.data.forEach((soal, index) => {
+                // Tangani berbagai kemungkinan nama field
+                const pertanyaan = soal.pertanyaan || soal.pertanyaan_soal || '-';
+                const opsiA = soal.opsi_a || soal.opsiA || '-';
+                const opsiB = soal.opsi_b || soal.opsiB || '-';
+                const opsiC = soal.opsi_c || soal.opsiC || '-';
+                const opsiD = soal.opsi_d || soal.opsiD || '-';
+                const jawaban = soal.jawaban_benar || soal.kunci_jawaban || soal.jawaban || '-';
+                
                 const div = document.createElement('div');
                 div.className = "bg-slate-50 p-4 rounded-lg border border-slate-200";
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <p class="text-xs font-bold text-slate-500 mb-1">Soal ${index + 1}</p>
-                            <p class="text-sm font-semibold text-slate-700">${soal.pertanyaan}</p>
+                            <p class="text-sm font-semibold text-slate-700">${pertanyaan}</p>
                             <div class="mt-2 text-xs text-slate-500 space-y-0.5">
-                                <p>A. ${soal.opsi_a}</p>
-                                <p>B. ${soal.opsi_b}</p>
-                                <p>C. ${soal.opsi_c}</p>
-                                <p>D. ${soal.opsi_d}</p>
-                                <p class="text-teal-600 font-bold mt-1">Jawaban: ${soal.jawaban_benar}</p>
+                                <p>A. ${opsiA}</p>
+                                <p>B. ${opsiB}</p>
+                                <p>C. ${opsiC}</p>
+                                <p>D. ${opsiD}</p>
+                                <p class="text-teal-600 font-bold mt-1">Jawaban: ${jawaban}</p>
                             </div>
                         </div>
                         <div class="flex gap-2 ml-4">
