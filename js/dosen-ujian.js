@@ -68,19 +68,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadKelasDosen(idDosen) {
     const select = document.getElementById('filterKelasUjian');
     
+    console.log(">>> Loading kelas untuk dosen:", idDosen);
+    
     try {
-        console.log("Loading kelas untuk dosen:", idDosen);
-        
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/plain;charset=utf-8',
             },
-            body: JSON.stringify({ action: 'get_kelas_dosen_ujian', id_dosen: idDosen })
+            body: JSON.stringify({ 
+                action: 'get_kelas_dosen_ujian', 
+                id_dosen: idDosen 
+            })
         });
         
+        console.log(">>> Response status:", response.status);
+        
         const result = await response.json();
-        console.log("Response kelas:", result);
+        console.log(">>> Response data:", JSON.stringify(result));
         
         if (result.status === 'success') {
             select.innerHTML = '<option value="">-- Pilih Mata Kuliah --</option>';
@@ -93,15 +98,17 @@ async function loadKelasDosen(idDosen) {
             result.data.forEach(kelas => {
                 const option = document.createElement('option');
                 option.value = kelas.id_kelas;
-                option.textContent = kelas.nama_kelas + ' (' + kelas.id_kelas + ')';
+                option.textContent = kelas.nama_kelas;
                 select.appendChild(option);
             });
+            
+            console.log(">>> Dropdown berhasil diisi dengan", result.data.length, "mata kuliah");
         } else {
-            console.error('Error dari server:', result.message);
-            select.innerHTML = '<option value="">-- Error memuat data --</option>';
+            console.error('>>> Error dari server:', result.message);
+            select.innerHTML = '<option value="">-- Error: ' + result.message + ' --</option>';
         }
     } catch (error) {
-        console.error('Error loading kelas:', error);
+        console.error('>>> Error loading kelas:', error);
         select.innerHTML = '<option value="">-- Error koneksi --</option>';
     }
 }
