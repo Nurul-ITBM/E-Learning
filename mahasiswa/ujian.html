@@ -8,13 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .bg-brand-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .sidebar-item-active { background-color: #eff6ff; color: #4f46e5; font-weight: 600; }
-        .sidebar-item { color: #64748b; font-weight: 500; transition: all 0.2s; }
-        .sidebar-item:hover { color: #4f46e5; background-color: #f8fafc; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -22,66 +19,17 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-    <!-- SIDEBAR UTAMA -->
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
-        <div class="overflow-y-auto">
-            <div class="bg-brand-gradient p-6 text-white rounded-br-2xl">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
-                        <p class="text-xs text-indigo-100 uppercase tracking-wider mt-0.5">Sistem Pembelajaran</p>
-                    </div>
-                </div>
-            </div>
+    <!-- TEMPAT PENAMPUNG SIDEBAR (Diisi oleh JS) -->
+    <div id="sidebar-container"></div>
 
-            <div class="px-4 py-6 text-sm">
-                <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg mb-6">
-                    <i class="fa-solid fa-house w-5 text-center"></i><span>Dashboard</span>
-                </a>
-
-                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Menu Utama</p>
-                <nav class="space-y-1 mb-8">
-                    <a href="matakuliah.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-book w-5 text-center"></i><span>Mata Kuliah</span></a>
-                    <a href="tugas.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-file-pen w-5 text-center"></i><span>Tugas</span></a>
-                    <!-- Menu Ujian Aktif -->
-                    <a href="ujian.html" class="flex items-center space-x-3 px-4 py-3 sidebar-item-active rounded-xl"><i class="fa-regular fa-file-lines w-5 text-center"></i><span>Ujian</span></a>
-                    <a href="absensi.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-user-check w-5 text-center"></i><span>Absensi</span></a>
-                    <a href="nilai.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-chart-simple w-5 text-center"></i><span>Nilai</span></a>
-                    <a href="pengumuman.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Pengumuman</span></a>
-                </nav>
-
-                <p class="px-4 text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Akun</p>
-                <nav class="space-y-1">
-                    <a href="profil.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-regular fa-user w-5 text-center"></i><span>Profil Saya</span></a>
-                    <a href="pengaturan.html" class="flex items-center space-x-3 px-4 py-2.5 sidebar-item rounded-lg"><i class="fa-solid fa-gear w-5 text-center"></i><span>Pengaturan</span></a>
-                </nav>
-            </div>
-        </div>
-
-        <div class="p-4 border-t border-slate-100">
-            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm mb-3">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Keluar</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
         
+        <!-- TEMPAT PENAMPUNG HEADER (Diisi oleh JS) -->
+        <div id="header-container"></div>
+
         <!-- ================= VIEW 1: DAFTAR UJIAN ================= -->
         <div id="viewDaftarUjian" class="flex flex-col h-full">
-            <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-800">Daftar Ujian Aktif</h2>
-                <div class="flex items-center space-x-3 border-l border-slate-200 pl-6">
-                    <img src="https://ui-avatars.com/api/?name=Andi+P&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-10 h-10 rounded-full border border-slate-200">
-                    <div class="hidden md:block leading-tight">
-                        <p class="text-sm font-bold text-slate-800" id="userNameDisplay">Memuat...</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Mahasiswa</p>
-                    </div>
-                </div>
-            </header>
-
             <div class="p-8">
                 <div class="flex justify-between items-end mb-6 border-b border-slate-200 pb-4">
                     <div>
@@ -132,7 +80,7 @@
                     <div id="totalSoalLabel" class="text-[11px] text-slate-400 text-center pt-4 border-t border-slate-100">Memuat soal...</div>
                 </div>
 
-                <!-- Konten Soal (Kanan) -->
+                <!-- Konten Soal -->
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 lg:col-span-3 flex flex-col justify-between overflow-y-auto">
                     <div>
                         <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
@@ -186,214 +134,9 @@
         </div>
     </main>
 
-    <!-- SCRIPT TERPADU -->
+    <!-- Scripts -->
     <script src="../js/config.js"></script>
-    <script>
-        let currentUser = null;
-        let currentIndex = 0;
-        let daftarSoal = [];
-        let jawabanSiswa = {};
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const sessionData = localStorage.getItem('user_session');
-            if (!sessionData) { window.location.href = '../login.html'; return; }
-            
-            currentUser = JSON.parse(sessionData);
-            document.getElementById('userNameDisplay').innerText = currentUser.username.split('@')[0];
-
-            document.getElementById('btnLogout').addEventListener('click', () => {
-                localStorage.removeItem('user_session');
-                window.location.href = '../login.html';
-            });
-
-            // Load daftar ujian awal
-            await loadDaftarUjian(currentUser.id_user);
-
-            // Listener pilihan ganda
-            document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
-                    jawabanSiswa[currentIndex].opsi = e.target.value;
-                    renderNavigasi();
-                    renderTampilanSoal();
-                });
-            });
-        });
-
-        // 1. Ambil Daftar Ujian
-        async function loadDaftarUjian(id_user) {
-            const container = document.getElementById('containerDaftarUjian');
-            try {
-                const response = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'get_ujian', id_mahasiswa: id_user })
-                });
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    container.innerHTML = '';
-                    if (result.data.length === 0) {
-                        container.innerHTML = '<p class="text-slate-500 col-span-full text-center py-10">Belum ada jadwal ujian saat ini.</p>';
-                        return;
-                    }
-
-                    result.data.forEach(u => {
-                        const card = document.createElement('div');
-                        card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
-                        card.innerHTML = `
-                            <div>
-                                <div class="flex justify-between items-start mb-3">
-                                    <span class="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">UJIAN</span>
-                                    <span class="text-xs font-bold text-slate-400">Bobot: ${u.bobot}</span>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-800 mb-1">${u.judul}</h3>
-                                <p class="text-xs text-indigo-600 font-semibold mb-3">${u.mata_kuliah}</p>
-                                <p class="text-xs text-slate-500 mb-4 line-clamp-2">${u.deskripsi}</p>
-                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
-                                    <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-red-500 mr-1.5"></i> Mulai: ${u.mulai}</div>
-                                    <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${u.selesai}</div>
-                                </div>
-                            </div>
-                            <div class="mt-6">
-                                <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
-                                    <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(card);
-                    });
-                } else {
-                    container.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">${result.message}</p>`;
-                }
-            } catch (err) {
-                container.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">Gagal terhubung ke server.</p>`;
-            }
-        }
-
-        // 2. Transisi Masuk Lembar Soal
-        async function mulaiUjian(id_ujian, judul_ujian) {
-            document.getElementById('viewDaftarUjian').classList.add('hidden');
-            document.getElementById('viewLembarSoal').classList.remove('hidden');
-            document.getElementById('headerJudulUjian').innerText = judul_ujian;
-
-            try {
-                const response = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'get_soal', id_ujian: id_ujian })
-                });
-                const result = await response.json();
-
-                if (result.status === 'success' && result.data.length > 0) {
-                    daftarSoal = result.data;
-                    currentIndex = 0;
-                    jawabanSiswa = {};
-                    document.getElementById('totalSoalLabel').innerText = `Total Soal: ${daftarSoal.length} Pilihan Ganda`;
-                    renderTampilanSoal();
-                    renderNavigasi();
-                } else {
-                    alert('Gagal memuat soal: ' + (result.message || 'Data kosong'));
-                    kembaliKeDaftar();
-                }
-            } catch (error) {
-                alert('Terjadi kesalahan koneksi.');
-                kembaliKeDaftar();
-            }
-        }
-
-        // 3. Kembali ke Daftar
-        function kembaliKeDaftar() {
-            if (confirm('Keluar dari ujian? Progress jawaban Anda akan direset.')) {
-                document.getElementById('viewLembarSoal').classList.add('hidden');
-                document.getElementById('viewDaftarUjian').classList.remove('hidden');
-            }
-        }
-
-        // 4. Render Tampilan Soal Aktif
-        function renderTampilanSoal() {
-            if (daftarSoal.length === 0) return;
-            const soal = daftarSoal[currentIndex];
-
-            document.getElementById('nomorSoalHeader').innerText = `Soal ${currentIndex + 1} dari ${daftarSoal.length}`;
-            document.getElementById('teksPertanyaan').innerText = soal.pertanyaan;
-            document.getElementById('teksOpsiA').innerText = soal.opsi_a;
-            document.getElementById('teksOpsiB').innerText = soal.opsi_b;
-            document.getElementById('teksOpsiC').innerText = soal.opsi_c;
-            document.getElementById('teksOpsiD').innerText = soal.opsi_d;
-
-            document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
-                input.checked = false;
-                input.parentElement.classList.remove('border-2', 'border-indigo-600', 'bg-indigo-50/50', 'shadow-sm');
-                input.parentElement.classList.add('border', 'border-slate-200');
-            });
-
-            if (jawabanSiswa[currentIndex] && jawabanSiswa[currentIndex].opsi) {
-                const pilihan = jawabanSiswa[currentIndex].opsi;
-                const targetInput = document.querySelector(`input[name="opsiJawaban"][value="${pilihan}"]`);
-                if (targetInput) {
-                    targetInput.checked = true;
-                    targetInput.parentElement.classList.remove('border', 'border-slate-200');
-                    targetInput.parentElement.classList.add('border-2', 'border-indigo-600', 'bg-indigo-50/50', 'shadow-sm');
-                }
-            }
-
-            document.getElementById('checkRagu').checked = jawabanSiswa[currentIndex] ? jawabanSiswa[currentIndex].ragu : false;
-            document.getElementById('btnSebelumnya').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
-            document.getElementById('btnBerikutnya').innerText = currentIndex === daftarSoal.length - 1 ? 'Selesai' : 'Berikutnya ';
-        }
-
-        // 5. Render Navigasi Nomor
-        function renderNavigasi() {
-            const container = document.getElementById('gridNavigasi');
-            container.innerHTML = '';
-
-            daftarSoal.forEach((_, idx) => {
-                const btn = document.createElement('button');
-                btn.innerText = idx + 1;
-                
-                let kelasWarna = "bg-slate-100 text-slate-600 hover:bg-slate-200";
-                const status = jawabanSiswa[idx];
-                if (status) {
-                    if (status.ragu) kelasWarna = "bg-amber-500 text-white shadow-sm";
-                    else if (status.opsi) kelasWarna = "bg-emerald-500 text-white shadow-sm";
-                }
-
-                if (idx === currentIndex) {
-                    btn.className = "w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center bg-indigo-600 text-white ring-4 ring-indigo-100 shadow-md";
-                } else {
-                    btn.className = `w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center ${kelasWarna}`;
-                }
-
-                btn.onclick = () => {
-                    currentIndex = idx;
-                    renderTampilanSoal();
-                    renderNavigasi();
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        // 6. Navigasi Tombol Sebelumnya / Berikutnya
-        function pindahSoal(arah) {
-            const target = currentIndex + arah;
-            if (target >= 0 && target < daftarSoal.length) {
-                currentIndex = target;
-                renderTampilanSoal();
-                renderNavigasi();
-            } else if (target >= daftarSoal.length) {
-                if (confirm('Apakah Anda ingin mengakhiri dan mengumpulkan ujian ini?')) {
-                    alert('Ujian berhasil dikumpulkan!');
-                    document.getElementById('viewLembarSoal').classList.add('hidden');
-                    document.getElementById('viewDaftarUjian').classList.remove('hidden');
-                }
-            }
-        }
-
-        // 7. Tandai Ragu-ragu
-        function toggleRaguRagu(checkbox) {
-            if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
-            jawabanSiswa[currentIndex].ragu = checkbox.checked;
-            renderNavigasi();
-        }
-    </script>
+    <script src="../js/mahasiswa-load-components.js"></script>
+    <script src="../js/ujian.js"></script>
 </body>
 </html>
