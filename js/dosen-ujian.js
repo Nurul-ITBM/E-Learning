@@ -1,10 +1,36 @@
 // ==========================================
-// js/dosen-ujian.js - Logika Kelola Ujian Dosen
+// js/dosen-ujian.js - Logika Kelola Ujian Dosen (FINAL)
+// Fitur: CRUD Ujian + Jenis Ujian + CRUD Soal + Loading State
 // ==========================================
 
 let daftarUjian = [];
 let currentIdUjian = null;
 
+// ==========================================
+// KONFIGURASI WARNA BADGE JENIS UJIAN
+// ==========================================
+const JENIS_UJIAN_CONFIG = {
+    'UTS': {
+        label: 'UTS',
+        class: 'bg-blue-50 text-blue-600 border-blue-100'
+    },
+    'UAS': {
+        label: 'UAS',
+        class: 'bg-purple-50 text-purple-600 border-purple-100'
+    },
+    'Quiz': {
+        label: 'Quiz',
+        class: 'bg-amber-50 text-amber-600 border-amber-100'
+    },
+    'Tugas Besar': {
+        label: 'Tugas Besar',
+        class: 'bg-rose-50 text-rose-600 border-rose-100'
+    }
+};
+
+// ==========================================
+// INISIALISASI HALAMAN
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Ambil session
     const sessionData = localStorage.getItem('user_session');
@@ -36,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // 4. Event listener dropdown
+    // 4. Event listener dropdown kelas
     const filterKelas = document.getElementById('filterKelasUjian');
     if (filterKelas) {
         filterKelas.addEventListener('change', async (e) => {
@@ -60,6 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('modalUjianTitle').innerText = 'Tambah Ujian Baru';
         document.getElementById('formTambahUjian').reset();
         document.getElementById('ujian_id_kelas').value = idKelas;
+        // Set default jenis ujian
+        document.getElementById('ujian_jenis').value = 'UTS';
         document.getElementById('modalTambahUjian').classList.remove('hidden');
     });
     
@@ -77,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// Load dropdown kelas dosen
+// LOAD DROPDOWN KELAS DOSEN
 // ==========================================
 async function loadKelasDosen(idDosen) {
     const select = document.getElementById('filterKelasUjian');
@@ -127,7 +155,7 @@ async function loadKelasDosen(idDosen) {
 }
 
 // ==========================================
-// Load daftar ujian berdasarkan kelas
+// LOAD DAFTAR UJIAN BERDASARKAN KELAS
 // ==========================================
 async function loadDaftarUjian(idKelas) {
     const container = document.getElementById('containerDaftarUjian');
@@ -158,12 +186,16 @@ async function loadDaftarUjian(idKelas) {
             }
             
             ujianKelas.forEach(ujian => {
+                // ✅ Ambil config warna badge berdasarkan jenis ujian
+                const jenisUjian = ujian.jenis_ujian || 'UTS';
+                const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
+                
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">Aktif</span>
+                            <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
                             <span class="text-xs font-bold text-slate-400">Bobot: ${ujian.bobot}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${ujian.judul}</h3>
@@ -204,7 +236,6 @@ function setButtonLoading(buttonId, isLoading, loadingText = 'Memuat...') {
     if (!btn) return;
     
     if (isLoading) {
-        // Simpan HTML asli jika belum disimpan
         if (!btn.dataset.originalHtml) {
             btn.dataset.originalHtml = btn.innerHTML;
         }
@@ -212,7 +243,6 @@ function setButtonLoading(buttonId, isLoading, loadingText = 'Memuat...') {
         btn.disabled = true;
         btn.classList.add('opacity-70', 'cursor-not-allowed');
     } else {
-        // Kembalikan HTML asli
         if (btn.dataset.originalHtml) {
             btn.innerHTML = btn.dataset.originalHtml;
             delete btn.dataset.originalHtml;
@@ -238,7 +268,7 @@ function setButtonDisabled(buttonId, isDisabled) {
 }
 
 // ==========================================
-// Simpan ujian (tambah/edit)
+// SIMPAN UJIAN (TAMBAH/EDIT)
 // ==========================================
 async function simpanUjian() {
     const btn = document.querySelector('#formTambahUjian button[type="submit"]');
@@ -248,6 +278,7 @@ async function simpanUjian() {
     
     try {
         const idEdit = document.getElementById('ujian_id_ujian_edit').value;
+        const jenisUjian = document.getElementById('ujian_jenis').value;
         
         const data = {
             action: idEdit ? 'update_ujian' : 'tambah_ujian',
@@ -258,6 +289,7 @@ async function simpanUjian() {
             mulai: document.getElementById('ujian_mulai').value,
             selesai: document.getElementById('ujian_selesai').value,
             bobot: document.getElementById('ujian_bobot').value,
+            jenis_ujian: jenisUjian,
             link: '-'
         };
         
@@ -291,13 +323,10 @@ async function simpanUjian() {
 }
 
 // ==========================================
-// Edit ujian - HANYA TOMBOL EDIT YANG LOADING
+// EDIT UJIAN - DENGAN LOADING STATE
 // ==========================================
 async function editUjian(idUjian) {
-    // Hanya tombol Edit yang menampilkan loading
     setButtonLoading(`btnEdit-${idUjian}`, true, 'Memuat...');
-    
-    // Tombol lain hanya di-disable (teks tidak berubah)
     setButtonDisabled(`btnSoal-${idUjian}`, true);
     setButtonDisabled(`btnHapus-${idUjian}`, true);
     
@@ -321,6 +350,7 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_mulai').value = ujian.mulai;
             document.getElementById('ujian_selesai').value = ujian.selesai;
             document.getElementById('ujian_bobot').value = ujian.bobot;
+            document.getElementById('ujian_jenis').value = ujian.jenis_ujian || 'UTS';  // ✅ ISI JENIS UJIAN
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
             document.getElementById('modalTambahUjian').classList.remove('hidden');
         } else {
@@ -330,7 +360,6 @@ async function editUjian(idUjian) {
         console.error("Error editUjian:", error);
         alert('❌ Gagal memuat data ujian: ' + error.message);
     } finally {
-        // Kembalikan semua tombol ke keadaan semula
         setButtonLoading(`btnEdit-${idUjian}`, false);
         setButtonDisabled(`btnSoal-${idUjian}`, false);
         setButtonDisabled(`btnHapus-${idUjian}`, false);
@@ -338,15 +367,12 @@ async function editUjian(idUjian) {
 }
 
 // ==========================================
-// Hapus ujian - HANYA TOMBOL HAPUS YANG LOADING
+// HAPUS UJIAN - DENGAN LOADING STATE
 // ==========================================
 async function hapusUjian(idUjian) {
     if (!confirm('Apakah Anda yakin ingin menghapus ujian ini?')) return;
     
-    // Hanya tombol Hapus yang menampilkan loading
     setButtonLoading(`btnHapus-${idUjian}`, true, 'Menghapus...');
-    
-    // Tombol lain hanya di-disable
     setButtonDisabled(`btnSoal-${idUjian}`, true);
     setButtonDisabled(`btnEdit-${idUjian}`, true);
     
@@ -366,7 +392,6 @@ async function hapusUjian(idUjian) {
             await loadDaftarUjian(idKelas);
         } else {
             alert('❌ ' + result.message);
-            // Kembalikan tombol jika gagal
             setButtonLoading(`btnHapus-${idUjian}`, false);
             setButtonDisabled(`btnSoal-${idUjian}`, false);
             setButtonDisabled(`btnEdit-${idUjian}`, false);
@@ -374,7 +399,6 @@ async function hapusUjian(idUjian) {
     } catch (error) {
         console.error("Error hapusUjian:", error);
         alert('❌ Terjadi kesalahan');
-        // Kembalikan tombol jika gagal
         setButtonLoading(`btnHapus-${idUjian}`, false);
         setButtonDisabled(`btnSoal-${idUjian}`, false);
         setButtonDisabled(`btnEdit-${idUjian}`, false);
@@ -382,15 +406,12 @@ async function hapusUjian(idUjian) {
 }
 
 // ==========================================
-// Kelola soal - HANYA TOMBOL SOAL YANG LOADING
+// KELOLA SOAL - DENGAN LOADING STATE
 // ==========================================
 async function kelolaSoal(idUjian, judulUjian) {
     currentIdUjian = idUjian;
     
-    // Hanya tombol Soal yang menampilkan loading
     setButtonLoading(`btnSoal-${idUjian}`, true, 'Memuat...');
-    
-    // Tombol lain di-disable
     setButtonDisabled(`btnEdit-${idUjian}`, true);
     setButtonDisabled(`btnHapus-${idUjian}`, true);
     
@@ -407,7 +428,7 @@ async function kelolaSoal(idUjian, judulUjian) {
 }
 
 // ==========================================
-// Load daftar soal
+// LOAD DAFTAR SOAL
 // ==========================================
 async function loadDaftarSoal(idUjian) {
     const container = document.getElementById('containerDaftarSoal');
@@ -479,7 +500,7 @@ async function loadDaftarSoal(idUjian) {
 }
 
 // ==========================================
-// Tampilkan form tambah soal
+// TAMPILKAN FORM TAMBAH SOAL
 // ==========================================
 function tampilkanFormTambahSoal() {
     document.getElementById('soal_id_ujian').value = currentIdUjian;
@@ -491,7 +512,7 @@ function tampilkanFormTambahSoal() {
 }
 
 // ==========================================
-// Simpan soal
+// SIMPAN SOAL
 // ==========================================
 async function simpanSoal() {
     const btn = document.querySelector('#formTambahSoal button[type="submit"]');
@@ -542,7 +563,7 @@ async function simpanSoal() {
 }
 
 // ==========================================
-// Hapus soal
+// HAPUS SOAL
 // ==========================================
 async function hapusSoal(idSoal) {
     if (!confirm('Apakah Anda yakin ingin menghapus soal ini?')) return;
@@ -570,7 +591,7 @@ async function hapusSoal(idSoal) {
 }
 
 // ==========================================
-// Tutup modal
+// TUTUP MODAL
 // ==========================================
 function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
