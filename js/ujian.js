@@ -39,6 +39,34 @@ const JENIS_UJIAN_CONFIG = {
 };
 
 // ==========================================
+// HELPER: Format Tanggal & Waktu ke Format Indonesia
+// ==========================================
+function formatTanggalWaktu(tanggalISO) {
+    if (!tanggalISO) return '-';
+    
+    try {
+        const date = new Date(tanggalISO);
+        if (isNaN(date.getTime())) return tanggalISO;
+        
+        const options = {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Asia/Jakarta',
+            hour12: false
+        };
+        
+        return date.toLocaleString('id-ID', options);
+        
+    } catch (e) {
+        console.error('Error format tanggal:', e);
+        return tanggalISO;
+    }
+}
+
+// ==========================================
 // INISIALISASI HALAMAN
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -107,7 +135,7 @@ async function loadStatusUjian(id_mahasiswa) {
 }
 
 // ==========================================
-// 2. LOAD DAFTAR UJIAN (DENGAN BADGE JENIS UJIAN)
+// 2. LOAD DAFTAR UJIAN (DENGAN BADGE JENIS UJIAN & FORMAT TANGGAL)
 // ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
@@ -139,6 +167,10 @@ async function loadDaftarUjian(id_user) {
                 // ✅ Ambil config warna badge berdasarkan jenis ujian
                 const jenisUjian = u.jenis_ujian || 'UTS';
                 const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
+                
+                // ✅ FORMAT WAKTU KE FORMAT INDONESIA
+                const waktuMulai = formatTanggalWaktu(u.mulai);
+                const waktuSelesai = formatTanggalWaktu(u.selesai);
                 
                 // Card class berbeda berdasarkan status
                 let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
@@ -189,8 +221,8 @@ async function loadDaftarUjian(id_user) {
                         <p class="text-xs text-indigo-600 font-semibold mb-3">${u.mata_kuliah}</p>
                         <p class="text-xs text-slate-500 mb-4 line-clamp-2">${u.deskripsi}</p>
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
-                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-red-500 mr-1.5"></i> Mulai: ${u.mulai}</div>
-                            <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${u.selesai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-red-500 mr-1.5"></i> Mulai: ${waktuMulai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${waktuSelesai}</div>
                         </div>
                     </div>
                     <div class="mt-6">
@@ -274,7 +306,7 @@ function kembaliKeDaftar() {
         document.getElementById('viewDaftarUjian').classList.remove('hidden');
         document.getElementById('containerDaftarUjian').innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
         
-        // ✅ Refresh daftar ujian (tanpa reload full)
+        // ✅ Refresh daftar ujian tanpa reload full
         const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
         loadStatusUjian(idMhs).then(() => {
             loadDaftarUjian(idMhs);
