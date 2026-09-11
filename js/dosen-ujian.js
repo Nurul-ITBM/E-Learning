@@ -1,6 +1,6 @@
 // ==========================================
 // js/dosen-ujian.js - Logika Kelola Ujian Dosen (FINAL)
-// Fitur: CRUD Ujian + Jenis Ujian + CRUD Soal + Loading State
+// Fitur: CRUD Ujian + Jenis Ujian + Durasi Ujian + CRUD Soal + Loading State
 // ==========================================
 
 let daftarUjian = [];
@@ -86,8 +86,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('modalUjianTitle').innerText = 'Tambah Ujian Baru';
         document.getElementById('formTambahUjian').reset();
         document.getElementById('ujian_id_kelas').value = idKelas;
-        // Set default jenis ujian
+        // Set default values
         document.getElementById('ujian_jenis').value = 'UTS';
+        document.getElementById('ujian_durasi').value = 60;
         document.getElementById('modalTambahUjian').classList.remove('hidden');
     });
     
@@ -190,6 +191,9 @@ async function loadDaftarUjian(idKelas) {
                 const jenisUjian = ujian.jenis_ujian || 'UTS';
                 const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
                 
+                // ✅ Durasi ujian
+                const durasi = ujian.durasi_menit || 60;
+                
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
                 card.innerHTML = `
@@ -203,6 +207,7 @@ async function loadDaftarUjian(idKelas) {
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
                             <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-teal-500 mr-1.5"></i> Mulai: ${ujian.mulai}</div>
                             <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${ujian.selesai}</div>
+                            <div class="flex items-center"><i class="fa-solid fa-stopwatch w-4 text-amber-500 mr-1.5"></i> Durasi: ${durasi} menit</div>
                         </div>
                     </div>
                     <div class="mt-4 flex gap-2">
@@ -279,6 +284,7 @@ async function simpanUjian() {
     try {
         const idEdit = document.getElementById('ujian_id_ujian_edit').value;
         const jenisUjian = document.getElementById('ujian_jenis').value;
+        const durasiMenit = parseInt(document.getElementById('ujian_durasi').value) || 60;
         
         const data = {
             action: idEdit ? 'update_ujian' : 'tambah_ujian',
@@ -290,6 +296,7 @@ async function simpanUjian() {
             selesai: document.getElementById('ujian_selesai').value,
             bobot: document.getElementById('ujian_bobot').value,
             jenis_ujian: jenisUjian,
+            durasi_menit: durasiMenit,
             link: '-'
         };
         
@@ -350,7 +357,8 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_mulai').value = ujian.mulai;
             document.getElementById('ujian_selesai').value = ujian.selesai;
             document.getElementById('ujian_bobot').value = ujian.bobot;
-            document.getElementById('ujian_jenis').value = ujian.jenis_ujian || 'UTS';  // ✅ ISI JENIS UJIAN
+            document.getElementById('ujian_jenis').value = ujian.jenis_ujian || 'UTS';
+            document.getElementById('ujian_durasi').value = ujian.durasi_menit || 60;
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
             document.getElementById('modalTambahUjian').classList.remove('hidden');
         } else {
