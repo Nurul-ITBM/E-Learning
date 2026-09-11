@@ -194,6 +194,10 @@ async function loadDaftarUjian(idKelas) {
                 // ✅ Durasi ujian
                 const durasi = ujian.durasi_menit || 60;
                 
+                // ✅ FORMAT WAKTU KE FORMAT INDONESIA
+                const waktuMulai = formatTanggalWaktu(ujian.mulai);
+                const waktuSelesai = formatTanggalWaktu(ujian.selesai);
+                
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
                 card.innerHTML = `
@@ -205,8 +209,8 @@ async function loadDaftarUjian(idKelas) {
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${ujian.judul}</h3>
                         <p class="text-xs text-slate-500 mb-4 line-clamp-2">${ujian.deskripsi}</p>
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
-                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-teal-500 mr-1.5"></i> Mulai: ${ujian.mulai}</div>
-                            <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${ujian.selesai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-teal-500 mr-1.5"></i> Mulai: ${waktuMulai}</div>
+                            <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${waktuSelesai}</div>
                             <div class="flex items-center"><i class="fa-solid fa-stopwatch w-4 text-amber-500 mr-1.5"></i> Durasi: ${durasi} menit</div>
                         </div>
                     </div>
