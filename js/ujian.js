@@ -1,6 +1,6 @@
 // ==========================================
 // js/ujian.js - Logika Ujian CBT Mahasiswa (FINAL)
-// Fitur: Timer, Navigasi, Simpan Jawaban, Kunci Ujian, Badge Jenis Ujian
+// Fitur: Timer Dinamis, Navigasi, Simpan Jawaban, Kunci Ujian, Badge Jenis Ujian
 // ==========================================
 
 // ==========================================
@@ -14,7 +14,8 @@ let currentIdUjian = null;
 let timerInterval = null;
 let sisaWaktuDetik = 0;
 let totalWaktuDetik = 0;
-let ujianSelesai = []; // Array of {id_ujian, nilai, jumlah_benar, total_soal}
+let ujianSelesai = [];        // Array of {id_ujian, nilai, jumlah_benar, total_soal}
+let daftarUjianGlobal = [];   // ✅ Simpan daftar ujian untuk lookup durasi
 
 // ==========================================
 // KONFIGURASI WARNA BADGE JENIS UJIAN
@@ -135,7 +136,7 @@ async function loadStatusUjian(id_mahasiswa) {
 }
 
 // ==========================================
-// 2. LOAD DAFTAR UJIAN (DENGAN BADGE JENIS UJIAN & FORMAT TANGGAL)
+// 2. LOAD DAFTAR UJIAN (DENGAN BADGE & DURASI)
 // ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
@@ -153,6 +154,9 @@ async function loadDaftarUjian(id_user) {
         console.log(">>> Daftar ujian:", result);
 
         if (result.status === 'success') {
+            // ✅ SIMPAN DAFTAR UJIAN KE VARIABEL GLOBAL (untuk lookup durasi)
+            daftarUjianGlobal = result.data;
+            
             container.innerHTML = '';
             if (result.data.length === 0) {
                 container.innerHTML = '<p class="text-slate-500 col-span-full text-center py-10">Belum ada jadwal ujian saat ini.</p>';
@@ -168,9 +172,12 @@ async function loadDaftarUjian(id_user) {
                 const jenisUjian = u.jenis_ujian || 'UTS';
                 const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
                 
-                // ✅ FORMAT WAKTU KE FORMAT INDONESIA
+                // ✅ Format waktu
                 const waktuMulai = formatTanggalWaktu(u.mulai);
                 const waktuSelesai = formatTanggalWaktu(u.selesai);
+                
+                // ✅ Durasi ujian
+                const durasi = u.durasi_menit || 60;
                 
                 // Card class berbeda berdasarkan status
                 let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
@@ -223,6 +230,7 @@ async function loadDaftarUjian(id_user) {
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs text-slate-600 space-y-1">
                             <div class="flex items-center"><i class="fa-regular fa-clock w-4 text-red-500 mr-1.5"></i> Mulai: ${waktuMulai}</div>
                             <div class="flex items-center"><i class="fa-regular fa-hourglass-end w-4 text-slate-400 mr-1.5"></i> Selesai: ${waktuSelesai}</div>
+                            <div class="flex items-center"><i class="fa-solid fa-stopwatch w-4 text-amber-500 mr-1.5"></i> Durasi: ${durasi} menit</div>
                         </div>
                     </div>
                     <div class="mt-6">
@@ -241,7 +249,7 @@ async function loadDaftarUjian(id_user) {
 }
 
 // ==========================================
-// 3. MULAI UJIAN
+// 3. MULAI UJIAN (DENGAN DURASI DINAMIS)
 // ==========================================
 async function mulaiUjian(id_ujian, judul_ujian) {
     // ✅ Proteksi: cek apakah sudah dikerjakan
@@ -252,6 +260,15 @@ async function mulaiUjian(id_ujian, judul_ujian) {
     }
     
     currentIdUjian = id_ujian;
+    
+    // ✅ Ambil durasi dari daftarUjianGlobal
+    let durasiMenit = 60; // Default
+    const ujianInfo = daftarUjianGlobal.find(u => u.id_ujian === id_ujian);
+    if (ujianInfo && ujianInfo.durasi_menit) {
+        durasiMenit = parseInt(ujianInfo.durasi_menit) || 60;
+    }
+    console.log(">>> Durasi ujian:", durasiMenit, "menit");
+    
     document.getElementById('viewDaftarUjian').classList.add('hidden');
     document.getElementById('viewLembarSoal').classList.remove('hidden');
     document.getElementById('headerJudulUjian').innerText = judul_ujian;
@@ -281,8 +298,8 @@ async function mulaiUjian(id_ujian, judul_ujian) {
             renderTampilanSoal();
             renderNavigasi();
             
-            // Mulai timer 60 menit
-            mulaiTimer(60);
+            // ✅ MULAI TIMER DENGAN DURASI DINAMIS
+            mulaiTimer(durasiMenit);
             
         } else {
             alert('Gagal memuat soal: ' + (result.message || 'Data kosong'));
@@ -462,7 +479,7 @@ async function selesaiUjian() {
             document.getElementById('viewLembarSoal').classList.add('hidden');
             document.getElementById('viewDaftarUjian').classList.remove('hidden');
             
-            // ✅ Auto-reload status & daftar ujian (tanpa refresh browser)
+            // ✅ Auto-reload status & daftar ujian
             const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
             await loadStatusUjian(idMhs);
             await loadDaftarUjian(idMhs);
