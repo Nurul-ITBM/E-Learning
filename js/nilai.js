@@ -11,19 +11,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     const user = JSON.parse(sessionData);
-    const namaUser = user.username ? user.username.split('@')[0] : 'Mahasiswa';
-    document.getElementById('userNameDisplay').innerText = namaUser;
+    console.log(">>> User session:", user);
 
-    // 2. Fetch Data Nilai dari Server (Google Apps Script)
+    // 2. Fetch Data Nilai dari Server
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
             body: JSON.stringify({ 
                 action: 'get_nilai', 
-                id_mahasiswa: user.id_mahasiswa 
+                id_mahasiswa: user.id_mahasiswa || user.id_user
             })
         });
         const result = await res.json();
+        console.log(">>> Data nilai:", result);
         
         const tbody = document.getElementById('tabelNilaiBody');
         tbody.innerHTML = '';
@@ -33,11 +36,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let totalBobotSKS = 0;
 
             result.data.forEach((item, index) => {
-                // Pastikan SKS dibaca sebagai angka, default ke 3 jika kosong
                 const sks = parseInt(item.sks) || 3; 
                 totalSKS += sks;
 
-                // Konversi Grade ke Angka Mutu (A=4, B=3, C=2, D=1, E=0)
+                // Konversi Grade ke Angka Mutu
                 let bobot = 0;
                 const g = String(item.grade || '').trim().toUpperCase();
                 
@@ -58,12 +60,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-800">${index + 1}</td>
-                        <td class="px-6 py-4 font-medium text-slate-800">${item.nama_matkul}</td>
+                        <td class="px-6 py-4 font-medium text-slate-800">${item.nama_matkul || '-'}</td>
                         <td class="px-6 py-4 text-center">${item.sks || '-'}</td>
-                        <td class="px-6 py-4 text-center">${item.tugas}</td>
-                        <td class="px-6 py-4 text-center">${item.uts}</td>
-                        <td class="px-6 py-4 text-center">${item.uas}</td>
-                        <td class="px-6 py-4 text-center font-bold text-slate-700">${item.akhir}</td>
+                        <td class="px-6 py-4 text-center">${item.tugas || 0}</td>
+                        <td class="px-6 py-4 text-center">${item.uts || 0}</td>
+                        <td class="px-6 py-4 text-center">${item.uas || 0}</td>
+                        <td class="px-6 py-4 text-center">${item.kehadiran || 0}</td>
+                        <td class="px-6 py-4 text-center font-bold text-slate-700">${item.akhir || 0}</td>
                         <td class="px-6 py-4 text-center">
                             <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">${item.grade || '-'}</span>
                         </td>
@@ -71,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
             });
 
-            // Hitung dan tampilkan IPK secara akurat
+            // Hitung IPK
             if (totalSKS > 0) {
                 const ipk = (totalBobotSKS / totalSKS).toFixed(2);
                 const ipkDisplay = document.getElementById('ipkDisplay');
@@ -79,19 +82,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
         } else {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-slate-400 italic">Belum ada data nilai akademik.</td></tr>`;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center py-10 text-slate-400 italic">
+                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                        Belum ada data nilai akademik.
+                    </td>
+                </tr>
+            `;
         }
     } catch (err) {
-        console.error(err);
-        document.getElementById('tabelNilaiBody').innerHTML = `<tr><td colspan="8" class="text-center py-10 text-red-400">Gagal memuat data nilai dari server.</td></tr>`;
-    }
-
-    // 3. Tombol Logout
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            localStorage.removeItem('user_session');
-            window.location.href = '../login.html';
-        });
+        console.error("Error load nilai:", err);
+        document.getElementById('tabelNilaiBody').innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center py-10 text-red-400">
+                    <i class="fa-solid fa-circle-exclamation text-3xl mb-2 block"></i>
+                    Gagal memuat data nilai dari server.
+                </td>
+            </tr>
+        `;
     }
 });
