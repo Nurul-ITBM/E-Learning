@@ -1,6 +1,6 @@
 // ==========================================
 // js/ujian.js - Logika Ujian CBT Mahasiswa (FINAL)
-// Fitur: Timer, Navigasi, Simpan Jawaban, Kunci Ujian
+// Fitur: Timer, Navigasi, Simpan Jawaban, Kunci Ujian, Badge Jenis Ujian
 // ==========================================
 
 // ==========================================
@@ -15,6 +15,28 @@ let timerInterval = null;
 let sisaWaktuDetik = 0;
 let totalWaktuDetik = 0;
 let ujianSelesai = []; // Array of {id_ujian, nilai, jumlah_benar, total_soal}
+
+// ==========================================
+// KONFIGURASI WARNA BADGE JENIS UJIAN
+// ==========================================
+const JENIS_UJIAN_CONFIG = {
+    'UTS': {
+        label: 'UTS',
+        class: 'bg-blue-50 text-blue-600 border-blue-100'
+    },
+    'UAS': {
+        label: 'UAS',
+        class: 'bg-purple-50 text-purple-600 border-purple-100'
+    },
+    'Quiz': {
+        label: 'Quiz',
+        class: 'bg-amber-50 text-amber-600 border-amber-100'
+    },
+    'Tugas Besar': {
+        label: 'Tugas Besar',
+        class: 'bg-rose-50 text-rose-600 border-rose-100'
+    }
+};
 
 // ==========================================
 // INISIALISASI HALAMAN
@@ -85,7 +107,7 @@ async function loadStatusUjian(id_mahasiswa) {
 }
 
 // ==========================================
-// 2. LOAD DAFTAR UJIAN
+// 2. LOAD DAFTAR UJIAN (DENGAN BADGE JENIS UJIAN)
 // ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
@@ -114,6 +136,10 @@ async function loadDaftarUjian(id_user) {
                 const infoSelesai = ujianSelesai.find(item => item.id_ujian === u.id_ujian);
                 const sudahDikerjakan = !!infoSelesai;
                 
+                // ✅ Ambil config warna badge berdasarkan jenis ujian
+                const jenisUjian = u.jenis_ujian || 'UTS';
+                const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
+                
                 // Card class berbeda berdasarkan status
                 let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
                 if (sudahDikerjakan) {
@@ -125,7 +151,15 @@ async function loadDaftarUjian(id_user) {
                 let badgeHTML = '';
                 
                 if (sudahDikerjakan) {
-                    badgeHTML = `<span class="bg-green-50 text-green-600 border border-green-200 text-xs font-bold px-2.5 py-1 rounded-md">SELESAI</span>`;
+                    // ✅ Badge jenis ujian + badge SELESAI
+                    badgeHTML = `
+                        <div class="flex gap-1.5">
+                            <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                            <span class="bg-green-50 text-green-600 border border-green-200 text-xs font-bold px-2.5 py-1 rounded-md">
+                                <i class="fa-solid fa-check mr-0.5"></i> SELESAI
+                            </span>
+                        </div>
+                    `;
                     actionHTML = `
                         <div class="bg-green-50 text-green-600 border border-green-200 py-2.5 rounded-xl text-xs font-bold text-center">
                             <div><i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikerjakan</div>
@@ -134,7 +168,8 @@ async function loadDaftarUjian(id_user) {
                         </div>
                     `;
                 } else {
-                    badgeHTML = `<span class="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">UJIAN</span>`;
+                    // ✅ Badge jenis ujian
+                    badgeHTML = `<span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>`;
                     actionHTML = `
                         <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
                             <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
