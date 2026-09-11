@@ -29,6 +29,34 @@ const JENIS_UJIAN_CONFIG = {
 };
 
 // ==========================================
+// HELPER: Format Tanggal & Waktu ke Format Indonesia (WITA)
+// ==========================================
+function formatTanggalWaktu(tanggalISO) {
+    if (!tanggalISO) return '-';
+    
+    try {
+        const date = new Date(tanggalISO);
+        if (isNaN(date.getTime())) return tanggalISO;
+        
+        const options = {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Asia/Makassar',  // ✅ WITA
+            hour12: false
+        };
+        
+        return date.toLocaleString('id-ID', options);
+        
+    } catch (e) {
+        console.error('Error format tanggal:', e);
+        return tanggalISO;
+    }
+}
+
+// ==========================================
 // INISIALISASI HALAMAN
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
