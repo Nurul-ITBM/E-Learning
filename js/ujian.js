@@ -273,7 +273,12 @@ function kembaliKeDaftar() {
         document.getElementById('viewLembarSoal').classList.add('hidden');
         document.getElementById('viewDaftarUjian').classList.remove('hidden');
         document.getElementById('containerDaftarUjian').innerHTML = '<p class="text-slate-400 col-span-full text-center py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat ujian...</p>';
-        loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+        
+        // ✅ Refresh daftar ujian (tanpa reload full)
+        const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
+        loadStatusUjian(idMhs).then(() => {
+            loadDaftarUjian(idMhs);
+        });
     }
 }
 
@@ -425,10 +430,11 @@ async function selesaiUjian() {
             document.getElementById('viewLembarSoal').classList.add('hidden');
             document.getElementById('viewDaftarUjian').classList.remove('hidden');
             
-            // ✅ Refresh status & daftar ujian
+            // ✅ Auto-reload status & daftar ujian (tanpa refresh browser)
             const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
             await loadStatusUjian(idMhs);
             await loadDaftarUjian(idMhs);
+            
         } else {
             alert('❌ Gagal menyimpan jawaban: ' + result.message);
             
