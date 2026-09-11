@@ -62,7 +62,9 @@
         </div>
     </main>
 
-    <!-- Modal Tambah/Edit Ujian -->
+    <!-- ============================================ -->
+    <!-- MODAL TAMBAH / EDIT UJIAN                    -->
+    <!-- ============================================ -->
     <div id="modalTambahUjian" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -72,14 +74,20 @@
             <form id="formTambahUjian" class="p-5 space-y-4">
                 <input type="hidden" id="ujian_id_kelas">
                 <input type="hidden" id="ujian_id_ujian_edit">
+                
+                <!-- Judul -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Judul Ujian</label>
-                    <input id="ujian_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required>
+                    <input id="ujian_judul" type="text" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: Ujian Tengah Semester" required>
                 </div>
+                
+                <!-- Deskripsi -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Deskripsi</label>
-                    <textarea id="ujian_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" required></textarea>
+                    <textarea id="ujian_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" placeholder="Deskripsi ujian..." required></textarea>
                 </div>
+                
+                <!-- Waktu Mulai & Selesai -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Waktu Mulai</label>
@@ -90,17 +98,21 @@
                         <input id="ujian_selesai" type="datetime-local" class="w-full border rounded-lg p-2 text-sm" required>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai</label>
-                    <input id="ujian_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required>
-                </div>
                 
-                <!-- ✅ TAMBAHKAN INPUT DURASI INI -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Durasi Ujian (menit)</label>
-                    <input id="ujian_durasi" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="60" value="60" min="1" max="300" required>
-                    <p class="text-[10px] text-slate-400 mt-1">Contoh: 60 (1 jam), 90 (1.5 jam), 120 (2 jam)</p>
+                <!-- Bobot & Durasi -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai</label>
+                        <input id="ujian_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Durasi (menit)</label>
+                        <input id="ujian_durasi" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="60" value="60" min="1" max="300" required>
+                    </div>
                 </div>
+                <p class="text-[10px] text-slate-400 -mt-3">Durasi contoh: 60 (1 jam), 90 (1.5 jam), 120 (2 jam)</p>
+                
+                <!-- Status -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Status</label>
                     <select id="ujian_status" class="w-full border rounded-lg p-2 text-sm">
@@ -108,20 +120,30 @@
                         <option value="Draft">Draft</option>
                         <option value="Selesai">Selesai</option>
                     </select>
+                </div>
+                
+                <!-- Jenis Ujian -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Ujian</label>
                     <select id="ujian_jenis" class="w-full border rounded-lg p-2 text-sm" required>
                         <option value="UTS">UTS (Ujian Tengah Semester)</option>
                         <option value="UAS">UAS (Ujian Akhir Semester)</option>
+                        <option value="Quiz">Quiz</option>
+                        <option value="Tugas Besar">Tugas Besar</option>
                     </select>
                 </div>
-                </div>
-                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Ujian</button>
+                
+                <!-- Tombol Simpan -->
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">
+                    Simpan Ujian
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Kelola Soal -->
+    <!-- ============================================ -->
+    <!-- MODAL KELOLA SOAL                            -->
+    <!-- ============================================ -->
     <div id="modalKelolaSoal" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -141,7 +163,9 @@
         </div>
     </div>
 
-    <!-- Modal Tambah/Edit Soal -->
+    <!-- ============================================ -->
+    <!-- MODAL TAMBAH / EDIT SOAL                     -->
+    <!-- ============================================ -->
     <div id="modalTambahSoal" class="fixed inset-0 bg-black/50 z-[80] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -151,10 +175,14 @@
             <form id="formTambahSoal" class="p-5 space-y-4">
                 <input type="hidden" id="soal_id_ujian">
                 <input type="hidden" id="soal_id_soal_edit">
+                
+                <!-- Pertanyaan -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Pertanyaan</label>
-                    <textarea id="soal_pertanyaan" class="w-full border rounded-lg p-2 text-sm h-20" required></textarea>
+                    <textarea id="soal_pertanyaan" class="w-full border rounded-lg p-2 text-sm h-20" placeholder="Tulis pertanyaan..." required></textarea>
                 </div>
+                
+                <!-- Opsi A - D -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Opsi A</label>
                     <input id="soal_opsi_a" type="text" class="w-full border rounded-lg p-2 text-sm" required>
@@ -171,6 +199,8 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Opsi D</label>
                     <input id="soal_opsi_d" type="text" class="w-full border rounded-lg p-2 text-sm" required>
                 </div>
+                
+                <!-- Jawaban Benar & Bobot -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Jawaban Benar</label>
@@ -186,7 +216,11 @@
                         <input id="soal_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" value="5" required>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Soal</button>
+                
+                <!-- Tombol Simpan -->
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">
+                    Simpan Soal
+                </button>
             </form>
         </div>
     </div>
