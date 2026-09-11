@@ -36,13 +36,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 2. Load Dropdown Kelas
+    // 2. ✅ Tunggu DOM siap (karena sidebar/header dimuat dinamis)
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 3. ✅ Cek elemen ada
+    const filterKelas = document.getElementById('filterKelasAbsen');
+    const btnRefresh = document.getElementById('btnRefreshAbsen');
+    const btnGenerate = document.getElementById('btnGenerateNilaiHadir');
+    const btnExport = document.getElementById('btnExportExcel');
+    
+    if (!filterKelas || !btnRefresh || !btnGenerate || !btnExport) {
+        console.error('❌ Elemen HTML tidak ditemukan!');
+        return;
+    }
+
+    // 4. Load Dropdown Kelas
     if (currentUser.id_dosen) {
         await loadKelasDosen(currentUser.id_dosen);
     }
 
-    // 3. Event Listener Dropdown
-    document.getElementById('filterKelasAbsen').addEventListener('change', async (e) => {
+    // 5. Event Listener Dropdown
+    filterKelas.addEventListener('change', async (e) => {
         currentIdKelas = e.target.value;
         
         if (!currentIdKelas) {
@@ -53,28 +67,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
             document.getElementById('infoCard').classList.add('hidden');
-            document.getElementById('btnRefreshAbsen').disabled = true;
-            document.getElementById('btnGenerateNilaiHadir').disabled = true;
-            document.getElementById('btnExportExcel').disabled = true;
+            btnRefresh.disabled = true;
+            btnGenerate.disabled = true;
+            btnExport.disabled = true;
             return;
         }
         
         await loadRekapAbsensi(currentIdKelas);
-        document.getElementById('btnRefreshAbsen').disabled = false;
-        document.getElementById('btnGenerateNilaiHadir').disabled = false;
-        document.getElementById('btnExportExcel').disabled = false;
+        btnRefresh.disabled = false;
+        btnGenerate.disabled = false;
+        btnExport.disabled = false;
     });
 
-    // 4. Tombol Refresh
-    document.getElementById('btnRefreshAbsen').addEventListener('click', async () => {
+    // 6. Tombol Refresh
+    btnRefresh.addEventListener('click', async () => {
         if (currentIdKelas) await loadRekapAbsensi(currentIdKelas);
     });
 
-    // 5. Tombol Generate Nilai Kehadiran
-    document.getElementById('btnGenerateNilaiHadir').addEventListener('click', generateNilaiKehadiran);
+    // 7. Tombol Generate Nilai Kehadiran
+    btnGenerate.addEventListener('click', generateNilaiKehadiran);
 
-    // 6. Tombol Export Excel
-    document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
+    // 8. Tombol Export Excel
+    btnExport.addEventListener('click', exportExcel);
 });
 
 // ==========================================
