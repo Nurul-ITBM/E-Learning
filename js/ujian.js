@@ -1,4 +1,7 @@
+// ==========================================
 // js/ujian.js - Logika Ujian CBT Mahasiswa (FINAL)
+// Fitur: Timer, Navigasi, Simpan Jawaban, Kunci Ujian
+// ==========================================
 
 // ==========================================
 // VARIABEL GLOBAL
@@ -11,6 +14,7 @@ let currentIdUjian = null;
 let timerInterval = null;
 let sisaWaktuDetik = 0;
 let totalWaktuDetik = 0;
+let ujianSelesai = []; // Array of {id_ujian, nilai, jumlah_benar, total_soal}
 
 // ==========================================
 // INISIALISASI HALAMAN
@@ -30,10 +34,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 3. Load daftar ujian
-    await loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+    const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
 
-    // 4. Listener pilihan ganda
+    // 3. Load status ujian yang sudah dikerjakan
+    await loadStatusUjian(idMhs);
+    
+    // 4. Load daftar ujian
+    await loadDaftarUjian(idMhs);
+
+    // 5. Listener pilihan ganda
     document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
         input.addEventListener('change', (e) => {
             if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
@@ -45,7 +54,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 1. AMBIL DAFTAR UJIAN
+// 1. LOAD STATUS UJIAN (YANG SUDAH DIKERJAKAN)
+// ==========================================
+async function loadStatusUjian(id_mahasiswa) {
+    try {
+        console.log(">>> Loading status ujian untuk:", id_mahasiswa);
+        
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify({ 
+                action: 'cek_status_ujian', 
+                id_mahasiswa: id_mahasiswa 
+            })
+        });
+        const result = await response.json();
+        console.log(">>> Status ujian:", result);
+        
+        if (result.status === 'success') {
+            ujianSelesai = result.data || [];
+        } else {
+            ujianSelesai = [];
+        }
+    } catch (error) {
+        console.error("Error loadStatusUjian:", error);
+        ujianSelesai = [];
+    }
+}
+
+// ==========================================
+// 2. LOAD DAFTAR UJIAN
 // ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
@@ -70,12 +110,44 @@ async function loadDaftarUjian(id_user) {
             }
 
             result.data.forEach(u => {
+                // ✅ Cek apakah ujian sudah dikerjakan
+                const infoSelesai = ujianSelesai.find(item => item.id_ujian === u.id_ujian);
+                const sudahDikerjakan = !!infoSelesai;
+                
+                // Card class berbeda berdasarkan status
+                let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
+                if (sudahDikerjakan) {
+                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-green-200 flex flex-col justify-between";
+                }
+                
+                // Action HTML berbeda
+                let actionHTML = '';
+                let badgeHTML = '';
+                
+                if (sudahDikerjakan) {
+                    badgeHTML = `<span class="bg-green-50 text-green-600 border border-green-200 text-xs font-bold px-2.5 py-1 rounded-md">SELESAI</span>`;
+                    actionHTML = `
+                        <div class="bg-green-50 text-green-600 border border-green-200 py-2.5 rounded-xl text-xs font-bold text-center">
+                            <div><i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikerjakan</div>
+                            <div class="text-lg font-bold mt-1">Nilai: ${infoSelesai.nilai}</div>
+                            <div class="text-[10px] font-normal">Benar: ${infoSelesai.jumlah_benar}/${infoSelesai.total_soal}</div>
+                        </div>
+                    `;
+                } else {
+                    badgeHTML = `<span class="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">UJIAN</span>`;
+                    actionHTML = `
+                        <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
+                            <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
+                        </button>
+                    `;
+                }
+
                 const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
+                card.className = cardClass;
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-md border border-red-100">UJIAN</span>
+                            ${badgeHTML}
                             <span class="text-xs font-bold text-slate-400">Bobot: ${u.bobot}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${u.judul}</h3>
@@ -87,9 +159,7 @@ async function loadDaftarUjian(id_user) {
                         </div>
                     </div>
                     <div class="mt-6">
-                        <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
-                        </button>
+                        ${actionHTML}
                     </div>
                 `;
                 container.appendChild(card);
@@ -104,13 +174,26 @@ async function loadDaftarUjian(id_user) {
 }
 
 // ==========================================
-// 2. MULAI UJIAN
+// 3. MULAI UJIAN
 // ==========================================
 async function mulaiUjian(id_ujian, judul_ujian) {
+    // ✅ Proteksi: cek apakah sudah dikerjakan
+    const sudahDikerjakan = ujianSelesai.some(item => item.id_ujian === id_ujian);
+    if (sudahDikerjakan) {
+        alert('⚠️ Anda sudah mengerjakan ujian ini!');
+        return;
+    }
+    
     currentIdUjian = id_ujian;
     document.getElementById('viewDaftarUjian').classList.add('hidden');
     document.getElementById('viewLembarSoal').classList.remove('hidden');
     document.getElementById('headerJudulUjian').innerText = judul_ujian;
+
+    // Tampilkan loading
+    document.getElementById('teksPertanyaan').innerHTML = 
+        '<i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mr-2"></i> Memuat soal...';
+    document.getElementById('gridNavigasi').innerHTML = 
+        '<p class="text-slate-400 text-xs col-span-4 text-center py-4">Memuat...</p>';
 
     try {
         const response = await fetch(CONFIG.API_URL, {
@@ -146,7 +229,7 @@ async function mulaiUjian(id_ujian, judul_ujian) {
 }
 
 // ==========================================
-// 3. KEMBALI KE DAFTAR
+// 4. KEMBALI KE DAFTAR
 // ==========================================
 function kembaliKeDaftar() {
     if (confirm('Keluar dari ujian? Progress jawaban Anda akan direset.')) {
@@ -160,7 +243,7 @@ function kembaliKeDaftar() {
 }
 
 // ==========================================
-// 4. RENDER TAMPILAN SOAL
+// 5. RENDER TAMPILAN SOAL
 // ==========================================
 function renderTampilanSoal() {
     if (daftarSoal.length === 0) return;
@@ -197,7 +280,7 @@ function renderTampilanSoal() {
 }
 
 // ==========================================
-// 5. RENDER NAVIGASI NOMOR
+// 6. RENDER NAVIGASI NOMOR
 // ==========================================
 function renderNavigasi() {
     const container = document.getElementById('gridNavigasi');
@@ -230,7 +313,7 @@ function renderNavigasi() {
 }
 
 // ==========================================
-// 6. NAVIGASI SOAL
+// 7. NAVIGASI SOAL
 // ==========================================
 function pindahSoal(arah) {
     const target = currentIndex + arah;
@@ -246,7 +329,7 @@ function pindahSoal(arah) {
 }
 
 // ==========================================
-// 7. SELESAI UJIAN - KIRIM JAWABAN KE BACKEND
+// 8. SELESAI UJIAN - KIRIM JAWABAN KE BACKEND
 // ==========================================
 async function selesaiUjian() {
     stopTimer();
@@ -306,7 +389,11 @@ async function selesaiUjian() {
             
             document.getElementById('viewLembarSoal').classList.add('hidden');
             document.getElementById('viewDaftarUjian').classList.remove('hidden');
-            loadDaftarUjian(currentUser.id_user || currentUser.id_mahasiswa);
+            
+            // ✅ Refresh status & daftar ujian
+            const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
+            await loadStatusUjian(idMhs);
+            await loadDaftarUjian(idMhs);
         } else {
             alert('❌ Gagal menyimpan jawaban: ' + result.message);
             
@@ -327,7 +414,7 @@ async function selesaiUjian() {
 }
 
 // ==========================================
-// 8. FUNGSI TIMER
+// 9. FUNGSI TIMER
 // ==========================================
 function mulaiTimer(durasiMenit = 60) {
     if (timerInterval) clearInterval(timerInterval);
@@ -399,7 +486,7 @@ function stopTimer() {
 }
 
 // ==========================================
-// 9. TANDAI RAGU-RAGU
+// 10. TANDAI RAGU-RAGU
 // ==========================================
 function toggleRaguRagu(checkbox) {
     if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
