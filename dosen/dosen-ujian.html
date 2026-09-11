@@ -94,6 +94,13 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai</label>
                     <input id="ujian_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required>
                 </div>
+                
+                <!-- ✅ TAMBAHKAN INPUT DURASI INI -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Durasi Ujian (menit)</label>
+                    <input id="ujian_durasi" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="60" value="60" min="1" max="300" required>
+                    <p class="text-[10px] text-slate-400 mt-1">Contoh: 60 (1 jam), 90 (1.5 jam), 120 (2 jam)</p>
+                </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Status</label>
                     <select id="ujian_status" class="w-full border rounded-lg p-2 text-sm">
