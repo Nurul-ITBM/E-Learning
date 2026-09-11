@@ -55,7 +55,7 @@ function formatTanggalWaktu(tanggalISO) {
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            timeZone: 'Asia/Jakarta',
+            timeZone: 'Asia/Makassar',
             hour12: false
         };
         
