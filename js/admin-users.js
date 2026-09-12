@@ -532,4 +532,8 @@ function formatWaktu(waktu) {
 
 // ==========================================
 // TUTUP MODAL
-// =
+// ==========================================
+function tutupModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+}
