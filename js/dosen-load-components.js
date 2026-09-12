@@ -157,7 +157,7 @@ function setupLogoutHandler() {
 }
 
 // ==========================================
-// ✅ TOGGLE SIDEBAR (MOBILE)
+// ✅ TOGGLE SIDEBAR (MOBILE) - PERBAIKAN
 // ==========================================
 function setupSidebarToggle() {
     // Buat overlay jika belum ada
@@ -168,6 +168,13 @@ function setupSidebarToggle() {
     }
     
     const overlay = document.getElementById('sidebarOverlay');
+    
+    // ✅ RESET STATE saat halaman load
+    const sidebarInit = document.querySelector('aside');
+    if (sidebarInit) {
+        sidebarInit.classList.remove('show');
+        overlay.classList.remove('show');
+    }
     
     // Event delegation untuk semua klik
     document.addEventListener('click', function(e) {
