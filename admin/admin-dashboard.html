@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - EduLearn</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <!-- Container Sidebar (KIRI) -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content (KANAN) -->
+    <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+        
+        <!-- Container Header (ATAS) -->
+        <div id="header-container"></div>
+
+        <!-- Content Area -->
+        <div class="p-4 md:p-8 space-y-6">
+            
+            <!-- Hero Banner -->
+            <div class="rounded-2xl p-6 md:p-8 flex justify-between items-center shadow-sm relative overflow-hidden"
+                 style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);">
+                <div class="relative z-10">
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-2">
+                        Selamat Datang, <span id="bannerAdminName" class="text-orange-700">Administrator</span>! 🛡️
+                    </h2>
+                    <p class="text-xs md:text-sm text-slate-600">Kelola pengguna, pantau aktivitas, dan maintenance sistem.</p>
+                </div>
+                <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-orange-200 opacity-40 text-7xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- STAT CARDS (DARI BACKEND)                     -->
+            <!-- ============================================ -->
+            <div id="statCards" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Loading skeleton -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- MASTER DATA STATS                             -->
+            <!-- ============================================ -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Statistik Master Data -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-chart-simple text-orange-600 mr-2"></i>
+                            Statistik Master Data
+                        </h3>
+                    </div>
+                    <div id="masterStats" class="grid grid-cols-2 gap-4">
+                        <div class="text-center py-6 text-slate-400 col-span-full">
+                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 block"></i>
+                            <p class="text-xs">Memuat...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Aktivitas Terbaru -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-list-check text-orange-600 mr-2"></i>
+                            Aktivitas Terbaru
+                        </h3>
+                        <a href="admin-log.html" class="text-xs font-bold text-orange-600 hover:underline">
+                            Lihat Semua <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                        </a>
+                    </div>
+                    <div id="logTerbaru" class="space-y-3 max-h-[300px] overflow-y-auto">
+                        <div class="text-center py-6 text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 block"></i>
+                            <p class="text-xs">Memuat log...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- QUICK ACTIONS                                 -->
+            <!-- ============================================ -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-base font-bold text-slate-800 mb-5 pb-3 border-b border-slate-100 flex items-center">
+                    <i class="fa-solid fa-bolt text-orange-600 mr-2"></i>
+                    Aksi Cepat
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <a href="admin-users.html" class="bg-orange-50 hover:bg-orange-100 border border-orange-100 rounded-xl p-4 text-center transition">
+                        <i class="fa-solid fa-users text-2xl text-orange-600 mb-2 block"></i>
+                        <p class="text-xs font-bold text-slate-700">Kelola Users</p>
+                    </a>
+                    <a href="admin-log.html" class="bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-xl p-4 text-center transition">
+                        <i class="fa-solid fa-list-check text-2xl text-blue-600 mb-2 block"></i>
+                        <p class="text-xs font-bold text-slate-700">Log Aktivitas</p>
+                    </a>
+                    <a href="admin-backup.html" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-xl p-4 text-center transition">
+                        <i class="fa-solid fa-database text-2xl text-emerald-600 mb-2 block"></i>
+                        <p class="text-xs font-bold text-slate-700">Backup</p>
+                    </a>
+                    <a href="admin-users.html" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-xl p-4 text-center transition">
+                        <i class="fa-solid fa-user-check text-2xl text-purple-600 mb-2 block"></i>
+                        <p class="text-xs font-bold text-slate-700">Verifikasi</p>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>
