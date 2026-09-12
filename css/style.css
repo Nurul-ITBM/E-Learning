@@ -181,6 +181,7 @@ aside {
         z-index: 50;
         box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
         overflow-y: auto;
+        transition: transform 0.3s ease-in-out;
     }
 
     /* Sidebar muncul saat class .show */
@@ -206,77 +207,19 @@ aside {
         padding: 1rem !important;
     }
 
-    .px-8 {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
     .p-6 {
         padding: 1rem !important;
     }
 
-    .p-5 {
-        padding: 0.875rem !important;
-    }
-
-    /* Hero banner padding */
-    .p-8.rounded-2xl {
-        padding: 1.25rem !important;
-    }
-
-    /* Stat cards: 2 kolom */
+    /* Grid jadi 1 kolom */
     .grid-cols-2 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
-    /* Grid layout jadi 1 kolom */
     .lg\:grid-cols-2,
     .lg\:grid-cols-3,
     .lg\:grid-cols-4 {
         grid-template-columns: 1fr !important;
-    }
-
-    /* Hero banner: vertikal center */
-    .bg-gradient-to-r {
-        flex-direction: column !important;
-        text-align: center !important;
-        gap: 1rem;
-    }
-
-    /* Icon di hero banner disembunyikan */
-    .bg-gradient-to-r .absolute {
-        display: none !important;
-    }
-
-    /* Header: padding lebih kecil */
-    header {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    /* Text heading: lebih kecil */
-    h2.text-2xl {
-        font-size: 1.25rem !important;
-    }
-
-    h2.text-lg {
-        font-size: 0.875rem !important;
-    }
-
-    /* Stat cards: ukuran text */
-    .text-2xl {
-        font-size: 1.25rem !important;
-    }
-
-    /* Hide chevron & spesialisasi di mobile */
-    .hidden.md\:block {
-        display: none !important;
-    }
-
-    /* Avatar header lebih kecil */
-    .w-10.h-10 {
-        width: 2rem !important;
-        height: 2rem !important;
     }
 }
 
