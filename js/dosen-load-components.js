@@ -2,6 +2,9 @@
 // Loader Sidebar & Header untuk Portal Dosen
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // ✅ Tambahkan class role-dosen ke body
+    document.body.classList.add('role-dosen');
+    
     try {
         // ==========================================
         // 1. MUAT SIDEBAR DOSEN
@@ -35,6 +38,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 3. SETUP HANDLER LOGOUT (TERPUSAT)
         // ==========================================
         setupLogoutHandler();
+
+        // ==========================================
+        // 4. ✅ SETUP TOGGLE SIDEBAR (MOBILE)
+        // ==========================================
+        setupSidebarToggle();
 
     } catch (error) {
         console.error("Gagal memuat komponen:", error);
@@ -108,6 +116,27 @@ function fillHeaderData() {
     if (spesialisasiDisplay) {
         spesialisasiDisplay.innerText = user.spesialisasi || 'Dosen Pengajar';
     }
+    
+    // ✅ Set inisial avatar otomatis
+    const avatarInisial = document.getElementById('dosenAvatarInisial');
+    if (avatarInisial) {
+        const nama = user.nama_dosen || 'Dosen';
+        
+        // Ambil kata valid (skip gelar dengan titik)
+        const kata = nama.split(' ').filter(k => k.length > 0 && !k.includes('.'));
+        
+        let inisial = '';
+        
+        if (kata.length >= 2) {
+            inisial = kata[0].charAt(0) + kata[1].charAt(0);
+        } else if (kata.length === 1) {
+            inisial = kata[0].substring(0, 2);
+        } else {
+            inisial = nama.replace(/[^A-Za-z]/g, '').substring(0, 2);
+        }
+        
+        avatarInisial.innerText = inisial.toUpperCase() || 'DS';
+    }
 }
 
 // ==========================================
@@ -122,6 +151,56 @@ function setupLogoutHandler() {
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
                 window.location.href = '../login.html';
+            }
+        }
+    });
+}
+
+// ==========================================
+// ✅ TOGGLE SIDEBAR (MOBILE)
+// ==========================================
+function setupSidebarToggle() {
+    // Buat overlay jika belum ada
+    if (!document.getElementById('sidebarOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'sidebarOverlay';
+        document.body.appendChild(overlay);
+    }
+    
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    // Event delegation untuk semua klik
+    document.addEventListener('click', function(e) {
+        
+        // 1. Tombol Hamburger
+        const toggleBtn = e.target.closest('#btnToggleSidebar');
+        if (toggleBtn) {
+            e.preventDefault();
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+            return;
+        }
+        
+        // 2. Klik overlay → tutup sidebar
+        if (e.target.id === 'sidebarOverlay') {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+            return;
+        }
+        
+        // 3. Klik menu link → tutup sidebar (mobile)
+        const menuLink = e.target.closest('.sidebar-nav-link');
+        if (menuLink && window.innerWidth <= 768) {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
             }
         }
     });
