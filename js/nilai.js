@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (result.status === 'success' && result.data.length > 0) {
             let totalSKS = 0;
             let totalBobotSKS = 0;
+            let totalMataKuliah = 0;
 
             result.data.forEach((item, index) => {
                 const sks = parseInt(item.sks) || 3; 
-                totalSKS += sks;
-
+                
                 // Konversi Grade ke Angka Mutu
                 let bobot = 0;
                 const g = String(item.grade || '').trim().toUpperCase();
@@ -49,7 +49,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 else if (g === 'D') bobot = 1;
                 else if (g === 'E') bobot = 0;
 
+                // ✅ SELALU tambah SKS (termasuk grade E)
+                totalSKS += sks;
                 totalBobotSKS += (sks * bobot);
+                totalMataKuliah++;
 
                 let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
                 if (g === 'A') badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
@@ -74,11 +77,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
             });
 
-            // Hitung IPK
+            // ✅ Hitung IPK
+            console.log('>>> Total SKS:', totalSKS);
+            console.log('>>> Total Bobot SKS:', totalBobotSKS);
+            console.log('>>> Total MK:', totalMataKuliah);
+            
+            const ipkDisplay = document.getElementById('ipkDisplay');
+            
             if (totalSKS > 0) {
                 const ipk = (totalBobotSKS / totalSKS).toFixed(2);
-                const ipkDisplay = document.getElementById('ipkDisplay');
-                if (ipkDisplay) ipkDisplay.innerText = ipk;
+                console.log('>>> IPK:', ipk);
+                
+                if (ipkDisplay) {
+                    ipkDisplay.innerText = ipk;
+                    
+                    // Hapus class warna lama
+                    ipkDisplay.classList.remove(
+                        'text-indigo-600', 
+                        'text-emerald-600', 
+                        'text-blue-600',
+                        'text-amber-600', 
+                        'text-red-600',
+                        'text-slate-400'
+                    );
+                    
+                    // Beri warna berdasarkan IPK
+                    const ipkNum = parseFloat(ipk);
+                    if (ipkNum >= 3.5) {
+                        ipkDisplay.classList.add('text-emerald-600');
+                    } else if (ipkNum >= 3.0) {
+                        ipkDisplay.classList.add('text-indigo-600');
+                    } else if (ipkNum >= 2.5) {
+                        ipkDisplay.classList.add('text-blue-600');
+                    } else if (ipkNum >= 2.0) {
+                        ipkDisplay.classList.add('text-amber-600');
+                    } else {
+                        ipkDisplay.classList.add('text-red-600');
+                    }
+                }
+            } else {
+                // Tidak ada SKS valid
+                if (ipkDisplay) {
+                    ipkDisplay.innerText = '-';
+                    ipkDisplay.classList.add('text-slate-400');
+                }
             }
 
         } else {
@@ -90,6 +132,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                 </tr>
             `;
+            
+            const ipkDisplay = document.getElementById('ipkDisplay');
+            if (ipkDisplay) {
+                ipkDisplay.innerText = '-';
+                ipkDisplay.classList.add('text-slate-400');
+            }
         }
     } catch (err) {
         console.error("Error load nilai:", err);
