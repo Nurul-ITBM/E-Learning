@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Admin - EduLearn Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <!-- CryptoJS untuk hash password -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <div id="sidebar-container"></div>
+
+    <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+        
+        <div id="header-container"></div>
+
+        <div class="p-4 md:p-8 space-y-6">
+            
+            <!-- Hero Banner -->
+            <div class="rounded-2xl p-6 md:p-8 flex justify-between items-center shadow-sm relative overflow-hidden"
+                 style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);">
+                <div class="relative z-10">
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-2">Profil Saya 👤</h2>
+                    <p class="text-xs md:text-sm text-slate-600">Kelola informasi pribadi dan keamanan akun admin Anda.</p>
+                </div>
+                <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-orange-200 opacity-40 text-7xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+            </div>
+
+            <!-- Container Profil -->
+            <div id="profilContainer">
+                <div class="text-center py-16 text-slate-400">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3 block"></i>
+                    <p class="text-sm">Memuat profil...</p>
+                </div>
+            </div>
+
+            <!-- Container Statistik -->
+            <div id="statistikContainer"></div>
+
+        </div>
+    </main>
+
+    <!-- ============================================ -->
+    <!-- MODAL EDIT PROFIL                            -->
+    <!-- ============================================ -->
+    <div id="modalEditProfil" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-user-edit text-orange-600 mr-2"></i>Edit Profil
+                </h3>
+                <button onclick="tutupModal('modalEditProfil')" class="text-slate-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formEditProfil" class="p-5 space-y-4">
+                <input type="hidden" id="editIdUser">
+                
+                <!-- Nama (Read-Only) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Nama <i class="fa-solid fa-lock text-slate-400 ml-1"></i>
+                    </label>
+                    <input type="text" id="editNama" readonly
+                        class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed">
+                </div>
+
+                <!-- Username / Email -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Username / Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" id="editUsername" required
+                        class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500"
+                        placeholder="email@elearning.ac.id">
+                </div>
+
+                <!-- Role (Read-Only) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Role <i class="fa-solid fa-lock text-slate-400 ml-1"></i>
+                    </label>
+                    <input type="text" id="editRole" readonly
+                        class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="tutupModal('modalEditProfil')" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-lg text-sm transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg text-sm transition">
+                        <i class="fa-solid fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL GANTI PASSWORD                         -->
+    <!-- ============================================ -->
+    <div id="modalGantiPassword" class="fixed inset-0 bg-black/50 z-[80] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-key text-orange-600 mr-2"></i>Ganti Password
+                </h3>
+                <button onclick="tutupModal('modalGantiPassword')" class="text-slate-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formGantiPassword" class="p-5 space-y-4">
+                
+                <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-amber-700">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    Setelah ganti password, Anda akan <strong>logout otomatis</strong> dan harus login ulang dengan password baru.
+                </div>
+
+                <!-- Password Lama -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Password Lama <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="passwordLama" required
+                            class="w-full border border-slate-200 rounded-lg p-2 pr-10 text-sm focus:ring-2 focus:ring-orange-500"
+                            placeholder="Masukkan password lama">
+                        <button type="button" onclick="togglePassword('passwordLama')" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-600 p-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password Baru -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Password Baru <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="passwordBaru" required minlength="6"
+                            class="w-full border border-slate-200 rounded-lg p-2 pr-10 text-sm focus:ring-2 focus:ring-orange-500"
+                            placeholder="Minimal 6 karakter">
+                        <button type="button" onclick="togglePassword('passwordBaru')" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-600 p-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Konfirmasi -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Konfirmasi Password Baru <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="passwordKonfirmasi" required
+                            class="w-full border border-slate-200 rounded-lg p-2 pr-10 text-sm focus:ring-2 focus:ring-orange-500"
+                            placeholder="Ulangi password baru">
+                        <button type="button" onclick="togglePassword('passwordKonfirmasi')" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-600 p-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="tutupModal('modalGantiPassword')" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-lg text-sm transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg text-sm transition">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Ganti
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/admin-profil.js"></script>
+</body>
+</html>
