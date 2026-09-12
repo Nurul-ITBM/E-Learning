@@ -39,21 +39,31 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             localStorage.setItem('user_session', JSON.stringify(result.data));
 
             setTimeout(() => {
-                const role = result.data.role;
+                // ✅ Lowercase role untuk case-insensitive comparison
+                const role = (result.data.role || '').toLowerCase().trim();
                 const origin = window.location.origin;
                 const basePath = window.location.pathname.replace(/\/[^/]*$/, '/');
-            
-                // ✅ REDIRECT BERDASARKAN ROLE
+                
+                console.log(">>> Role:", role);
+                console.log(">>> Base path:", basePath);
+                
+                let redirectUrl = '';
+                
                 if (role === 'admin') {
-                    window.location.href = origin + basePath + 'admin/admin-dashboard.html';
+                    redirectUrl = origin + basePath + 'admin/admin-dashboard.html';
                 } else if (role === 'dosen') {
-                    window.location.href = origin + basePath + 'dosen/dosen-dashboard.html';
+                    redirectUrl = origin + basePath + 'dosen/dosen-dashboard.html';
                 } else if (role === 'mahasiswa') {
-                    window.location.href = origin + basePath + 'mahasiswa/dashboard.html';
+                    redirectUrl = origin + basePath + 'mahasiswa/dashboard.html';
                 } else {
-                    // Fallback: redirect ke beranda
-                    window.location.href = origin + basePath;
+                    // Fallback jika role tidak dikenali
+                    console.error("Role tidak dikenali:", role);
+                    redirectUrl = origin + basePath;
                 }
+                
+                console.log(">>> Redirect ke:", redirectUrl);
+                window.location.href = redirectUrl;
+                
             }, 1000);
         } else {
             msg.className = 'mt-4 text-center text-red-600 bg-red-50 p-2 rounded-lg text-sm block border border-red-200';
