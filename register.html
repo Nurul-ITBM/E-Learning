@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi - EduLearn E-Learning</title>
+    
+    <!-- Tailwind CSS & Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Kustom -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Library Kriptografi untuk Hash Password -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen py-8">
+
+    <!-- Tombol Kembali ke Beranda -->
+    <a href="index.html" class="absolute top-6 left-6 text-gray-500 hover:text-indigo-600 flex items-center space-x-2 transition-colors">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="font-medium text-sm">Kembali ke Beranda</span>
+    </a>
+
+    <!-- Card Registrasi -->
+    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        
+        <!-- Header & Logo -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="bg-indigo-500 p-3 rounded-xl text-white mb-4 shadow-md">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-wide">Daftar Akun</h1>
+            <p class="text-gray-500 text-sm mt-1">Buat akun baru untuk mengakses EduLearn</p>
+        </div>
+
+        <form id="registerForm">
+            
+            <!-- Pilih Role -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Daftar Sebagai</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center justify-center p-3 rounded-xl border-2 border-indigo-500 bg-indigo-50 cursor-pointer transition role-option active" data-role="mahasiswa">
+                        <input type="radio" name="role" value="mahasiswa" class="hidden" checked>
+                        <i class="fa-solid fa-user-graduate mr-2 text-indigo-600"></i>
+                        <span class="text-sm font-bold text-indigo-700">Mahasiswa</span>
+                    </label>
+                    <label class="flex items-center justify-center p-3 rounded-xl border-2 border-gray-200 hover:border-indigo-300 cursor-pointer transition role-option" data-role="dosen">
+                        <input type="radio" name="role" value="dosen" class="hidden">
+                        <i class="fa-solid fa-chalkboard-user mr-2 text-gray-600"></i>
+                        <span class="text-sm font-bold text-gray-600">Dosen</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Input Nama Lengkap -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="nama" placeholder="Nama lengkap Anda" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
+                        required>
+                </div>
+            </div>
+
+            <!-- Input NIM/NIP -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2" id="labelNimNip">
+                    NIM (Nomor Induk Mahasiswa)
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-id-card text-gray-400"></i>
+                    </div>
+                    <input type="text" id="nim_nip" placeholder="Contoh: A1B226001" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
+                        required>
+                </div>
+            </div>
+
+            <!-- Input Email -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-envelope text-gray-400"></i>
+                    </div>
+                    <input type="email" id="email" placeholder="email@elearning.ac.id" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
+                        required>
+                </div>
+            </div>
+
+            <!-- Input Program Studi -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Program Studi</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-book text-gray-400"></i>
+                    </div>
+                    <select id="program_studi" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white appearance-none" 
+                        required>
+                        <option value="">-- Pilih Program Studi --</option>
+                        <option value="Agroteknologi">Agroteknologi</option>
+                        <option value="Agribisnis">Agribisnis</option>
+                        <option value="Teknik Pertanian">Teknik Pertanian</option>
+                        <option value="Ilmu Tanah">Ilmu Tanah</option>
+                        <option value="Hama dan Penyakit Tanaman">Hama dan Penyakit Tanaman</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Input Angkatan (Khusus Mahasiswa) -->
+            <div class="mb-5" id="angkatanWrapper">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Angkatan</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-regular fa-calendar text-gray-400"></i>
+                    </div>
+                    <input type="number" id="angkatan" placeholder="Contoh: 2026" min="2000" max="2100"
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white">
+                </div>
+            </div>
+
+            <!-- Input Password -->
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" placeholder="Minimal 6 karakter" minlength="6"
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
+                        required>
+                    <button type="button" onclick="togglePassword('password')" 
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Konfirmasi Password -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password_konfirmasi" placeholder="Ulangi password" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
+                        required>
+                    <button type="button" onclick="togglePassword('password_konfirmasi')" 
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Checkbox Syarat & Ketentuan -->
+            <div class="mb-6">
+                <label class="flex items-start space-x-2 cursor-pointer">
+                    <input type="checkbox" id="setuju" class="mt-0.5 rounded text-indigo-600" required>
+                    <span class="text-xs text-gray-600">
+                        Saya menyetujui <a href="#" class="text-indigo-600 hover:underline font-semibold">Syarat & Ketentuan</a> serta 
+                        <a href="#" class="text-indigo-600 hover:underline font-semibold">Kebijakan Privasi</a> EduLearn
+                    </span>
+                </label>
+            </div>
+
+            <!-- Tombol Registrasi -->
+            <button type="submit" id="registerBtn" 
+                class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all flex justify-center items-center space-x-2">
+                <span>Daftar Sekarang</span>
+                <i class="fa-solid fa-user-plus text-sm"></i>
+            </button>
+            
+            <!-- Pesan Notifikasi -->
+            <div id="statusMessage" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
+
+            <!-- Link ke Login -->
+            <div class="mt-6 text-center text-sm text-gray-600">
+                Sudah punya akun? 
+                <a href="login.html" class="text-indigo-600 hover:underline font-bold">Login di sini</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Script -->
+    <script src="js/config.js"></script>
+    <script>
+        // ==========================================
+        // TOGGLE PASSWORD VISIBILITY
+        // ==========================================
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = event.target.closest('button');
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // ==========================================
+        // TOGGLE ROLE (Mahasiswa / Dosen)
+        // ==========================================
+        document.querySelectorAll('.role-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const role = this.dataset.role;
+                
+                // Update visual
+                document.querySelectorAll('.role-option').forEach(o => {
+                    o.classList.remove('border-indigo-500', 'bg-indigo-50', 'active');
+                    o.classList.add('border-gray-200');
+                    const icon = o.querySelector('i');
+                    const text = o.querySelector('span');
+                    icon.classList.remove('text-indigo-600');
+                    icon.classList.add('text-gray-600');
+                    text.classList.remove('text-indigo-700');
+                    text.classList.add('text-gray-600');
+                });
+                
+                this.classList.add('border-indigo-500', 'bg-indigo-50', 'active');
+                this.classList.remove('border-gray-200');
+                const icon = this.querySelector('i');
+                const text = this.querySelector('span');
+                icon.classList.remove('text-gray-600');
+                icon.classList.add('text-indigo-600');
+                text.classList.remove('text-gray-600');
+                text.classList.add('text-indigo-700');
+                
+                // Update radio
+                this.querySelector('input[type="radio"]').checked = true;
+                
+                // Update label NIM/NIP
+                const labelNimNip = document.getElementById('labelNimNip');
+                const inputNimNip = document.getElementById('nim_nip');
+                const angkatanWrapper = document.getElementById('angkatanWrapper');
+                
+                if (role === 'dosen') {
+                    labelNimNip.innerText = 'NIP (Nomor Induk Pegawai)';
+                    inputNimNip.placeholder = 'Contoh: 198001012010121001';
+                    angkatanWrapper.classList.add('hidden');
+                } else {
+                    labelNimNip.innerText = 'NIM (Nomor Induk Mahasiswa)';
+                    inputNimNip.placeholder = 'Contoh: A1B226001';
+                    angkatanWrapper.classList.remove('hidden');
+                }
+            });
+        });
+
+        // ==========================================
+        // SUBMIT FORM REGISTRASI
+        // ==========================================
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('registerBtn');
+            const originalText = btn.innerHTML;
+            const statusMsg = document.getElementById('statusMessage');
+            
+            // Ambil data
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const nama = document.getElementById('nama').value.trim();
+            const nimNip = document.getElementById('nim_nip').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const programStudi = document.getElementById('program_studi').value;
+            const angkatan = document.getElementById('angkatan').value;
+            const password = document.getElementById('password').value;
+            const passwordKonfirmasi = document.getElementById('password_konfirmasi').value;
+            const setuju = document.getElementById('setuju').checked;
+            
+            // Validasi
+            if (!nama || !nimNip || !email || !programStudi || !password) {
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '⚠️ Semua kolom wajib diisi!';
+                statusMsg.classList.remove('hidden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '⚠️ Password minimal 6 karakter!';
+                statusMsg.classList.remove('hidden');
+                return;
+            }
+            
+            if (password !== passwordKonfirmasi) {
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '⚠️ Konfirmasi password tidak cocok!';
+                statusMsg.classList.remove('hidden');
+                return;
+            }
+            
+            if (role === 'mahasiswa' && !angkatan) {
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '⚠️ Angkatan wajib diisi untuk mahasiswa!';
+                statusMsg.classList.remove('hidden');
+                return;
+            }
+            
+            if (!setuju) {
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '⚠️ Anda harus menyetujui Syarat & Ketentuan!';
+                statusMsg.classList.remove('hidden');
+                return;
+            }
+            
+            // Loading
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memproses...';
+            btn.disabled = true;
+            statusMsg.classList.add('hidden');
+            
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'registrasi',
+                        role: role,
+                        nama: nama,
+                        nim_nip: nimNip,
+                        email: email,
+                        program_studi: programStudi,
+                        angkatan: angkatan,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                console.log(">>> Response registrasi:", result);
+                
+                if (result.status === 'success') {
+                    statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-green-50 text-green-600 font-semibold';
+                    statusMsg.innerHTML = '✅ ' + result.message + '<br><span class="text-xs">Mengalihkan ke halaman login...</span>';
+                    statusMsg.classList.remove('hidden');
+                    
+                    // Reset form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Redirect ke login setelah 3 detik
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                    statusMsg.innerText = '❌ ' + result.message;
+                    statusMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error registrasi:", error);
+                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.innerText = '❌ Terjadi kesalahan koneksi. Coba lagi.';
+                statusMsg.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
