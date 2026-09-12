@@ -12,7 +12,7 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
@@ -31,10 +31,14 @@
         <!-- Content Area -->
         <div class="p-8 space-y-6">
             
-            <!-- Hero Banner -->
-            <div class="bg-banner-gradient rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
+            <!-- ============================================ -->
+            <!-- HERO BANNER                                   -->
+            <!-- ============================================ -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 flex justify-between items-center shadow-sm relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat datang, <span id="bannerNameDisplay" class="text-indigo-700">Mahasiswa</span>! 👋</h2>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">
+                        Selamat datang, <span id="bannerNameDisplay" class="text-indigo-700">Mahasiswa</span>! 👋
+                    </h2>
                     <p class="text-sm text-slate-600">Tetap semangat belajar dan jangan lupa menyelesaikan tugas tepat waktu.</p>
                 </div>
                 <div class="hidden md:flex absolute right-10 top-0 h-full items-center text-indigo-200 opacity-40 text-7xl">
@@ -42,28 +46,209 @@
                 </div>
             </div>
 
-            <!-- Stat Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <!-- (Pertahankan kartu statistik Anda yang sudah ada di sini) -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-book-open text-xl"></i></div>
-                    <div><h3 class="text-2xl font-bold text-slate-800 leading-none">5</h3><p class="text-xs text-slate-500 mt-1.5 font-medium">Mata Kuliah Aktif</p></div>
+            <!-- ============================================ -->
+            <!-- STAT CARDS (5 KARTU)                          -->
+            <!-- ============================================ -->
+            <div id="statCards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- Loading skeleton -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
                 </div>
-                <!-- ... (lanjutkan statistik lainnya) ... -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+                        <div class="flex-1">
+                            <div class="h-6 bg-slate-200 rounded w-12 mb-2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-20"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Grid Layout Utama (Jadwal, Tugas, dll tetap di sini) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- ... (Kode layout utama Anda tetap sama persis) ... -->
+            <!-- ============================================ -->
+            <!-- GRID: JADWAL HARI INI + TUGAS MENDATANG      -->
+            <!-- ============================================ -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- JADWAL HARI INI -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-calendar-day text-indigo-600 mr-2"></i>
+                            <span id="titleHariIni">Jadwal Kuliah Hari Ini</span>
+                        </h3>
+                        <a href="matakuliah.html" class="text-xs font-bold text-indigo-600 hover:underline">
+                            Lihat Semua <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                        </a>
+                    </div>
+                    <div id="jadwalHariIni" class="space-y-3 max-h-[400px] overflow-y-auto">
+                        <div class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 block"></i>
+                            <p class="text-sm">Memuat jadwal...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TUGAS MENDATANG -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-file-pen text-purple-600 mr-2"></i>
+                            Tugas Mendatang
+                        </h3>
+                        <a href="tugas.html" class="text-xs font-bold text-purple-600 hover:underline">
+                            Lihat Semua <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                        </a>
+                    </div>
+                    <div id="tugasMendatang" class="space-y-3 max-h-[400px] overflow-y-auto">
+                        <div class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 block"></i>
+                            <p class="text-sm">Memuat tugas...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- ============================================ -->
+            <!-- GRID: UJIAN TERSEDIA + NILAI TERKINI         -->
+            <!-- ============================================ -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- UJIAN TERSEDIA -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-regular fa-file-lines text-rose-600 mr-2"></i>
+                            Ujian Tersedia
+                        </h3>
+                        <a href="ujian.html" class="text-xs font-bold text-rose-600 hover:underline">
+                            Lihat Semua <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                        </a>
+                    </div>
+                    <div id="ujianTersedia" class="space-y-3 max-h-[400px] overflow-y-auto">
+                        <div class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 block"></i>
+                            <p class="text-sm">Memuat ujian...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NILAI TERKINI -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                        <h3 class="text-base font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-chart-simple text-emerald-600 mr-2"></i>
+                            Nilai Terkini
+                        </h3>
+                        <a href="nilai.html" class="text-xs font-bold text-emerald-600 hover:underline">
+                            Lihat Semua <i class="fa-solid fa-arrow-right ml-0.5"></i>
+                        </a>
+                    </div>
+                    <div id="nilaiTerkini" class="space-y-3 max-h-[400px] overflow-y-auto">
+                        <div class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 block"></i>
+                            <p class="text-sm">Memuat nilai...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- INFO CARD BAWAH (OPSIONAL)                    -->
+            <!-- ============================================ -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <!-- Kehadiran Info -->
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-600 font-semibold">Kehadiran Semester Ini</p>
+                            <p class="text-[10px] text-slate-500">Pastikan kehadiran ≥ 75%</p>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-3xl font-extrabold text-emerald-700" id="statKehadiranBawah">0</span>
+                        <span class="text-sm font-bold text-emerald-600">%</span>
+                    </div>
+                </div>
+
+                <!-- Total Tugas Info -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-file-pen"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-600 font-semibold">Total Tugas</p>
+                            <p class="text-[10px] text-slate-500">Sepanjang semester ini</p>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-3xl font-extrabold text-purple-700" id="statTotalTugasBawah">0</span>
+                        <span class="text-sm font-bold text-purple-600">tugas</span>
+                    </div>
+                </div>
+
+                <!-- Ujian Selesai Info -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i class="fa-regular fa-file-lines"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-600 font-semibold">Total Ujian</p>
+                            <p class="text-[10px] text-slate-500">Sepanjang semester ini</p>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-3xl font-extrabold text-blue-700" id="statTotalUjianBawah">0</span>
+                        <span class="text-sm font-bold text-blue-600">ujian</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- Scripts (Urutan Penting) -->
+    <!-- Scripts -->
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
-    
-    <!-- Ganti nama file JS ini sesuai dengan logic dashboard mahasiswa Anda -->
     <script src="../js/mahasiswa-dashboard.js"></script>
 </body>
 </html>
