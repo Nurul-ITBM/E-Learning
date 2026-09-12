@@ -42,12 +42,18 @@
             <p class="text-gray-500 text-sm mt-1 text-center">Buat akun baru untuk mengakses EduLearn</p>
         </div>
 
-        <!-- Info Verifikasi -->
+        <!-- ✅ Info Verifikasi + Email -->
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 flex items-start gap-2">
             <i class="fa-solid fa-info-circle text-amber-600 mt-0.5"></i>
-            <p class="text-xs text-amber-700">
-                Setelah mendaftar, akun Anda akan <strong>menunggu verifikasi admin</strong> sebelum bisa digunakan untuk login.
-            </p>
+            <div class="text-xs text-amber-700">
+                <p>
+                    Setelah mendaftar, akun Anda akan <strong>menunggu verifikasi admin</strong> sebelum bisa digunakan untuk login.
+                </p>
+                <p class="mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-envelope text-amber-600"></i>
+                    <span><strong>Email notifikasi</strong> akan dikirim ke alamat email Anda saat akun diverifikasi.</span>
+                </p>
+            </div>
         </div>
 
         <form id="registerForm">
@@ -125,7 +131,7 @@
                         <option value="">-- Pilih Program Studi --</option>
                         <option value="Agroteknologi">Agroteknologi</option>
                         <option value="Kewirausahaan">Kewirausahaan</option>
-                        <option value="Ilmu Kelawutan">Ilmu Kelautan</option>
+                        <option value="Ilmu Kelautan">Ilmu Kelautan</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
@@ -199,6 +205,14 @@
             
             <!-- Pesan Notifikasi -->
             <div id="statusMessage" class="mt-4 text-center text-sm hidden p-3 rounded-lg"></div>
+
+            <!-- ✅ Link Cek Status Akun -->
+            <div class="mt-4 text-center">
+                <a href="cek-status.html" class="text-indigo-600 hover:underline text-sm font-semibold">
+                    <i class="fa-solid fa-magnifying-glass mr-1"></i>
+                    Sudah daftar? Cek status akun Anda
+                </a>
+            </div>
 
             <!-- Link ke Login -->
             <div class="mt-6 text-center text-sm text-gray-600">
@@ -304,7 +318,7 @@
             const setuju = document.getElementById('setuju').checked;
             
             // ==========================================
-            // VALIDASI
+            // VALIDASI CLIENT-SIDE
             // ==========================================
             if (!nama || !nimNip || !email || !programStudi || !password) {
                 statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
@@ -371,22 +385,36 @@
                 // HANDLE RESPONSE
                 // ==========================================
                 if (result.status === 'success') {
-                    // ✅ SUKSES - Akun menunggu verifikasi admin
+                    // ✅ SUKSES - Akun menunggu verifikasi + email terkirim
                     statusMsg.className = 'mt-4 text-center text-sm p-4 rounded-lg bg-amber-50 text-amber-700 border border-amber-200';
                     statusMsg.innerHTML = `
                         <div class="flex flex-col items-center gap-2">
-                            <i class="fa-solid fa-clock text-3xl text-amber-500"></i>
-                            <p class="font-bold">✅ Registrasi Berhasil!</p>
+                            <i class="fa-solid fa-circle-check text-3xl text-green-500"></i>
+                            <p class="font-bold">Registrasi Berhasil!</p>
+                            
                             <p class="text-xs">
                                 Akun Anda sedang <strong>menunggu verifikasi admin</strong>.
                             </p>
-                            <p class="text-xs text-amber-600">
-                                Anda akan bisa login setelah admin memverifikasi akun Anda.
-                            </p>
+                            
+                            <div class="bg-white rounded-lg p-3 w-full border border-amber-200 mt-2">
+                                <p class="text-xs text-amber-700 flex items-center gap-2 justify-center">
+                                    <i class="fa-solid fa-envelope text-amber-500"></i>
+                                    <span>Email notifikasi telah dikirim ke <strong>${email}</strong></span>
+                                </p>
+                                <p class="text-xs text-amber-500 mt-2 text-center">
+                                    <i class="fa-solid fa-info-circle"></i> 
+                                    Cek juga folder <strong>Spam</strong> jika tidak ada di Inbox
+                                </p>
+                            </div>
+                            
                             <p class="text-xs text-amber-500 mt-1">
-                                <i class="fa-solid fa-info-circle"></i> 
+                                <i class="fa-solid fa-clock"></i> 
                                 Estimasi verifikasi: 1×24 jam kerja
                             </p>
+                            
+                            <a href="cek-status.html" class="mt-2 text-indigo-600 hover:underline text-xs font-semibold">
+                                Cek status akun Anda di sini →
+                            </a>
                         </div>
                     `;
                     statusMsg.classList.remove('hidden');
@@ -394,10 +422,25 @@
                     // Reset form
                     document.getElementById('registerForm').reset();
                     
+                    // Reset visual role ke default (mahasiswa)
+                    const defaultRole = document.querySelector('.role-option[data-role="mahasiswa"]');
+                    if (defaultRole) {
+                        document.querySelectorAll('.role-option').forEach(o => {
+                            o.classList.remove('border-indigo-500', 'bg-indigo-50', 'active');
+                            o.classList.add('border-gray-200');
+                        });
+                        defaultRole.classList.add('border-indigo-500', 'bg-indigo-50', 'active');
+                        defaultRole.classList.remove('border-gray-200');
+                        defaultRole.querySelector('input[type="radio"]').checked = true;
+                        document.getElementById('labelNimNip').innerText = 'NIM (Nomor Induk Mahasiswa)';
+                        document.getElementById('labelProdi').innerText = 'Program Studi';
+                        document.getElementById('angkatanWrapper').classList.remove('hidden');
+                    }
+                    
                     // Update tombol
                     btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Berhasil Didaftarkan';
                     btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                    btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+                    btn.classList.add('bg-green-600', 'hover:bg-green-700');
                     
                     // TIDAK redirect ke login karena akun belum aktif
                     // User harus tunggu verifikasi admin
