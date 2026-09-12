@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let totalSKS = 0;
             let totalBobotSKS = 0;
             let totalMataKuliah = 0;
+            let jumlahGradeE = 0;
 
             result.data.forEach((item, index) => {
                 const sks = parseInt(item.sks) || 3; 
@@ -47,9 +48,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 else if (g === 'B') bobot = 3;
                 else if (g === 'C') bobot = 2;
                 else if (g === 'D') bobot = 1;
-                else if (g === 'E') bobot = 0;
+                else if (g === 'E') {
+                    bobot = 0;
+                    jumlahGradeE++;
+                }
 
-                // ✅ SELALU tambah SKS (termasuk grade E)
                 totalSKS += sks;
                 totalBobotSKS += (sks * bobot);
                 totalMataKuliah++;
@@ -83,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('>>> Total MK:', totalMataKuliah);
             
             const ipkDisplay = document.getElementById('ipkDisplay');
+            const ipkInfo = document.getElementById('ipkInfo');
             
             if (totalSKS > 0) {
                 const ipk = (totalBobotSKS / totalSKS).toFixed(2);
@@ -115,11 +119,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ipkDisplay.classList.add('text-red-600');
                     }
                 }
+                
+                // ✅ Info tambahan
+                if (ipkInfo) {
+                    ipkInfo.innerText = `${totalMataKuliah} MK • ${totalSKS} SKS`;
+                }
+                
+                // ✅ Alert jika semua Grade E
+                if (jumlahGradeE === totalMataKuliah && totalMataKuliah > 0) {
+                    const alertContainer = document.getElementById('alertIpk');
+                    if (alertContainer) {
+                        alertContainer.classList.remove('hidden');
+                        alertContainer.innerHTML = `
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-3">
+                                <div class="bg-red-100 text-red-600 p-2 rounded-lg flex-shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="text-xs">
+                                    <p class="font-bold text-red-700">IPK Anda 0.00</p>
+                                    <p class="text-red-600 mt-0.5">Semua mata kuliah memiliki Grade E. Silakan mengulang mata kuliah untuk memperbaiki nilai.</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
             } else {
-                // Tidak ada SKS valid
                 if (ipkDisplay) {
                     ipkDisplay.innerText = '-';
                     ipkDisplay.classList.add('text-slate-400');
+                }
+                if (ipkInfo) {
+                    ipkInfo.innerText = 'Belum ada nilai';
                 }
             }
 
