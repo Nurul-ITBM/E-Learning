@@ -21,7 +21,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const hashedPassword = CryptoJS.SHA256(pass).toString();
 
     try {
-        // Menggunakan CONFIG.API_URL dari file js/config.js
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             body: JSON.stringify({
@@ -44,11 +43,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 const origin = window.location.origin;
                 const basePath = window.location.pathname.replace(/\/[^/]*$/, '/');
             
-                if (role === 'dosen') {
+                // ✅ REDIRECT BERDASARKAN ROLE
+                if (role === 'admin') {
+                    window.location.href = origin + basePath + 'admin/admin-dashboard.html';
+                } else if (role === 'dosen') {
                     window.location.href = origin + basePath + 'dosen/dosen-dashboard.html';
                 } else if (role === 'mahasiswa') {
                     window.location.href = origin + basePath + 'mahasiswa/dashboard.html';
                 } else {
+                    // Fallback: redirect ke beranda
                     window.location.href = origin + basePath;
                 }
             }, 1000);
