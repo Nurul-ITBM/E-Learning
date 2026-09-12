@@ -31,7 +31,7 @@
     </a>
 
     <!-- Card Registrasi -->
-    <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 mx-4">
         
         <!-- Header & Logo -->
         <div class="flex flex-col items-center mb-8">
@@ -39,7 +39,15 @@
                 <i class="fa-solid fa-graduation-cap text-3xl"></i>
             </div>
             <h1 class="text-2xl font-bold text-slate-800 tracking-wide">Daftar Akun</h1>
-            <p class="text-gray-500 text-sm mt-1">Buat akun baru untuk mengakses EduLearn</p>
+            <p class="text-gray-500 text-sm mt-1 text-center">Buat akun baru untuk mengakses EduLearn</p>
+        </div>
+
+        <!-- Info Verifikasi -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 flex items-start gap-2">
+            <i class="fa-solid fa-info-circle text-amber-600 mt-0.5"></i>
+            <p class="text-xs text-amber-700">
+                Setelah mendaftar, akun Anda akan <strong>menunggu verifikasi admin</strong> sebelum bisa digunakan untuk login.
+            </p>
         </div>
 
         <form id="registerForm">
@@ -102,9 +110,11 @@
                 </div>
             </div>
 
-            <!-- Input Program Studi -->
+            <!-- Input Program Studi / Spesialisasi -->
             <div class="mb-5">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Program Studi</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2" id="labelProdi">
+                    Program Studi
+                </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-book text-gray-400"></i>
@@ -118,7 +128,11 @@
                         <option value="Teknik Pertanian">Teknik Pertanian</option>
                         <option value="Ilmu Tanah">Ilmu Tanah</option>
                         <option value="Hama dan Penyakit Tanaman">Hama dan Penyakit Tanaman</option>
+                        <option value="Budidaya Pertanian">Budidaya Pertanian</option>
                     </select>
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
+                    </div>
                 </div>
             </div>
 
@@ -145,7 +159,7 @@
                         class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
                         required>
                     <button type="button" onclick="togglePassword('password')" 
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600">
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 p-1">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                 </div>
@@ -162,7 +176,7 @@
                         class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-gray-50 focus:bg-white" 
                         required>
                     <button type="button" onclick="togglePassword('password_konfirmasi')" 
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600">
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 p-1">
                         <i class="fa-solid fa-eye"></i>
                     </button>
                 </div>
@@ -187,7 +201,7 @@
             </button>
             
             <!-- Pesan Notifikasi -->
-            <div id="statusMessage" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
+            <div id="statusMessage" class="mt-4 text-center text-sm hidden p-3 rounded-lg"></div>
 
             <!-- Link ke Login -->
             <div class="mt-6 text-center text-sm text-gray-600">
@@ -226,7 +240,7 @@
             option.addEventListener('click', function() {
                 const role = this.dataset.role;
                 
-                // Update visual
+                // Reset semua visual
                 document.querySelectorAll('.role-option').forEach(o => {
                     o.classList.remove('border-indigo-500', 'bg-indigo-50', 'active');
                     o.classList.add('border-gray-200');
@@ -238,6 +252,7 @@
                     text.classList.add('text-gray-600');
                 });
                 
+                // Set visual yang aktif
                 this.classList.add('border-indigo-500', 'bg-indigo-50', 'active');
                 this.classList.remove('border-gray-200');
                 const icon = this.querySelector('i');
@@ -250,18 +265,21 @@
                 // Update radio
                 this.querySelector('input[type="radio"]').checked = true;
                 
-                // Update label NIM/NIP
+                // Update label & field
                 const labelNimNip = document.getElementById('labelNimNip');
+                const labelProdi = document.getElementById('labelProdi');
                 const inputNimNip = document.getElementById('nim_nip');
                 const angkatanWrapper = document.getElementById('angkatanWrapper');
                 
                 if (role === 'dosen') {
                     labelNimNip.innerText = 'NIP (Nomor Induk Pegawai)';
                     inputNimNip.placeholder = 'Contoh: 198001012010121001';
+                    labelProdi.innerText = 'Bidang Spesialisasi';
                     angkatanWrapper.classList.add('hidden');
                 } else {
                     labelNimNip.innerText = 'NIM (Nomor Induk Mahasiswa)';
                     inputNimNip.placeholder = 'Contoh: A1B226001';
+                    labelProdi.innerText = 'Program Studi';
                     angkatanWrapper.classList.remove('hidden');
                 }
             });
@@ -288,43 +306,47 @@
             const passwordKonfirmasi = document.getElementById('password_konfirmasi').value;
             const setuju = document.getElementById('setuju').checked;
             
-            // Validasi
+            // ==========================================
+            // VALIDASI
+            // ==========================================
             if (!nama || !nimNip || !email || !programStudi || !password) {
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Semua kolom wajib diisi!';
                 statusMsg.classList.remove('hidden');
                 return;
             }
             
             if (password.length < 6) {
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Password minimal 6 karakter!';
                 statusMsg.classList.remove('hidden');
                 return;
             }
             
             if (password !== passwordKonfirmasi) {
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Konfirmasi password tidak cocok!';
                 statusMsg.classList.remove('hidden');
                 return;
             }
             
             if (role === 'mahasiswa' && !angkatan) {
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Angkatan wajib diisi untuk mahasiswa!';
                 statusMsg.classList.remove('hidden');
                 return;
             }
             
             if (!setuju) {
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Anda harus menyetujui Syarat & Ketentuan!';
                 statusMsg.classList.remove('hidden');
                 return;
             }
             
-            // Loading
+            // ==========================================
+            // LOADING
+            // ==========================================
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memproses...';
             btn.disabled = true;
             statusMsg.classList.add('hidden');
@@ -348,29 +370,57 @@
                 const result = await response.json();
                 console.log(">>> Response registrasi:", result);
                 
+                // ==========================================
+                // HANDLE RESPONSE
+                // ==========================================
                 if (result.status === 'success') {
-                    statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-green-50 text-green-600 font-semibold';
-                    statusMsg.innerHTML = '✅ ' + result.message + '<br><span class="text-xs">Mengalihkan ke halaman login...</span>';
+                    // ✅ SUKSES - Akun menunggu verifikasi admin
+                    statusMsg.className = 'mt-4 text-center text-sm p-4 rounded-lg bg-amber-50 text-amber-700 border border-amber-200';
+                    statusMsg.innerHTML = `
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="fa-solid fa-clock text-3xl text-amber-500"></i>
+                            <p class="font-bold">✅ Registrasi Berhasil!</p>
+                            <p class="text-xs">
+                                Akun Anda sedang <strong>menunggu verifikasi admin</strong>.
+                            </p>
+                            <p class="text-xs text-amber-600">
+                                Anda akan bisa login setelah admin memverifikasi akun Anda.
+                            </p>
+                            <p class="text-xs text-amber-500 mt-1">
+                                <i class="fa-solid fa-info-circle"></i> 
+                                Estimasi verifikasi: 1×24 jam kerja
+                            </p>
+                        </div>
+                    `;
                     statusMsg.classList.remove('hidden');
                     
                     // Reset form
                     document.getElementById('registerForm').reset();
                     
-                    // Redirect ke login setelah 3 detik
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 3000);
+                    // Update tombol
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Berhasil Didaftarkan';
+                    btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+                    
+                    // TIDAK redirect ke login karena akun belum aktif
+                    // User harus tunggu verifikasi admin
+                    
                 } else {
-                    statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
-                    statusMsg.innerText = '❌ ' + result.message;
+                    // ❌ GAGAL - Tampilkan pesan error
+                    statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
+                    statusMsg.innerHTML = '❌ ' + result.message;
                     statusMsg.classList.remove('hidden');
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
+                
             } catch (error) {
                 console.error("Error registrasi:", error);
-                statusMsg.className = 'mt-4 text-center text-sm p-2 rounded-lg bg-red-50 text-red-600';
-                statusMsg.innerText = '❌ Terjadi kesalahan koneksi. Coba lagi.';
+                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
+                statusMsg.innerText = '❌ Terjadi kesalahan koneksi. Silakan coba lagi.';
                 statusMsg.classList.remove('hidden');
-            } finally {
+                
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
