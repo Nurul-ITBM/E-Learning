@@ -1,15 +1,32 @@
-<header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-    <h2 id="pageTitle" class="text-lg font-bold text-slate-800">Loading...</h2>            
-    <div class="flex items-center space-x-6">
-        <button class="relative text-slate-500 hover:text-indigo-600 transition">
+<!-- components/header-mahasiswa.html -->
+<header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+    
+    <!-- ✅ TOMBOL HAMBURGER (Mobile only) -->
+    <button id="btnToggleSidebar" class="md:hidden text-slate-600 hover:text-indigo-600 mr-3 p-2 rounded-lg hover:bg-indigo-50 transition">
+        <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+    
+    <h2 id="pageTitle" class="text-base md:text-lg font-bold text-slate-800 flex-1">Loading...</h2>
+    
+    <div class="flex items-center space-x-3 md:space-x-6">
+        
+        <!-- Notifikasi -->
+        <button class="relative text-slate-500 hover:text-indigo-600 transition p-2 rounded-lg hover:bg-indigo-50">
             <i class="fa-regular fa-bell text-xl"></i>
-            <span class="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 border-2 border-white rounded-full text-[9px] font-bold text-white flex items-center justify-center">2</span>
+            <span class="absolute top-1 right-1 w-4 h-4 bg-indigo-500 border-2 border-white rounded-full text-[9px] font-bold text-white flex items-center justify-center">2</span>
         </button>
-        <div class="flex items-center space-x-3 border-l border-slate-200 pl-6 cursor-pointer">
-            <img src="https://ui-avatars.com/api/?name=Mahasiswa&background=e0e7ff&color=4f46e5" alt="Avatar" class="w-10 h-10 rounded-full border border-slate-200">
+        
+        <!-- Profile -->
+        <div class="flex items-center space-x-2 md:space-x-3 border-l border-slate-200 pl-3 md:pl-6">
+            <div class="relative">
+                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-sm border-2 border-indigo-100">
+                    <span class="text-white font-bold text-xs md:text-sm" id="mahasiswaAvatarInisial">BS</span>
+                </div>
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+            </div>
             <div class="hidden md:block leading-tight">
                 <p class="text-sm font-bold text-slate-800" id="mahasiswaNameDisplay">Memuat...</p>
-                <p class="text-xs text-slate-500 mt-0.5" id="mahasiswaProdiDisplay">Mahasiswa</p>
+                <p class="text-xs text-indigo-600 mt-0.5 font-medium" id="mahasiswaProdiDisplay">Mahasiswa</p>
             </div>
         </div>
     </div>
