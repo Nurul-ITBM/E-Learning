@@ -1,0 +1,96 @@
+<!-- components/layout-admin.html -->
+<!-- Layout Admin: Sidebar + Header (Tema Orange) -->
+
+<!-- ============================================ -->
+<!-- BAGIAN SIDEBAR                               -->
+<!-- ============================================ -->
+<div id="part-sidebar">
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0">
+        <div class="overflow-y-auto">
+            
+            <!-- Header Sidebar -->
+            <div class="p-6 text-white rounded-br-2xl" 
+                 style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                        <i class="fa-solid fa-user-shield text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
+                        <p class="text-xs text-orange-100 uppercase tracking-wider mt-0.5">Portal Admin</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Navigasi -->
+            <div class="sidebar-menu-wrap">
+                <a href="admin-dashboard.html" id="menu-dashboard" class="sidebar-nav-link dashboard-link">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+
+                <p class="sidebar-section-title">Manajemen</p>
+                
+                <a href="admin-users.html" id="menu-users" class="sidebar-nav-link">
+                    <i class="fa-solid fa-users"></i> Kelola Users
+                </a>
+                <a href="admin-log.html" id="menu-log" class="sidebar-nav-link">
+                    <i class="fa-solid fa-list-check"></i> Log Aktivitas
+                </a>
+                <a href="admin-backup.html" id="menu-backup" class="sidebar-nav-link">
+                    <i class="fa-solid fa-database"></i> Backup Database
+                </a>
+
+                <p class="sidebar-section-title">Akun</p>
+                <a href="admin-profil.html" id="menu-profil" class="sidebar-nav-link">
+                    <i class="fa-regular fa-user"></i> Profil Admin
+                </a>
+            </div>
+        </div>
+
+        <!-- Tombol Keluar -->
+        <div class="sidebar-logout-wrap">
+            <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Keluar</span>
+            </button>
+            <div class="text-center text-xs text-slate-400 mt-2"><p>&copy; 2026 EduLearn</p></div>
+        </div>
+    </aside>
+</div>
+
+<!-- ============================================ -->
+<!-- BAGIAN HEADER                                -->
+<!-- ============================================ -->
+<div id="part-header">
+    <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        
+        <!-- Tombol Hamburger (Mobile) -->
+        <button id="btnToggleSidebar" class="md:hidden text-slate-600 hover:text-orange-600 mr-3 p-2 rounded-lg hover:bg-orange-50 transition">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+        
+        <h2 id="pageTitle" class="text-base md:text-lg font-bold text-slate-800 flex-1">Loading...</h2>
+        
+        <div class="flex items-center space-x-3 md:space-x-6">
+            
+            <!-- Notifikasi -->
+            <button class="relative text-slate-500 hover:text-orange-600 transition p-2 rounded-lg hover:bg-orange-50">
+                <i class="fa-regular fa-bell text-xl"></i>
+                <span class="absolute top-1 right-1 w-4 h-4 bg-orange-500 border-2 border-white rounded-full text-[9px] font-bold text-white flex items-center justify-center">2</span>
+            </button>
+            
+            <!-- Profile -->
+            <div class="flex items-center space-x-2 md:space-x-3 border-l border-slate-200 pl-3 md:pl-6">
+                <div class="relative">
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm border-2 border-orange-100">
+                        <span class="text-white font-bold text-xs md:text-sm" id="adminAvatarInisial">AD</span>
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <div class="hidden md:block leading-tight">
+                    <p class="text-sm font-bold text-slate-800" id="adminNameDisplay">Memuat...</p>
+                    <p class="text-xs text-orange-600 mt-0.5 font-medium">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </header>
+</div>
