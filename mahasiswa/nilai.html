@@ -12,7 +12,7 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
@@ -29,42 +29,145 @@
         <div id="header-container"></div>
 
         <!-- Content Area -->
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
+        <div class="p-8 space-y-6">
+            
+            <!-- Header + IP Card -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-200 pb-4 gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Rekapitulasi Nilai Akademik</h2>
                     <p class="text-sm text-slate-500 mt-1">Berikut adalah daftar nilai komponen tugas, UTS, UAS, dan nilai akhir Anda.</p>
                 </div>
-                <div class="bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm text-right">
-                    <p class="text-xs text-slate-400 font-bold uppercase">Indeks Prestasi (IP)</p>
-                    <p class="text-xl font-extrabold text-indigo-600" id="ipkDisplay">0.00</p>
+                
+                <!-- IP Card -->
+                <div class="bg-white border border-slate-200 px-5 py-3 rounded-xl shadow-sm text-right min-w-[160px]">
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Indeks Prestasi (IP)</p>
+                    <p class="text-2xl font-extrabold text-indigo-600 mt-1" id="ipkDisplay">0.00</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5" id="ipkInfo">Memuat...</p>
                 </div>
             </div>
 
+            <!-- ✅ Alert Container (untuk kasus khusus, misal semua Grade E) -->
+            <div id="alertIpk" class="hidden"></div>
+
+            <!-- Tabel Nilai -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <table class="w-full text-left text-sm text-slate-600">
-                    <thead class="bg-slate-50 text-slate-800 uppercase font-bold text-xs">
-                        <tr>
-                            <th class="px-6 py-4">No</th>
-                            <th class="px-6 py-4">Mata Kuliah</th>
-                            <th class="px-6 py-4 text-center">SKS</th>
-                            <th class="px-6 py-4 text-center">Tugas</th>
-                            <th class="px-6 py-4 text-center">UTS</th>
-                            <th class="px-6 py-4 text-center">UAS</th>
-                            <th class="px-6 py-4 text-center">Kehadiran</th>
-                            <th class="px-6 py-4 text-center">Akhir</th>
-                            <th class="px-6 py-4 text-center">Grade</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelNilaiBody">
-                        <tr>
-                            <td colspan="9" class="text-center py-10 text-slate-400 italic">
-                                <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data nilai...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-slate-800 uppercase font-bold text-xs">
+                            <tr>
+                                <th class="px-6 py-4">No</th>
+                                <th class="px-6 py-4">Mata Kuliah</th>
+                                <th class="px-6 py-4 text-center">SKS</th>
+                                <th class="px-6 py-4 text-center">Tugas</th>
+                                <th class="px-6 py-4 text-center">UTS</th>
+                                <th class="px-6 py-4 text-center">UAS</th>
+                                <th class="px-6 py-4 text-center">Kehadiran</th>
+                                <th class="px-6 py-4 text-center">Akhir</th>
+                                <th class="px-6 py-4 text-center">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelNilaiBody">
+                            <tr>
+                                <td colspan="9" class="text-center py-10 text-slate-400 italic">
+                                    <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data nilai...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- ✅ Legenda Grade -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <p class="text-xs font-bold text-slate-600 mb-3">
+                    <i class="fa-solid fa-info-circle text-indigo-600 mr-1"></i> Keterangan Grade & Nilai Mutu
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                    <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                        <span class="font-bold text-emerald-700">A</span>
+                        <span class="text-slate-500">(4.00)</span>
+                        <span class="text-slate-400 text-[10px] ml-auto">≥ 85</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                        <span class="font-bold text-blue-700">B</span>
+                        <span class="text-slate-500">(3.00)</span>
+                        <span class="text-slate-400 text-[10px] ml-auto">≥ 70</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                        <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                        <span class="font-bold text-amber-700">C</span>
+                        <span class="text-slate-500">(2.00)</span>
+                        <span class="text-slate-400 text-[10px] ml-auto">≥ 60</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
+                        <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                        <span class="font-bold text-orange-700">D</span>
+                        <span class="text-slate-500">(1.00)</span>
+                        <span class="text-slate-400 text-[10px] ml-auto">≥ 50</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span class="font-bold text-red-700">E</span>
+                        <span class="text-slate-500">(0.00)</span>
+                        <span class="text-slate-400 text-[10px] ml-auto">&lt; 50</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ Info Tambahan -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                
+                <!-- Info IPK -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-700">Rumus IPK</p>
+                            <p class="text-[10px] text-slate-500">Indeks Prestasi Kumulatif</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        IPK = <strong class="text-indigo-700">Σ (SKS × Nilai Mutu)</strong> ÷ <strong class="text-indigo-700">Σ SKS</strong>
+                    </p>
+                </div>
+                
+                <!-- Info Grade E -->
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-xl p-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-700">Grade E</p>
+                            <p class="text-[10px] text-slate-500">Tidak Lulus</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        Grade E memiliki <strong class="text-red-700">nilai mutu 0</strong> dan <strong class="text-red-700">tidak menyumbang IPK</strong>.
+                    </p>
+                </div>
+                
+                <!-- Info Batas Kehadiran -->
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-xl p-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-700">Batas Kehadiran</p>
+                            <p class="text-[10px] text-slate-500">Persyaratan Ujian</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">
+                        Minimal <strong class="text-emerald-700">75%</strong> kehadiran untuk mengikuti UAS.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </main>
 
