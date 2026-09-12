@@ -71,11 +71,9 @@ function formatTanggalWaktu(tanggalISO) {
 // INISIALISASI HALAMAN
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Set Judul Halaman
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = 'Ujian';
 
-    // 2. Ambil Session
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) { 
         window.location.href = '../login.html'; 
@@ -87,13 +85,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const idMhs = currentUser.id_mahasiswa || currentUser.id_user;
 
-    // 3. Load status ujian yang sudah dikerjakan
-    await loadStatusUjian(idMhs);
-    
-    // 4. Load daftar ujian
-    await loadDaftarUjian(idMhs);
+    // ✅ PARALEL FETCH — jangan sequential
+    try {
+        await Promise.all([
+            loadStatusUjian(idMhs),
+            loadDaftarUjian(idMhs)
+        ]);
+    } catch (err) {
+        console.error('Error loading data:', err);
+    }
 
-    // 5. Listener pilihan ganda
+    // Listener pilihan ganda
     document.querySelectorAll('input[name="opsiJawaban"]').forEach(input => {
         input.addEventListener('change', (e) => {
             if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = { opsi: '', ragu: false };
@@ -136,7 +138,7 @@ async function loadStatusUjian(id_mahasiswa) {
 }
 
 // ==========================================
-// 2. LOAD DAFTAR UJIAN (DENGAN BADGE & DURASI)
+// 2. LOAD DAFTAR UJIAN (DENGAN STATUS JADWAL)
 // ==========================================
 async function loadDaftarUjian(id_user) {
     const container = document.getElementById('containerDaftarUjian');
@@ -145,52 +147,36 @@ async function loadDaftarUjian(id_user) {
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'get_ujian', id_mahasiswa: id_user })
         });
         const result = await response.json();
         console.log(">>> Daftar ujian:", result);
 
         if (result.status === 'success') {
-            // ✅ SIMPAN DAFTAR UJIAN KE VARIABEL GLOBAL (untuk lookup durasi)
             daftarUjianGlobal = result.data;
-            
             container.innerHTML = '';
+            
             if (result.data.length === 0) {
                 container.innerHTML = '<p class="text-slate-500 col-span-full text-center py-10">Belum ada jadwal ujian saat ini.</p>';
                 return;
             }
 
             result.data.forEach(u => {
-                // ✅ Cek apakah ujian sudah dikerjakan
-                const infoSelesai = ujianSelesai.find(item => item.id_ujian === u.id_ujian);
-                const sudahDikerjakan = !!infoSelesai;
-                
-                // ✅ Ambil config warna badge berdasarkan jenis ujian
                 const jenisUjian = u.jenis_ujian || 'UTS';
                 const jenisConfig = JENIS_UJIAN_CONFIG[jenisUjian] || JENIS_UJIAN_CONFIG['UTS'];
-                
-                // ✅ Format waktu
                 const waktuMulai = formatTanggalWaktu(u.mulai);
                 const waktuSelesai = formatTanggalWaktu(u.selesai);
-                
-                // ✅ Durasi ujian
                 const durasi = u.durasi_menit || 60;
                 
-                // Card class berbeda berdasarkan status
+                // ✅ Tentukan status card
                 let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
-                if (sudahDikerjakan) {
-                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-green-200 flex flex-col justify-between";
-                }
-                
-                // Action HTML berbeda
-                let actionHTML = '';
                 let badgeHTML = '';
+                let actionHTML = '';
                 
-                if (sudahDikerjakan) {
-                    // ✅ Badge jenis ujian + badge SELESAI
+                if (u.sudah_dikerjakan) {
+                    // Sudah dikerjakan
+                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-green-200 flex flex-col justify-between";
                     badgeHTML = `
                         <div class="flex gap-1.5">
                             <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
@@ -202,15 +188,48 @@ async function loadDaftarUjian(id_user) {
                     actionHTML = `
                         <div class="bg-green-50 text-green-600 border border-green-200 py-2.5 rounded-xl text-xs font-bold text-center">
                             <div><i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikerjakan</div>
-                            <div class="text-lg font-bold mt-1">Nilai: ${infoSelesai.nilai}</div>
-                            <div class="text-[10px] font-normal">Benar: ${infoSelesai.jumlah_benar}/${infoSelesai.total_soal}</div>
                         </div>
                     `;
-                } else {
-                    // ✅ Badge jenis ujian
-                    badgeHTML = `<span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>`;
+                } else if (u.status_waktu === 'belum') {
+                    // Belum waktunya
+                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between opacity-75";
+                    badgeHTML = `
+                        <div class="flex gap-1.5">
+                            <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                            <span class="bg-amber-50 text-amber-600 border border-amber-200 text-xs font-bold px-2.5 py-1 rounded-md">
+                                <i class="fa-regular fa-clock mr-0.5"></i> BELUM DIBUKA
+                            </span>
+                        </div>
+                    `;
                     actionHTML = `
-                        <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
+                        <div class="bg-amber-50 text-amber-600 border border-amber-200 py-2.5 rounded-xl text-xs font-bold text-center">
+                            <i class="fa-solid fa-lock mr-1"></i> Ujian Belum Dibuka
+                        </div>
+                    `;
+                } else if (u.status_waktu === 'tutup') {
+                    // Sudah lewat
+                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-red-200 flex flex-col justify-between opacity-75";
+                    badgeHTML = `
+                        <div class="flex gap-1.5">
+                            <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                            <span class="bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md">
+                                <i class="fa-solid fa-times mr-0.5"></i> TERKUNCI
+                            </span>
+                        </div>
+                    `;
+                    actionHTML = `
+                        <div class="bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-xl text-xs font-bold text-center">
+                            <i class="fa-solid fa-lock mr-1"></i> Waktu Ujian Habis
+                        </div>
+                    `;
+                } else if (u.bisa_dikerjakan) {
+                    // BISA dikerjakan
+                    badgeHTML = `
+                        <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                    `;
+                    actionHTML = `
+                        <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" 
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center">
                             <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
                         </button>
                     `;
