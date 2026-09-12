@@ -109,6 +109,55 @@ async function loadAbsensi(user) {
     }
 }
 
+async function loadAbsensi(user, retryCount = 0) {
+    const MAX_RETRY = 2;
+    
+    try {
+        const res = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ 
+                action: 'get_absensi', 
+                id_mahasiswa: user.id_mahasiswa || user.id_user
+            })
+        });
+        const result = await res.json();
+        console.log(">>> Data absensi:", result);
+        
+        if (result.status === 'success') {
+            dataAbsensiGlobal = result.data || [];
+            renderTabel(dataAbsensiGlobal);
+        } else {
+            showErrorState(result.message || 'Gagal memuat data.');
+        }
+    } catch (err) {
+        console.error("Error load absensi:", err);
+        
+        // ✅ Retry logic
+        if (retryCount < MAX_RETRY) {
+            console.log(`>>> Retry ${retryCount + 1}/${MAX_RETRY}...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return loadAbsensi(user, retryCount + 1);
+        }
+        
+        showErrorState('Gagal terhubung ke server. Coba lagi nanti.');
+    }
+}
+
+function showErrorState(message) {
+    document.getElementById('tabelAbsensiBody').innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center py-10 text-red-400">
+                <i class="fa-solid fa-circle-exclamation text-3xl mb-2 block"></i>
+                <p>${message}</p>
+                <button onclick="loadAbsensi(currentUser)" class="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">
+                    <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
 // ==========================================
 // RENDER TABEL
 // ==========================================
