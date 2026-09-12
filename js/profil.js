@@ -3,9 +3,6 @@
 // Fitur: Lihat Profil, Edit Profil, Ganti Password, Statistik
 // ==========================================
 
-// ==========================================
-// VARIABEL GLOBAL
-// ==========================================
 let currentUser = null;
 let currentProfil = null;
 
@@ -23,81 +20,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 2. Tunggu DOM siap
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // 2. ✅ Pasang EVENT DELEGATION DULU (untuk tombol dinamis)
+    setupEventDelegation();
 
-    // 3. Cek elemen
-    const profilContainer = document.getElementById('profilContainer');
-    if (!profilContainer) {
-        console.error('❌ Elemen profilContainer tidak ditemukan!');
-        return;
-    }
+    // 3. Tunggu DOM siap
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // 4. Load Profil & Statistik
     if (currentUser.id_mahasiswa) {
         await loadProfil(currentUser.id_mahasiswa);
         await loadStatistik(currentUser.id_mahasiswa);
     } else {
-        profilContainer.innerHTML = `
+        document.getElementById('profilContainer').innerHTML = `
             <div class="text-center py-16 text-red-400">
                 <i class="fa-solid fa-circle-exclamation text-5xl mb-4 block"></i>
                 <p class="text-sm font-medium">ID Mahasiswa tidak ditemukan di session.</p>
             </div>
         `;
     }
-
-    // 5. ✅ Event listener GLOBAL (delegasi) - untuk tombol dinamis
-    setupGlobalEventListeners();
 });
 
 // ==========================================
-// ✅ SETUP EVENT LISTENER GLOBAL (DELEGASI)
+// ✅ EVENT DELEGATION
 // ==========================================
-function setupGlobalEventListeners() {
+function setupEventDelegation() {
     document.addEventListener('click', function(e) {
-        // Tombol Edit Profil
+        // Edit Profil
         if (e.target.closest('#btnEditProfil')) {
             e.preventDefault();
+            console.log('>>> Klik Edit Profil');
             bukaModalEditProfil();
             return;
         }
         
-        // Tombol Ganti Password
+        // Ganti Password
         if (e.target.closest('#btnGantiPassword')) {
             e.preventDefault();
+            console.log('>>> Klik Ganti Password');
             bukaModalGantiPassword();
             return;
         }
         
-        // Tombol Simpan Profil
+        // ✅ Simpan Profil
         if (e.target.closest('#btnSimpanProfil')) {
             e.preventDefault();
+            console.log('>>> Klik Simpan Profil');
             simpanEditProfil();
             return;
         }
         
-        // Tombol Simpan Password
+        // Simpan Password
         if (e.target.closest('#btnSimpanPassword')) {
             e.preventDefault();
+            console.log('>>> Klik Simpan Password');
             simpanGantiPassword();
-            return;
-        }
-        
-        // Tombol Batal (tutup modal)
-        const btnBatal = e.target.closest('button[onclick*="tutupModal"]');
-        if (btnBatal) {
-            const onclickAttr = btnBatal.getAttribute('onclick');
-            const match = onclickAttr.match(/tutupModal\('([^']+)'\)/);
-            if (match) {
-                tutupModal(match[1]);
-            }
             return;
         }
     });
 }
 
 // ==========================================
-// LOAD PROFIL MAHASISWA
+// LOAD PROFIL
 // ==========================================
 async function loadProfil(idMahasiswa) {
     const container = document.getElementById('profilContainer');
@@ -155,7 +138,6 @@ function renderProfil(profil) {
     
     container.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
                     <div class="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -313,7 +295,7 @@ function renderStatistik(stat) {
 // ==========================================
 function bukaModalEditProfil() {
     if (!currentProfil) {
-        alert('Data profil belum dimuat. Mohon tunggu...');
+        alert('Data profil belum dimuat.');
         return;
     }
     
@@ -327,15 +309,15 @@ function bukaModalEditProfil() {
 }
 
 // ==========================================
-// SIMPAN EDIT PROFIL
+// ✅ SIMPAN EDIT PROFIL
 // ==========================================
 async function simpanEditProfil() {
-    console.log(">>> simpanEditProfil dipanggil");
+    console.log(">>> simpanEditProfil DIPANGGIL");
     
-    const nama = document.getElementById('editNama').value.trim();
-    const prodi = document.getElementById('editProdi').value.trim();
-    const angkatan = document.getElementById('editAngkatan').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
+    const nama = document.getElementById('editNama')?.value.trim() || '';
+    const prodi = document.getElementById('editProdi')?.value.trim() || '';
+    const angkatan = document.getElementById('editAngkatan')?.value.trim() || '';
+    const email = document.getElementById('editEmail')?.value.trim() || '';
     
     if (!nama) {
         alert('⚠️ Nama mahasiswa tidak boleh kosong.');
@@ -361,7 +343,7 @@ async function simpanEditProfil() {
             })
         });
         const result = await response.json();
-        console.log(">>> Update profil:", result);
+        console.log(">>> Response update profil:", result);
 
         if (result.status === 'success') {
             alert('✅ ' + result.message);
@@ -411,11 +393,9 @@ function bukaModalGantiPassword() {
 // SIMPAN GANTI PASSWORD
 // ==========================================
 async function simpanGantiPassword() {
-    console.log(">>> simpanGantiPassword dipanggil");
-    
-    const passwordLama = document.getElementById('passwordLama').value;
-    const passwordBaru = document.getElementById('passwordBaru').value;
-    const passwordKonfirmasi = document.getElementById('passwordKonfirmasi').value;
+    const passwordLama = document.getElementById('passwordLama')?.value || '';
+    const passwordBaru = document.getElementById('passwordBaru')?.value || '';
+    const passwordKonfirmasi = document.getElementById('passwordKonfirmasi')?.value || '';
     
     if (!passwordLama || !passwordBaru || !passwordKonfirmasi) {
         alert('⚠️ Semua kolom wajib diisi.');
@@ -437,9 +417,7 @@ async function simpanGantiPassword() {
         return;
     }
     
-    if (!confirm('Ganti password? Anda akan logout otomatis setelah ini.')) {
-        return;
-    }
+    if (!confirm('Ganti password? Anda akan logout otomatis setelah ini.')) return;
     
     const btn = document.getElementById('btnSimpanPassword');
     const originalText = btn.innerHTML;
@@ -458,7 +436,7 @@ async function simpanGantiPassword() {
             })
         });
         const result = await response.json();
-        console.log(">>> Ganti password:", result);
+        console.log(">>> Response ganti password:", result);
 
         if (result.status === 'success') {
             alert('✅ ' + result.message);
@@ -481,7 +459,7 @@ async function simpanGantiPassword() {
 }
 
 // ==========================================
-// TOGGLE PASSWORD VISIBILITY
+// TOGGLE PASSWORD
 // ==========================================
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
@@ -509,5 +487,6 @@ function togglePassword(inputId) {
 // TUTUP MODAL
 // ==========================================
 function tutupModal(id) {
-    document.getElementById(id).classList.add('hidden');
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
 }
