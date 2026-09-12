@@ -1,23 +1,37 @@
 /* ========================================== */
+/* BRAND GRADIENT - WARNA HEADER SIDEBAR       */
+/* ========================================== */
+
+/* Default: Dosen (teal → biru) */
+.bg-brand-gradient {
+    background: linear-gradient(135deg, #0d9488 0%, #0369a1 100%) !important;
+}
+
+/* Mahasiswa (indigo → purple) */
+body.role-mahasiswa .bg-brand-gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+}
+
+/* ========================================== */
 /* PRIMARY BUTTON - TOMBOL UTAMA (LOGIN, DLL)  */
 /* ========================================== */
 
 .bg-primary-btn {
-    background-color: #4f46e5 !important; /* Indigo 600 */
+    background-color: #4f46e5 !important;
     color: #ffffff !important;
     border: none;
 }
 
 .bg-primary-btn:hover {
-    background-color: #4338ca !important; /* Indigo 700 */
+    background-color: #4338ca !important;
 }
 
 .bg-primary-btn:active {
-    background-color: #3730a3 !important; /* Indigo 800 */
+    background-color: #3730a3 !important;
 }
 
 .bg-primary-btn:disabled {
-    background-color: #a5b4fc !important; /* Indigo 300 */
+    background-color: #a5b4fc !important;
     cursor: not-allowed;
     opacity: 0.7;
 }
@@ -27,7 +41,7 @@
 /* ========================================== */
 
 .text-navy {
-    color: #1e293b !important; /* Slate 800 */
+    color: #1e293b !important;
 }
 
 /* ========================================== */
@@ -99,10 +113,6 @@ body {
     border-top: 1px solid #e2e8f0;
 }
 
-aside {
-    min-height: 100vh;
-}
-
 /* ========================================== */
 /* SIDEBAR MAHASISWA - WARNA INDIGO (BIRU)     */
 /* ========================================== */
@@ -119,6 +129,184 @@ body.role-mahasiswa .sidebar-nav-link.active {
     border-radius: 0.75rem !important;
 }
 
-body.role-mahasiswa .bg-brand-gradient {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+/* ========================================== */
+/* SIDEBAR - BASE STYLING                      */
+/* ========================================== */
+
+aside {
+    min-height: 100vh;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* ========================================== */
+/* RESPONSIVE MOBILE - SIDEBAR COLLAPSE        */
+/* ========================================== */
+
+/* Tombol Hamburger (default: hidden di desktop) */
+#btnToggleSidebar {
+    display: none;
+}
+
+/* Overlay gelap saat sidebar terbuka di mobile */
+#sidebarOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+}
+
+#sidebarOverlay.show {
+    display: block;
+}
+
+/* Media Query untuk Mobile */
+@media (max-width: 768px) {
+
+    /* Body jadi kolom */
+    body {
+        flex-direction: column;
+    }
+
+    /* Sidebar tersembunyi default */
+    aside {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 80vw;
+        transform: translateX(-100%);
+        z-index: 50;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+        overflow-y: auto;
+    }
+
+    /* Sidebar muncul saat class .show */
+    aside.show {
+        transform: translateX(0);
+    }
+
+    /* Main full width */
+    main {
+        width: 100%;
+        flex: 1;
+    }
+
+    /* Tombol hamburger muncul */
+    #btnToggleSidebar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Padding lebih kecil di mobile */
+    .p-8 {
+        padding: 1rem !important;
+    }
+
+    .px-8 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .p-6 {
+        padding: 1rem !important;
+    }
+
+    .p-5 {
+        padding: 0.875rem !important;
+    }
+
+    /* Hero banner padding */
+    .p-8.rounded-2xl {
+        padding: 1.25rem !important;
+    }
+
+    /* Stat cards: 2 kolom */
+    .grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    /* Grid layout jadi 1 kolom */
+    .lg\:grid-cols-2,
+    .lg\:grid-cols-3,
+    .lg\:grid-cols-4 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Hero banner: vertikal center */
+    .bg-gradient-to-r {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 1rem;
+    }
+
+    /* Icon di hero banner disembunyikan */
+    .bg-gradient-to-r .absolute {
+        display: none !important;
+    }
+
+    /* Header: padding lebih kecil */
+    header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Text heading: lebih kecil */
+    h2.text-2xl {
+        font-size: 1.25rem !important;
+    }
+
+    h2.text-lg {
+        font-size: 0.875rem !important;
+    }
+
+    /* Stat cards: ukuran text */
+    .text-2xl {
+        font-size: 1.25rem !important;
+    }
+
+    /* Hide chevron & spesialisasi di mobile */
+    .hidden.md\:block {
+        display: none !important;
+    }
+
+    /* Avatar header lebih kecil */
+    .w-10.h-10 {
+        width: 2rem !important;
+        height: 2rem !important;
+    }
+}
+
+/* ========================================== */
+/* SMALL MOBILE - EXTRA COMPACT                */
+/* ========================================== */
+
+@media (max-width: 480px) {
+    aside {
+        width: 85vw;
+    }
+
+    .p-8 {
+        padding: 0.75rem !important;
+    }
+
+    h2.text-2xl {
+        font-size: 1.125rem !important;
+    }
+
+    .text-2xl {
+        font-size: 1.125rem !important;
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.5rem !important;
+    }
+
+    .bg-white.p-5 {
+        padding: 0.75rem !important;
+    }
 }
