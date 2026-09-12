@@ -1,7 +1,9 @@
+// ==========================================
 // js/absensi.js - Logika Halaman Absensi Mahasiswa
-// Fitur: Filter Tanggal, Window Absen 15 Menit, Keterangan Telat
+// Fitur: Filter Tanggal, Window Absen 15 Menit, Absen Keluar Independen
+// ==========================================
 
-let dataAbsensiGlobal = [];  // Simpan data untuk filter
+let dataAbsensiGlobal = [];
 let currentUser = null;
 
 // ==========================================
@@ -22,15 +24,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateJamSekarang();
     setInterval(updateJamSekarang, 1000);
 
-    // 3. Load Data Absensi
+    // 3. Tunggu DOM siap
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 4. Cek elemen
+    const filterTanggal = document.getElementById('filterTanggalAbsen');
+    const filterStatus = document.getElementById('filterStatusAbsen');
+    const btnReset = document.getElementById('btnResetFilter');
+
+    if (filterTanggal) filterTanggal.addEventListener('change', applyFilter);
+    if (filterStatus) filterStatus.addEventListener('change', applyFilter);
+    if (btnReset) btnReset.addEventListener('click', resetFilter);
+
+    // 5. Load Data Absensi
     await loadAbsensi(currentUser);
 
-    // 4. Event Listener Filter
-    document.getElementById('filterTanggalAbsen').addEventListener('change', applyFilter);
-    document.getElementById('filterStatusAbsen').addEventListener('change', applyFilter);
-    document.getElementById('btnResetFilter').addEventListener('click', resetFilter);
-
-    // 5. Auto-refresh setiap 30 detik
+    // 6. Auto-refresh setiap 30 detik
     setInterval(() => {
         console.log(">>> Auto-refresh absensi...");
         loadAbsensi(currentUser);
@@ -65,9 +74,7 @@ async function loadAbsensi(user) {
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ 
                 action: 'get_absensi', 
                 id_mahasiswa: user.id_mahasiswa || user.id_user
@@ -157,7 +164,7 @@ function renderTabel(data) {
                 </button>
             `;
         } else {
-            // TIDAK BISA absen masuk - tampilkan tombol disabled + tooltip
+            // TIDAK BISA absen masuk
             tombolMasuk = `
                 <button disabled 
                     class="tooltip-btn bg-slate-100 text-slate-400 px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-not-allowed w-full"
@@ -168,6 +175,7 @@ function renderTabel(data) {
         }
         
         // ✅ TOMBOL ABSEN KELUAR
+        // Perubahan: TIDAK ada syarat "harus absen masuk dulu"
         let tombolKeluar = '';
         if (item.waktu_keluar && item.waktu_keluar !== '-' && item.waktu_keluar !== '') {
             // Sudah absen keluar
@@ -226,26 +234,30 @@ function renderTabel(data) {
 // FILTER DATA
 // ==========================================
 function applyFilter() {
-    const tanggal = document.getElementById('filterTanggalAbsen').value;
-    const status = document.getElementById('filterStatusAbsen').value;
+    const tanggal = document.getElementById('filterTanggalAbsen')?.value || '';
+    const status = document.getElementById('filterStatusAbsen')?.value || '';
     
     let filtered = [...dataAbsensiGlobal];
     
-    // Filter tanggal (format: YYYY-MM-DD)
+    // Filter tanggal
     if (tanggal) {
         const [year, month, day] = tanggal.split('-');
-        const tanggalTampil = `${parseInt(day)} ${getNamaBulan(parseInt(month))} ${year}`;
+        const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                          'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const bulanStr = namaBulan[parseInt(month) - 1];
+        const tanggalPattern = `${parseInt(day)} ${bulanStr} ${year}`;
         
         filtered = filtered.filter(item => {
-            // Cocokkan dengan format tanggal di data
-            return item.tanggal && item.tanggal.includes(tanggalTampil.substring(0, 6));
+            return item.tanggal && item.tanggal === tanggalPattern;
         });
     }
     
     // Filter status
     if (status) {
         filtered = filtered.filter(item => {
-            if (status === 'Belum') return !item.waktu_masuk || item.waktu_masuk === '-';
+            if (status === 'Belum') {
+                return !item.waktu_masuk || item.waktu_masuk === '-';
+            }
             return item.status === status;
         });
     }
@@ -253,15 +265,13 @@ function applyFilter() {
     renderTabel(filtered);
 }
 
-function getNamaBulan(bulan) {
-    const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
-                       'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    return namaBulan[bulan - 1] || '';
-}
-
 function resetFilter() {
-    document.getElementById('filterTanggalAbsen').value = '';
-    document.getElementById('filterStatusAbsen').value = '';
+    const filterTanggal = document.getElementById('filterTanggalAbsen');
+    const filterStatus = document.getElementById('filterStatusAbsen');
+    
+    if (filterTanggal) filterTanggal.value = '';
+    if (filterStatus) filterStatus.value = '';
+    
     renderTabel(dataAbsensiGlobal);
 }
 
@@ -274,7 +284,11 @@ async function kirimAbsen(aksi, id_pertemuan) {
         return;
     }
     
-    if (!confirm(`Apakah Anda yakin ingin melakukan absen ${aksi}?`)) return;
+    const pesanKonfirmasi = aksi === 'MASUK' 
+        ? 'Apakah Anda yakin ingin melakukan absen MASUK?' 
+        : 'Apakah Anda yakin ingin melakukan absen KELUAR?';
+    
+    if (!confirm(pesanKonfirmasi)) return;
 
     // Loading state
     const btn = event.target.closest('button');
@@ -287,9 +301,7 @@ async function kirimAbsen(aksi, id_pertemuan) {
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ 
                 action: 'proses_absen', 
                 id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user, 
@@ -302,6 +314,7 @@ async function kirimAbsen(aksi, id_pertemuan) {
         alert(result.message);
         
         if (result.status === 'success') {
+            // Reload data absensi
             await loadAbsensi(currentUser);
         } else {
             if (btn) {
@@ -311,7 +324,7 @@ async function kirimAbsen(aksi, id_pertemuan) {
         }
     } catch (err) {
         console.error("Error kirim absen:", err);
-        alert("Terjadi kesalahan koneksi ke server.");
+        alert("❌ Terjadi kesalahan koneksi ke server.");
         if (btn) {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
