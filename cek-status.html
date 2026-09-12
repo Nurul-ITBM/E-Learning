@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Status Akun - EduLearn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen py-8">
+
+    <a href="login.html" class="absolute top-6 left-6 text-gray-500 hover:text-indigo-600 flex items-center space-x-2">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="font-medium text-sm">Kembali ke Login</span>
+    </a>
+
+    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 mx-4">
+        <div class="flex flex-col items-center mb-8">
+            <div class="bg-indigo-500 p-3 rounded-xl text-white mb-4 shadow-md">
+                <i class="fa-solid fa-magnifying-glass text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">Cek Status Akun</h1>
+            <p class="text-gray-500 text-sm mt-1 text-center">Masukkan email yang Anda daftarkan</p>
+        </div>
+
+        <div class="mb-5">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-regular fa-envelope text-gray-400"></i>
+                </div>
+                <input type="email" id="emailCek" placeholder="email@elearning.ac.id"
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 focus:bg-white">
+            </div>
+        </div>
+
+        <button onclick="cekStatus()" id="cekBtn"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-md transition-all flex justify-center items-center space-x-2">
+            <span>Cek Status</span>
+            <i class="fa-solid fa-search text-sm"></i>
+        </button>
+
+        <div id="hasilCek" class="mt-5"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        async function cekStatus() {
+            const email = document.getElementById('emailCek').value.trim();
+            const btn = document.getElementById('cekBtn');
+            const hasil = document.getElementById('hasilCek');
+
+            if (!email) {
+                hasil.innerHTML = '<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">⚠️ Masukkan email terlebih dahulu.</div>';
+                return;
+            }
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Mencari...';
+            btn.disabled = true;
+            hasil.innerHTML = '';
+
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'cek_status_akun',
+                        email: email
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const d = result.data;
+                    const isApproved = d.status_verifikasi === 'approved';
+                    const isRejected = d.status_verifikasi === 'rejected';
+
+                    let warna = isApproved ? 'green' : (isRejected ? 'red' : 'amber');
+                    let icon = isApproved ? 'fa-circle-check' : (isRejected ? 'fa-circle-xmark' : 'fa-clock');
+                    let judul = isApproved ? 'Akun Aktif' : (isRejected ? 'Akun Ditolak' : 'Menunggu Verifikasi');
+
+                    hasil.innerHTML = `
+                        <div class="p-4 rounded-lg bg-${warna}-50 border border-${warna}-200 text-${warna}-700">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fa-solid ${icon} text-xl"></i>
+                                <strong>${judul}</strong>
+                            </div>
+                            <p class="text-xs mb-1"><strong>Email:</strong> ${d.email}</p>
+                            <p class="text-xs mb-1"><strong>Status:</strong> ${d.status_verifikasi}</p>
+                            <p class="text-xs mb-3"><strong>Tanggal Daftar:</strong> ${d.tanggal_daftar}</p>
+                            ${isApproved ? '<a href="login.html" class="text-indigo-600 hover:underline text-sm font-semibold">Login sekarang →</a>' : ''}
+                            ${!isApproved && !isRejected ? '<p class="text-xs">Akun Anda masih menunggu verifikasi admin (1×24 jam kerja).</p>' : ''}
+                            ${isRejected ? '<p class="text-xs">Silakan hubungi admin untuk informasi lebih lanjut.</p>' : ''}
+                        </div>
+                    `;
+                } else {
+                    hasil.innerHTML = `<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">❌ ${result.message}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                hasil.innerHTML = '<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">❌ Terjadi kesalahan koneksi.</div>';
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
