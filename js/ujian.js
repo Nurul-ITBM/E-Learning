@@ -169,16 +169,16 @@ async function loadDaftarUjian(id_user) {
                 const waktuSelesai = formatTanggalWaktu(u.selesai);
                 const durasi = u.durasi_menit || 60;
                 
-                // ✅ Tentukan status card
+                // ✅ Tentukan tampilan berdasarkan status
                 let cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition flex flex-col justify-between";
                 let badgeHTML = '';
                 let actionHTML = '';
                 
                 if (u.sudah_dikerjakan) {
-                    // Sudah dikerjakan
+                    // ✅ SUDAH DIKERJAKAN
                     cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-green-200 flex flex-col justify-between";
                     badgeHTML = `
-                        <div class="flex gap-1.5">
+                        <div class="flex gap-1.5 flex-wrap">
                             <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
                             <span class="bg-green-50 text-green-600 border border-green-200 text-xs font-bold px-2.5 py-1 rounded-md">
                                 <i class="fa-solid fa-check mr-0.5"></i> SELESAI
@@ -187,14 +187,14 @@ async function loadDaftarUjian(id_user) {
                     `;
                     actionHTML = `
                         <div class="bg-green-50 text-green-600 border border-green-200 py-2.5 rounded-xl text-xs font-bold text-center">
-                            <div><i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikerjakan</div>
+                            <i class="fa-solid fa-circle-check mr-1"></i> Sudah Dikerjakan
                         </div>
                     `;
                 } else if (u.status_waktu === 'belum') {
-                    // Belum waktunya
-                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between opacity-75";
+                    // 🟡 BELUM WAKTUNYA
+                    cardClass = "bg-white p-6 rounded-2xl shadow-sm border border-amber-200 flex flex-col justify-between opacity-75";
                     badgeHTML = `
-                        <div class="flex gap-1.5">
+                        <div class="flex gap-1.5 flex-wrap">
                             <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
                             <span class="bg-amber-50 text-amber-600 border border-amber-200 text-xs font-bold px-2.5 py-1 rounded-md">
                                 <i class="fa-regular fa-clock mr-0.5"></i> BELUM DIBUKA
@@ -207,10 +207,10 @@ async function loadDaftarUjian(id_user) {
                         </div>
                     `;
                 } else if (u.status_waktu === 'tutup') {
-                    // Sudah lewat
+                    // 🔴 SUDAH LEWAT
                     cardClass = "bg-white p-6 rounded-2xl shadow-sm border-2 border-red-200 flex flex-col justify-between opacity-75";
                     badgeHTML = `
-                        <div class="flex gap-1.5">
+                        <div class="flex gap-1.5 flex-wrap">
                             <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
                             <span class="bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md">
                                 <i class="fa-solid fa-times mr-0.5"></i> TERKUNCI
@@ -223,9 +223,14 @@ async function loadDaftarUjian(id_user) {
                         </div>
                     `;
                 } else if (u.bisa_dikerjakan) {
-                    // BISA dikerjakan
+                    // 🟢 BISA DIKERJAKAN
                     badgeHTML = `
-                        <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                        <div class="flex gap-1.5 flex-wrap">
+                            <span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>
+                            <span class="bg-indigo-50 text-indigo-600 border border-indigo-200 text-xs font-bold px-2.5 py-1 rounded-md animate-pulse">
+                                <i class="fa-solid fa-circle-play mr-0.5"></i> TERSEDIA
+                            </span>
+                        </div>
                     `;
                     actionHTML = `
                         <button onclick="mulaiUjian('${u.id_ujian}', '${u.judul.replace(/'/g, "\\'")}')" 
@@ -233,15 +238,23 @@ async function loadDaftarUjian(id_user) {
                             <i class="fa-solid fa-pen-to-square mr-2"></i> Mulai Kerjakan Ujian
                         </button>
                     `;
+                } else {
+                    // Fallback
+                    badgeHTML = `<span class="${jenisConfig.class} text-xs font-bold px-2.5 py-1 rounded-md border">${jenisConfig.label}</span>`;
+                    actionHTML = `
+                        <div class="bg-slate-50 text-slate-500 border border-slate-200 py-2.5 rounded-xl text-xs font-bold text-center">
+                            <i class="fa-solid fa-circle-info mr-1"></i> ${u.alasan || 'Tidak tersedia'}
+                        </div>
+                    `;
                 }
 
                 const card = document.createElement('div');
                 card.className = cardClass;
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-3">
+                        <div class="flex justify-between items-start mb-3 gap-2">
                             ${badgeHTML}
-                            <span class="text-xs font-bold text-slate-400">Bobot: ${u.bobot}</span>
+                            <span class="text-xs font-bold text-slate-400 whitespace-nowrap">Bobot: ${u.bobot}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">${u.judul}</h3>
                         <p class="text-xs text-indigo-600 font-semibold mb-3">${u.mata_kuliah}</p>
