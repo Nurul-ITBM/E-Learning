@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup Database - EduLearn Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <div id="sidebar-container"></div>
+
+    <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+        
+        <div id="header-container"></div>
+
+        <div class="p-4 md:p-8 space-y-6">
+            
+            <!-- Header Title -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-slate-200 pb-4 gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Backup Database</h2>
+                    <p class="text-sm text-slate-500 mt-1">Buat backup dan kelola file backup database.</p>
+                </div>
+                <button id="btnRefresh" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-lg shadow-sm font-semibold text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Info Banner -->
+            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl p-6 flex items-start gap-4">
+                <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-database text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base font-bold text-slate-800 mb-1">Backup Otomatis & Manual</h3>
+                    <p class="text-sm text-slate-600">
+                        Backup database berisi <strong>salinan lengkap Spreadsheet</strong> yang disimpan di Google Drive.
+                        Disarankan melakukan backup secara rutin untuk mencegah kehilangan data.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-file-zipper"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statTotal">0</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Total Backup</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fa-regular fa-calendar"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800" id="statTerakhir">-</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Backup Terakhir</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-weight-hanging"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statUkuran">0 MB</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Total Ukuran</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-600">Aman</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Status Data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Buat Backup -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Buat Backup Baru</h3>
+                        <p class="text-xs text-slate-500">Klik tombol untuk membuat salinan database ke Google Drive.</p>
+                    </div>
+                    <button id="btnBackup" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg shadow-md font-bold text-sm transition flex items-center gap-2 w-full md:w-auto justify-center">
+                        <i class="fa-solid fa-plus-circle"></i> Buat Backup Sekarang
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabel Daftar Backup -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-5 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-purple-600 mr-2"></i>
+                        Riwayat Backup
+                    </h3>
+                </div>
+                <div id="containerTabel" class="overflow-x-auto">
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3 block"></i>
+                        <p class="text-sm">Memuat riwayat backup...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/70 z-[100] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center max-w-sm">
+            <div class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Membuat Backup...</h3>
+            <p class="text-sm text-slate-500">Mohon tunggu, proses backup sedang berjalan. Jangan tutup halaman ini.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/admin-backup.js"></script>
+</body>
+</html>
