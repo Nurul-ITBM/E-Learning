@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Users - EduLearn Admin</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <!-- Container Sidebar -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+        
+        <!-- Container Header -->
+        <div id="header-container"></div>
+
+        <!-- Content Area -->
+        <div class="p-4 md:p-8 space-y-6">
+            
+            <!-- Header Title -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-slate-200 pb-4 gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Kelola Users</h2>
+                    <p class="text-sm text-slate-500 mt-1">Lihat, verifikasi, dan kelola semua pengguna sistem.</p>
+                </div>
+                <button id="btnRefresh" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-lg shadow-sm font-semibold text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Info Cards -->
+            <div id="infoCards" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statTotal">0</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Total Users</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statMahasiswa">0</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Mahasiswa</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statDosen">0</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Dosen</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800" id="statPending">0</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Pending Verifikasi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 flex gap-2">
+                <button id="tabAll" class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition active-tab" onclick="switchTab('all')">
+                    <i class="fa-solid fa-users mr-1"></i> Semua User
+                </button>
+                <button id="tabPending" class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition text-slate-500 hover:bg-slate-50" onclick="switchTab('pending')">
+                    <i class="fa-solid fa-clock mr-1"></i> Permohonan Akun
+                    <span id="badgePending" class="hidden ml-1 bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+
+            <!-- Filter & Search -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchInput" placeholder="Cari nama, NIM, email..." 
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        </div>
+                    </div>
+                    <select id="filterRole" class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500">
+                        <option value="">Semua Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="dosen">Dosen</option>
+                        <option value="mahasiswa">Mahasiswa</option>
+                    </select>
+                    <select id="filterStatus" class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500">
+                        <option value="">Semua Status</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Nonaktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabel User -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div id="containerTabel" class="overflow-x-auto">
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3 block"></i>
+                        <p class="text-sm">Memuat data users...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ============================================ -->
+    <!-- MODAL EDIT USER                              -->
+    <!-- ============================================ -->
+    <div id="modalEditUser" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-user-edit text-orange-600 mr-2"></i>Edit User
+                </h3>
+                <button onclick="tutupModal('modalEditUser')" class="text-slate-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formEditUser" class="p-5 space-y-4">
+                <input type="hidden" id="editIdUser">
+                
+                <!-- Info User -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                    <p class="text-xs text-slate-500 mb-1">User</p>
+                    <p class="font-bold text-slate-800" id="editNama">-</p>
+                    <p class="text-xs text-slate-500 mt-1" id="editUsername">-</p>
+                </div>
+
+                <!-- Role -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Role</label>
+                    <select id="editRole" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500">
+                        <option value="admin">Admin</option>
+                        <option value="dosen">Dosen</option>
+                        <option value="mahasiswa">Mahasiswa</option>
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Status</label>
+                    <select id="editStatus" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500">
+                        <option value="true">Aktif</option>
+                        <option value="false">Nonaktif</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="tutupModal('modalEditUser')" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-lg text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg text-sm">
+                        <i class="fa-solid fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL RESET PASSWORD                         -->
+    <!-- ============================================ -->
+    <div id="modalResetPassword" class="fixed inset-0 bg-black/50 z-[80] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-key text-orange-600 mr-2"></i>Reset Password
+                </h3>
+                <button onclick="tutupModal('modalResetPassword')" class="text-slate-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formResetPassword" class="p-5 space-y-4">
+                <input type="hidden" id="resetIdUser">
+                
+                <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 text-xs text-amber-700">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    Password akan direset. User harus menggunakan password baru untuk login.
+                </div>
+
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                    <p class="text-xs text-slate-500 mb-1">User</p>
+                    <p class="font-bold text-slate-800" id="resetNama">-</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Password Baru</label>
+                    <input type="text" id="resetPasswordBaru" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-orange-500" 
+                        placeholder="Minimal 6 karakter" minlength="6" required>
+                    <p class="text-[10px] text-slate-400 mt-1">Beritahu password baru ke user.</p>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="tutupModal('modalResetPassword')" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-lg text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg text-sm">
+                        <i class="fa-solid fa-key mr-1"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-layout.js"></script>
+    <script src="../js/admin-users.js"></script>
+</body>
+</html>
