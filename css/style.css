@@ -242,3 +242,31 @@ aside {
         padding: 0.75rem !important;
     }
 }
+
+/* ========================================== */
+/* SIDEBAR ADMIN - WARNA ORANGE                */
+/* ========================================== */
+
+/* Menu Hover - Admin */
+body.role-admin .sidebar-nav-link:hover {
+    color: #ea580c !important;
+    background-color: #fff7ed !important;
+}
+
+/* Menu Aktif - Admin */
+body.role-admin .sidebar-nav-link.active {
+    background-color: #fff7ed !important;
+    color: #ea580c !important;
+    font-weight: 600 !important;
+    border-radius: 0.75rem !important;
+}
+
+/* Brand Gradient - Admin */
+body.role-admin .bg-brand-gradient {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+}
+
+/* Hover efek untuk notifikasi admin */
+body.role-admin header button:hover {
+    color: #ea580c;
+}
