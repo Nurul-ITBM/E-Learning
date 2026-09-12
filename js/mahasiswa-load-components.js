@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         // ==========================================
         setupLogoutHandler();
 
+        // ==========================================
+        // 4. ✅ SETUP TOGGLE SIDEBAR (MOBILE)
+        // ==========================================
+        setupSidebarToggle();
+
     } catch (error) {
         console.error("Gagal memuat komponen mahasiswa:", error);
     }
@@ -55,7 +60,7 @@ function highlightActiveMenu() {
         el.classList.remove('active');
     });
 
-    // ✅ Mapping halaman → ID menu (tanpa pengumuman)
+    // Mapping halaman → ID menu
     const menuMap = {
         'dashboard.html': 'menu-dashboard',
         'matakuliah.html': 'menu-matakuliah',
@@ -111,6 +116,27 @@ function fillHeaderData() {
     if (prodiDisplay) {
         prodiDisplay.innerText = user.program_studi || 'Mahasiswa';
     }
+    
+    // ✅ Set inisial avatar otomatis
+    const avatarInisial = document.getElementById('mahasiswaAvatarInisial');
+    if (avatarInisial) {
+        const nama = user.nama_mahasiswa || 'Mahasiswa';
+        
+        // Ambil kata valid
+        const kata = nama.split(' ').filter(k => k.length > 0);
+        
+        let inisial = '';
+        
+        if (kata.length >= 2) {
+            inisial = kata[0].charAt(0) + kata[1].charAt(0);
+        } else if (kata.length === 1) {
+            inisial = kata[0].substring(0, 2);
+        } else {
+            inisial = nama.substring(0, 2);
+        }
+        
+        avatarInisial.innerText = inisial.toUpperCase() || 'MH';
+    }
 }
 
 // ==========================================
@@ -125,6 +151,56 @@ function setupLogoutHandler() {
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
                 window.location.href = '../login.html';
+            }
+        }
+    });
+}
+
+// ==========================================
+// ✅ TOGGLE SIDEBAR (MOBILE)
+// ==========================================
+function setupSidebarToggle() {
+    // Buat overlay jika belum ada
+    if (!document.getElementById('sidebarOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'sidebarOverlay';
+        document.body.appendChild(overlay);
+    }
+    
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    // Event delegation untuk semua klik
+    document.addEventListener('click', function(e) {
+        
+        // 1. Tombol Hamburger
+        const toggleBtn = e.target.closest('#btnToggleSidebar');
+        if (toggleBtn) {
+            e.preventDefault();
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+            return;
+        }
+        
+        // 2. Klik overlay → tutup sidebar
+        if (e.target.id === 'sidebarOverlay') {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+            return;
+        }
+        
+        // 3. Klik menu link → tutup sidebar (mobile)
+        const menuLink = e.target.closest('.sidebar-nav-link');
+        if (menuLink && window.innerWidth <= 768) {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
             }
         }
     });
