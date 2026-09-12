@@ -124,7 +124,7 @@ function setupLogoutHandler() {
             
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
-                window.location.href = 'login.html';
+                window.location.href = '../login.html';
             }
         }
     });
