@@ -46,15 +46,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // 5. Handler Logout
+    // 5. ✅ Event listener GLOBAL (delegasi) - untuk tombol dinamis
+    setupGlobalEventListeners();
+});
+
+// ==========================================
+// ✅ SETUP EVENT LISTENER GLOBAL (DELEGASI)
+// ==========================================
+function setupGlobalEventListeners() {
     document.addEventListener('click', function(e) {
-        const logoutBtn = e.target.closest('#btnLogout');
-        if (logoutBtn) {
-            localStorage.removeItem('user_session');
-            window.location.href = 'login.html';
+        // Tombol Edit Profil
+        if (e.target.closest('#btnEditProfil')) {
+            e.preventDefault();
+            bukaModalEditProfil();
+            return;
+        }
+        
+        // Tombol Ganti Password
+        if (e.target.closest('#btnGantiPassword')) {
+            e.preventDefault();
+            bukaModalGantiPassword();
+            return;
+        }
+        
+        // Tombol Simpan Profil
+        if (e.target.closest('#btnSimpanProfil')) {
+            e.preventDefault();
+            simpanEditProfil();
+            return;
+        }
+        
+        // Tombol Simpan Password
+        if (e.target.closest('#btnSimpanPassword')) {
+            e.preventDefault();
+            simpanGantiPassword();
+            return;
+        }
+        
+        // Tombol Batal (tutup modal)
+        const btnBatal = e.target.closest('button[onclick*="tutupModal"]');
+        if (btnBatal) {
+            const onclickAttr = btnBatal.getAttribute('onclick');
+            const match = onclickAttr.match(/tutupModal\('([^']+)'\)/);
+            if (match) {
+                tutupModal(match[1]);
+            }
+            return;
         }
     });
-});
+}
 
 // ==========================================
 // LOAD PROFIL MAHASISWA
@@ -116,22 +156,14 @@ function renderProfil(profil) {
     container.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- KARTU PROFIL KIRI -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
-                    <!-- Avatar -->
                     <div class="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
                         <span class="text-white font-extrabold text-4xl">${inisial}</span>
                     </div>
-                    
-                    <!-- Nama & Prodi -->
                     <h3 class="text-lg font-bold text-slate-800 mb-1">${profil.nama_mahasiswa || '-'}</h3>
                     <p class="text-xs text-indigo-600 font-semibold mb-3">${profil.program_studi || 'Mahasiswa'}</p>
-                    
-                    <!-- Status -->
                     <div class="mb-6">${statusBadge}</div>
-                    
-                    <!-- NIM -->
                     <div class="bg-slate-50 rounded-lg p-3 border border-slate-100 text-xs">
                         <p class="text-slate-500 mb-1">NIM</p>
                         <p class="font-bold text-slate-800">${profil.nim || '-'}</p>
@@ -139,10 +171,7 @@ function renderProfil(profil) {
                 </div>
             </div>
             
-            <!-- KARTU DETAIL KANAN -->
             <div class="lg:col-span-2 space-y-6">
-                
-                <!-- Informasi Pribadi -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                     <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
                         <h3 class="text-base font-bold text-slate-800 flex items-center">
@@ -152,7 +181,6 @@ function renderProfil(profil) {
                             <i class="fa-solid fa-edit"></i> Edit Profil
                         </button>
                     </div>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                             <p class="text-xs text-slate-500 mb-1">Nama Lengkap</p>
@@ -177,14 +205,12 @@ function renderProfil(profil) {
                     </div>
                 </div>
                 
-                <!-- Keamanan Akun -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                     <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
                         <h3 class="text-base font-bold text-slate-800 flex items-center">
                             <i class="fa-solid fa-lock text-indigo-600 mr-2"></i> Keamanan Akun
                         </h3>
                     </div>
-                    
                     <div class="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-lg p-4">
                         <div class="flex items-center gap-3">
                             <div class="bg-amber-100 text-amber-600 p-2 rounded-lg">
@@ -200,32 +226,13 @@ function renderProfil(profil) {
                         </button>
                     </div>
                 </div>
-                
             </div>
         </div>
     `;
-    
-    // Re-attach event listeners setelah render
-    attachProfilEventListeners();
 }
 
 // ==========================================
-// ATTACH EVENT LISTENERS
-// ==========================================
-function attachProfilEventListeners() {
-    const btnEditProfil = document.getElementById('btnEditProfil');
-    if (btnEditProfil) {
-        btnEditProfil.addEventListener('click', bukaModalEditProfil);
-    }
-    
-    const btnGantiPassword = document.getElementById('btnGantiPassword');
-    if (btnGantiPassword) {
-        btnGantiPassword.addEventListener('click', bukaModalGantiPassword);
-    }
-}
-
-// ==========================================
-// LOAD STATISTIK MAHASISWA
+// LOAD STATISTIK
 // ==========================================
 async function loadStatistik(idMahasiswa) {
     const container = document.getElementById('statistikContainer');
@@ -263,7 +270,6 @@ function renderStatistik(stat) {
             <h3 class="text-base font-bold text-slate-800 mb-5 pb-3 border-b border-slate-100 flex items-center">
                 <i class="fa-solid fa-chart-line text-indigo-600 mr-2"></i> Statistik Perkuliahan
             </h3>
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
                     <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -272,7 +278,6 @@ function renderStatistik(stat) {
                     <p class="text-2xl font-extrabold text-blue-700">${stat.total_kelas || 0}</p>
                     <p class="text-xs text-slate-600 mt-1">Mata Kuliah</p>
                 </div>
-                
                 <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-center">
                     <div class="bg-purple-100 text-purple-600 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2">
                         <i class="fa-solid fa-file-pen"></i>
@@ -280,7 +285,6 @@ function renderStatistik(stat) {
                     <p class="text-2xl font-extrabold text-purple-700">${stat.total_tugas || 0}</p>
                     <p class="text-xs text-slate-600 mt-1">Tugas</p>
                 </div>
-                
                 <div class="bg-rose-50 border border-rose-100 rounded-xl p-4 text-center">
                     <div class="bg-rose-100 text-rose-600 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2">
                         <i class="fa-regular fa-file-lines"></i>
@@ -288,7 +292,6 @@ function renderStatistik(stat) {
                     <p class="text-2xl font-extrabold text-rose-700">${stat.total_ujian || 0}</p>
                     <p class="text-xs text-slate-600 mt-1">Ujian</p>
                 </div>
-                
                 <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
                     <div class="bg-emerald-100 text-emerald-600 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2">
                         <i class="fa-solid fa-user-check"></i>
@@ -297,7 +300,6 @@ function renderStatistik(stat) {
                     <p class="text-xs text-slate-600 mt-1">Kehadiran</p>
                 </div>
             </div>
-            
             <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 text-center">
                 <i class="fa-solid fa-info-circle mr-1"></i>
                 Total ${stat.total_hadir || 0} hadir dari ${stat.total_absensi || 0} pertemuan
@@ -310,7 +312,10 @@ function renderStatistik(stat) {
 // BUKA MODAL EDIT PROFIL
 // ==========================================
 function bukaModalEditProfil() {
-    if (!currentProfil) return;
+    if (!currentProfil) {
+        alert('Data profil belum dimuat. Mohon tunggu...');
+        return;
+    }
     
     document.getElementById('editNama').value = currentProfil.nama_mahasiswa || '';
     document.getElementById('editProdi').value = currentProfil.program_studi || '';
@@ -325,6 +330,8 @@ function bukaModalEditProfil() {
 // SIMPAN EDIT PROFIL
 // ==========================================
 async function simpanEditProfil() {
+    console.log(">>> simpanEditProfil dipanggil");
+    
     const nama = document.getElementById('editNama').value.trim();
     const prodi = document.getElementById('editProdi').value.trim();
     const angkatan = document.getElementById('editAngkatan').value.trim();
@@ -360,7 +367,7 @@ async function simpanEditProfil() {
             alert('✅ ' + result.message);
             tutupModal('modalEditProfil');
             
-            // Update session localStorage
+            // Update session
             currentUser.nama_mahasiswa = nama;
             currentUser.program_studi = prodi;
             currentUser.angkatan = angkatan;
@@ -370,7 +377,7 @@ async function simpanEditProfil() {
             // Reload profil
             await loadProfil(currentUser.id_mahasiswa);
             
-            // Update nama di header
+            // Update header
             const nameDisplay = document.getElementById('mahasiswaNameDisplay');
             if (nameDisplay) nameDisplay.innerText = nama;
             
@@ -404,11 +411,12 @@ function bukaModalGantiPassword() {
 // SIMPAN GANTI PASSWORD
 // ==========================================
 async function simpanGantiPassword() {
+    console.log(">>> simpanGantiPassword dipanggil");
+    
     const passwordLama = document.getElementById('passwordLama').value;
     const passwordBaru = document.getElementById('passwordBaru').value;
     const passwordKonfirmasi = document.getElementById('passwordKonfirmasi').value;
     
-    // Validasi
     if (!passwordLama || !passwordBaru || !passwordKonfirmasi) {
         alert('⚠️ Semua kolom wajib diisi.');
         return;
@@ -456,7 +464,6 @@ async function simpanGantiPassword() {
             alert('✅ ' + result.message);
             tutupModal('modalGantiPassword');
             
-            // Logout otomatis setelah 2 detik
             setTimeout(() => {
                 localStorage.removeItem('user_session');
                 window.location.href = 'login.html';
