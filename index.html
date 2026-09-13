@@ -9,262 +9,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS Kustom -->
+    <!-- ✅ CSS Global & Index -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index-style.css">
     
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <style>
-        /* ==========================================
-           GLOBAL
-           ========================================== */
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #eef2ff;
-            overflow-x: hidden;
-            position: relative;
-            min-height: 100vh;
-        }
-
-        /* ==========================================
-           BACKGROUND SEAMLESS - ANIMATED GRADIENT BLOBS
-           (Sama seperti login.html)
-           ========================================== */
-        .blob-container {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.55;
-            will-change: transform;
-        }
-
-        .blob-1 {
-            width: 500px;
-            height: 500px;
-            background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
-            top: -150px;
-            left: -150px;
-            animation: blob-float-1 18s ease-in-out infinite;
-        }
-
-        .blob-2 {
-            width: 600px;
-            height: 600px;
-            background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
-            bottom: -200px;
-            right: -200px;
-            animation: blob-float-2 22s ease-in-out infinite;
-        }
-
-        .blob-3 {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, #67e8f9 0%, #06b6d4 100%);
-            top: 40%;
-            left: 50%;
-            animation: blob-float-3 20s ease-in-out infinite;
-        }
-
-        .blob-4 {
-            width: 350px;
-            height: 350px;
-            background: linear-gradient(135deg, #f9a8d4 0%, #ec4899 100%);
-            top: 20%;
-            right: 15%;
-            animation: blob-float-4 25s ease-in-out infinite;
-        }
-
-        @keyframes blob-float-1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33%      { transform: translate(80px, 60px) scale(1.1); }
-            66%      { transform: translate(-40px, 100px) scale(0.95); }
-        }
-        @keyframes blob-float-2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33%      { transform: translate(-100px, -80px) scale(1.15); }
-            66%      { transform: translate(60px, -40px) scale(0.9); }
-        }
-        @keyframes blob-float-3 {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50%      { transform: translate(-40%, -60%) scale(1.2); }
-        }
-        @keyframes blob-float-4 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50%      { transform: translate(-80px, 80px) scale(1.1); }
-        }
-
-        .grid-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            background-image: 
-                linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
-        }
-
-        /* ==========================================
-           NAVBAR - GLASSMORPHISM
-           ========================================== */
-        .navbar-glass {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 20px -4px rgba(79, 70, 229, 0.08);
-            position: sticky;
-            top: 0;
-            z-index: 40;
-        }
-
-        /* ==========================================
-           HERO SECTION
-           ========================================== */
-        .hero-heading {
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-            animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        .hero-paragraph {
-            animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
-        }
-
-        .hero-buttons {
-            animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
-        }
-
-        .hero-badge {
-            animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        .hero-illustration {
-            animation: fade-in-scale 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-        }
-
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fade-in-scale {
-            from { opacity: 0; transform: scale(0.95); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        /* ==========================================
-           TOMBOL GRADIENT (KONSISTEN DENGAN LOGIN)
-           ========================================== */
-        .btn-primary-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            box-shadow: 
-                0 4px 14px -2px rgba(99, 102, 241, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary-gradient:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 8px 24px -4px rgba(99, 102, 241, 0.5),
-                0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .btn-outline-glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            color: #4f46e5;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-glass:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.15);
-        }
-
-        /* ==========================================
-           FEATURE CARD
-           ========================================== */
-        .feature-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .feature-card:hover {
-            background: rgba(255, 255, 255, 0.95);
-            transform: translateY(-6px);
-            box-shadow: 
-                0 20px 40px -10px rgba(79, 70, 229, 0.2),
-                0 0 0 1px rgba(99, 102, 241, 0.1);
-            border-color: rgba(99, 102, 241, 0.2);
-        }
-
-        /* ==========================================
-           STAT CARD
-           ========================================== */
-        .stat-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-        }
-
-        /* ==========================================
-           FLOATING ANIMATION UNTUK ILUSTRASI
-           ========================================== */
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-12px); }
-        }
-        .float-slow {
-            animation: float-slow 4s ease-in-out infinite;
-        }
-
-        /* ==========================================
-           ACCESSIBILITY
-           ========================================== */
-        @media (prefers-reduced-motion: reduce) {
-            .blob,
-            .hero-heading,
-            .hero-paragraph,
-            .hero-buttons,
-            .hero-badge,
-            .hero-illustration,
-            .float-slow {
-                animation: none !important;
-                transition: none !important;
-            }
-        }
-    </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="index-page flex flex-col min-h-screen">
 
-    <!-- ✅ Background Blobs (Sama seperti login) -->
+    <!-- Background Blobs -->
     <div class="blob-container" aria-hidden="true">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -272,11 +26,11 @@
         <div class="blob blob-4"></div>
     </div>
     
-    <!-- ✅ Grid overlay -->
+    <!-- Grid overlay -->
     <div class="grid-overlay" aria-hidden="true"></div>
 
     <!-- ==========================================
-         NAVBAR - GLASSMORPHISM
+         NAVBAR (Tanpa menu Fitur/Tentang/Kontak)
          ========================================== -->
     <header class="navbar-glass">
         <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -289,12 +43,7 @@
                     <span class="font-bold text-2xl text-slate-800 tracking-wide">EduLearn</span>
                 </a>
                 
-                <!-- Menu Navigasi Desktop -->
-                <nav class="hidden md:flex items-center space-x-8">
-                    <a href="#fitur" class="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors">Fitur</a>
-                    <a href="#tentang" class="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors">Tentang</a>
-                    <a href="#kontak" class="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors">Kontak</a>
-                </nav>
+                <!-- ✅ Menu Navigasi DIHAPUS -->
                 
                 <!-- Tombol Login dan Registrasi -->
                 <div class="flex items-center space-x-3">
@@ -312,7 +61,7 @@
     </header>
 
     <!-- ==========================================
-         HERO SECTION
+         HERO SECTION (Tanpa mini stats)
          ========================================== -->
     <main class="flex-grow relative z-10">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center">
@@ -353,24 +102,10 @@
                     </a>
                 </div>
 
-                <!-- Mini Stats -->
-                <div class="mt-10 flex flex-wrap gap-6 justify-center md:justify-start">
-                    <div>
-                        <p class="text-2xl font-bold text-slate-800">500+</p>
-                        <p class="text-xs text-slate-500 font-medium">Mahasiswa Aktif</p>
-                    </div>
-                    <div class="border-l border-slate-300 pl-6">
-                        <p class="text-2xl font-bold text-slate-800">50+</p>
-                        <p class="text-xs text-slate-500 font-medium">Mata Kuliah</p>
-                    </div>
-                    <div class="border-l border-slate-300 pl-6">
-                        <p class="text-2xl font-bold text-slate-800">30+</p>
-                        <p class="text-xs text-slate-500 font-medium">Dosen Ahli</p>
-                    </div>
-                </div>
+                <!-- ✅ Mini Stats DIHAPUS -->
             </div>
 
-            <!-- Ilustrasi / Gambar -->
+            <!-- Ilustrasi -->
             <div class="md:w-1/2 flex justify-center hero-illustration">
                 <div class="relative w-full max-w-md">
                     <!-- Dekorasi Blob Belakang -->
@@ -541,38 +276,7 @@
         </div>
     </section>
 
-    <!-- ==========================================
-         STATISTIK SECTION
-         ========================================== -->
-    <section class="relative z-10 py-16 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-5xl mx-auto">
-            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 md:p-12 shadow-2xl shadow-indigo-500/30 relative overflow-hidden">
-                
-                <!-- Dekorasi -->
-                <div class="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                
-                <div class="relative grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
-                    <div>
-                        <p class="text-4xl md:text-5xl font-extrabold mb-2">500+</p>
-                        <p class="text-sm text-indigo-100 font-medium">Mahasiswa Aktif</p>
-                    </div>
-                    <div>
-                        <p class="text-4xl md:text-5xl font-extrabold mb-2">50+</p>
-                        <p class="text-sm text-indigo-100 font-medium">Mata Kuliah</p>
-                    </div>
-                    <div>
-                        <p class="text-4xl md:text-5xl font-extrabold mb-2">30+</p>
-                        <p class="text-sm text-indigo-100 font-medium">Dosen Ahli</p>
-                    </div>
-                    <div>
-                        <p class="text-4xl md:text-5xl font-extrabold mb-2">99%</p>
-                        <p class="text-sm text-indigo-100 font-medium">Kepuasan User</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- ✅ STATISTIK SECTION DIHAPUS -->
 
     <!-- ==========================================
          CTA SECTION
