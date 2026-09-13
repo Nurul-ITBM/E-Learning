@@ -30,7 +30,7 @@
     <div class="grid-overlay" aria-hidden="true"></div>
 
     <!-- ==========================================
-         NAVBAR (Tanpa menu Fitur/Tentang/Kontak)
+         NAVBAR
          ========================================== -->
     <header class="navbar-glass">
         <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,8 +42,6 @@
                     </div>
                     <span class="font-bold text-2xl text-slate-800 tracking-wide">EduLearn</span>
                 </a>
-                
-                <!-- ✅ Menu Navigasi DIHAPUS -->
                 
                 <!-- Tombol Login dan Registrasi -->
                 <div class="flex items-center space-x-3">
@@ -61,7 +59,7 @@
     </header>
 
     <!-- ==========================================
-         HERO SECTION (Tanpa mini stats)
+         HERO SECTION
          ========================================== -->
     <main class="flex-grow relative z-10">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center">
@@ -90,19 +88,17 @@
                     Akses materi perkuliahan, kumpulkan tugas tepat waktu, dan ikuti ujian secara online dengan sistem yang terintegrasi, responsif, dan mudah digunakan.
                 </p>
                 
-                <!-- Buttons -->
+                <!-- ✅ Buttons (DIPERBARUI) -->
                 <div class="hero-buttons flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-                    <a href="login.html" class="btn-primary-gradient px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
-                        <span>Mulai Belajar Sekarang</span>
-                        <i class="fa-solid fa-arrow-right text-sm"></i>
+                    <a href="cek-status.html" class="btn-primary-gradient px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <span>Cek Status Registrasi</span>
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
                     </a>
                     <a href="#fitur" class="btn-outline-glass px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
                         <i class="fa-solid fa-circle-play text-sm"></i>
                         <span>Pelajari Fitur</span>
                     </a>
                 </div>
-
-                <!-- ✅ Mini Stats DIHAPUS -->
             </div>
 
             <!-- Ilustrasi -->
@@ -113,7 +109,7 @@
                     <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-2000"></div>
                     <div class="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-4000"></div>
                     
-                    <!-- Card Ilustrasi Utama (Mockup) - Tema Agroteknologi -->
+                    <!-- Card Ilustrasi Utama (Mockup - Tema Agroteknologi) -->
                     <div class="relative bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/60 float-slow">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
@@ -135,7 +131,7 @@
                                 <div class="h-full w-[31%] bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
                             </div>
                         </div>
-                    
+
                         <!-- List Materi -->
                         <div class="space-y-2">
                             <div class="flex items-center gap-3 p-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100">
@@ -276,8 +272,6 @@
         </div>
     </section>
 
-    <!-- ✅ STATISTIK SECTION DIHAPUS -->
-
     <!-- ==========================================
          CTA SECTION
          ========================================== -->
@@ -289,10 +283,16 @@
             <p class="text-slate-600 mb-8 max-w-xl mx-auto">
                 Bergabunglah dengan ratusan mahasiswa yang sudah merasakan kemudahan belajar dengan EduLearn.
             </p>
-            <a href="register.html" class="btn-primary-gradient inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg">
-                <span>Daftar Sekarang — Gratis</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </a>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="register.html" class="btn-primary-gradient inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg">
+                    <span>Daftar Sekarang — Gratis</span>
+                    <i class="fa-solid fa-user-plus"></i>
+                </a>
+                <a href="cek-status.html" class="btn-outline-glass inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Cek Status Registrasi</span>
+                </a>
+            </div>
         </div>
     </section>
 
