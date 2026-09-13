@@ -9,16 +9,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ✅ CSS Global & Auth -->
+    <!-- ✅ CSS Global & Login -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/login.css">
     
     <!-- Library Kriptografi untuk Hash Password -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
-<body class="auth-page">
+<body class="login-page">
 
-    <!-- ✅ Background Blobs -->
+    <!-- Background Blobs -->
     <div class="blob-container" aria-hidden="true">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -26,10 +26,10 @@
         <div class="blob blob-4"></div>
     </div>
     
-    <!-- ✅ Grid overlay halus -->
+    <!-- Grid overlay -->
     <div class="grid-overlay" aria-hidden="true"></div>
 
-    <!-- ✅ TOMBOL KEMBALI KE BERANDA - OPSI 5 -->
+    <!-- Tombol Kembali -->
     <a href="index.html" class="btn-back-futuristic" aria-label="Kembali ke Beranda">
         <span class="icon-wrap">
             <i class="fa-solid fa-arrow-left text-xs"></i>
@@ -38,9 +38,8 @@
     </a>
 
     <!-- Card Login -->
-    <div class="auth-card p-10 rounded-2xl w-full max-w-md">
+    <div class="login-card p-10 rounded-2xl w-full max-w-md">
         
-        <!-- Header & Logo -->
         <div class="flex flex-col items-center mb-8">
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl text-white mb-4 shadow-lg shadow-indigo-500/30">
                 <i class="fa-solid fa-graduation-cap text-3xl"></i>
@@ -50,7 +49,6 @@
         </div>
 
         <form id="loginForm">
-            <!-- Input Username -->
             <div class="mb-5">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Username / Email</label>
                 <div class="relative">
@@ -62,7 +60,6 @@
                 </div>
             </div>
             
-            <!-- Input Password -->
             <div class="mb-6">
                 <div class="flex justify-between mb-2">
                     <label class="block text-sm font-semibold text-gray-700">Password</label>
@@ -73,7 +70,7 @@
                         <i class="fa-solid fa-lock text-gray-400"></i>
                     </div>
                     <input type="password" id="password" placeholder="••••••••" 
-                        class="input-glass w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
+                        class="input-glass w-full pl-10 pr-10 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                     <button type="button" onclick="togglePassword()" 
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 p-1">
                         <i class="fa-solid fa-eye" id="eyeIcon"></i>
@@ -81,17 +78,14 @@
                 </div>
             </div>
 
-            <!-- Tombol Login -->
             <button type="submit" id="loginBtn" 
-                class="btn-auth-gradient w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
+                class="btn-login-gradient w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
                 <span>Masuk ke Dashboard</span>
                 <i class="fa-solid fa-arrow-right text-sm"></i>
             </button>
             
-            <!-- Pesan Notifikasi -->
             <div id="statusMessage" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
 
-            <!-- ✅ Link ke Registrasi -->
             <div class="mt-6 text-center text-sm text-gray-600">
                 Belum punya akun? 
                 <a href="register.html" class="text-indigo-600 hover:underline font-bold">Daftar di sini</a>
@@ -99,114 +93,8 @@
         </form>
     </div>
 
-    <!-- Script -->
+    <!-- ✅ Pakai js/auth.js (versi lama yang sudah berfungsi) -->
     <script src="js/config.js"></script>
-    <script>
-        // ==========================================
-        // TOGGLE PASSWORD VISIBILITY
-        // ==========================================
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('eyeIcon');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        // ==========================================
-        // SUBMIT FORM LOGIN
-        // ==========================================
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('loginBtn');
-            const originalText = btn.innerHTML;
-            const statusMsg = document.getElementById('statusMessage');
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Validasi
-            if (!username || !password) {
-                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
-                statusMsg.innerText = '⚠️ Username dan password wajib diisi!';
-                statusMsg.classList.remove('hidden');
-                return;
-            }
-            
-            // Loading
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memproses...';
-            btn.disabled = true;
-            statusMsg.classList.add('hidden');
-            
-            try {
-                // Hash password dengan SHA-256 (sesuai backend)
-                const passwordHash = CryptoJS.SHA256(password).toString();
-                
-                const response = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'login',
-                        username: username,
-                        password: passwordHash
-                    })
-                });
-                
-                const result = await response.json();
-                console.log(">>> Response login:", result);
-                
-                if (result.status === 'success') {
-                    // ✅ SUKSES
-                    statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-green-50 text-green-600 border border-green-200';
-                    statusMsg.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Login berhasil! Mengalihkan...';
-                    statusMsg.classList.remove('hidden');
-                    
-                    // Simpan data user
-                    localStorage.setItem('user', JSON.stringify(result.data));
-                    localStorage.setItem('isLoggedIn', 'true');
-                    
-                    // Redirect berdasarkan role
-                    setTimeout(() => {
-                        const role = result.data.role;
-                        if (role === 'admin') {
-                            window.location.href = 'admin/dashboard.html';
-                        } else if (role === 'dosen') {
-                            window.location.href = 'dosen/dashboard.html';
-                        } else if (role === 'mahasiswa') {
-                            window.location.href = 'mahasiswa/dashboard.html';
-                        } else {
-                            window.location.href = 'index.html';
-                        }
-                    }, 800);
-                    
-                } else {
-                    // ❌ GAGAL
-                    statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
-                    statusMsg.innerHTML = '❌ ' + result.message;
-                    statusMsg.classList.remove('hidden');
-                    
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
-                
-            } catch (error) {
-                console.error("Error login:", error);
-                statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
-                statusMsg.innerText = '❌ Terjadi kesalahan koneksi. Silakan coba lagi.';
-                statusMsg.classList.remove('hidden');
-                
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
-    </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
