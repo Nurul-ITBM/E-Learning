@@ -3,7 +3,34 @@
 // ✅ Content-Type header
 // ✅ Debug log lengkap
 // ✅ Storage key konsisten
+// ✅ Toggle password visibility
 
+// ==========================================
+// TOGGLE PASSWORD VISIBILITY
+// ==========================================
+function togglePassword() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    
+    if (!input || !icon) {
+        console.warn('Element password atau eyeIcon tidak ditemukan');
+        return;
+    }
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// ==========================================
+// LOGIN HANDLER
+// ==========================================
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault(); 
     
@@ -21,7 +48,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200';
     msg.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Menghubungkan ke server...';
 
-    // ✅ Hash password SHA-256 (selaras dengan hashPassword() di Auth.gs)
+    // Hash password SHA-256
     const hashedPassword = CryptoJS.SHA256(pass).toString();
 
     console.log('>>> Login attempt:', user);
@@ -30,16 +57,14 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
-            // ✅ Content-Type selaras dengan doPost(e) di API.gs
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-                action: 'login',        // ✅ cocok dengan routing API.gs
-                username: user,         // ✅ cocok dengan prosesLogin()
+                action: 'login',
+                username: user,
                 password: hashedPassword
             })
         });
 
-        // ✅ Cek response dulu sebelum JSON.parse
         const rawText = await response.text();
         console.log('>>> Raw response:', rawText);
         
@@ -53,17 +78,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
         console.log('>>> Parsed response:', result);
 
-        // ✅ Cek format response selaras dengan Auth.gs
         if (result.status === 'success') {
             msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-green-50 text-green-600 border border-green-200 font-medium';
             msg.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Login Berhasil! Mengalihkan...';
             
-            // ✅ Simpan ke multiple key untuk kompatibilitas
+            // Simpan ke multiple key
             localStorage.setItem('user_session', JSON.stringify(result.data));
             localStorage.setItem('user', JSON.stringify(result.data));
             localStorage.setItem('isLoggedIn', 'true');
 
-            // ✅ Debug log lengkap
             console.log('>>> Saved to localStorage');
             console.log('>>> Role:', result.data.role);
 
@@ -74,7 +97,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 
                 let redirectUrl = '';
                 
-                // ⚠️ SESUAIKAN dengan nama file dashboard Anda!
+                // ⚠️ Sesuaikan dengan nama file dashboard Anda
                 if (role === 'admin') {
                     redirectUrl = origin + basePath + 'admin/admin-dashboard.html';
                 } else if (role === 'dosen') {
@@ -88,31 +111,12 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 
                 console.log(">>> Redirect ke:", redirectUrl);
                 
-                // ✅ Cek file ada dulu, biar tahu kalau 404
-                fetch(redirectUrl, { method: 'HEAD' })
-                    .then(res => {
-                        if (res.ok) {
-                            console.log('✅ File dashboard ADA, redirect...');
-                            window.location.href = redirectUrl;
-                        } else {
-                            console.error('❌ File dashboard TIDAK ADA:', res.status);
-                            msg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
-                            msg.innerHTML = `
-                                <i class="fa-solid fa-triangle-exclamation mr-1"></i>
-                                Login berhasil, tapi halaman dashboard belum ada.<br>
-                                <strong>File yang dicari:</strong> ${redirectUrl}
-                            `;
-                        }
-                    })
-                    .catch(() => {
-                        console.log('⚠️ Tidak bisa cek file, redirect langsung...');
-                        window.location.href = redirectUrl;
-                    });
+                // Redirect langsung
+                window.location.href = redirectUrl;
                 
             }, 800);
             
         } else {
-            // ✅ Error dari Auth.gs
             msg.className = 'mt-4 text-center text-red-600 bg-red-50 p-2 rounded-lg text-sm block border border-red-200';
             msg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> ${result.message || 'Login gagal.'}`;
             
