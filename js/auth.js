@@ -76,11 +76,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 
                 // ⚠️ SESUAIKAN dengan nama file dashboard Anda!
                 if (role === 'admin') {
-                    redirectUrl = origin + basePath + 'admin/dashboard.html';
+                    redirectUrl = origin + basePath + 'admin/admin-dashboard.html';
                 } else if (role === 'dosen') {
-                    redirectUrl = origin + basePath + 'dosen/dashboard.html';
+                    redirectUrl = origin + basePath + 'dosen/dosen-dashboard.html';
                 } else if (role === 'mahasiswa') {
-                    redirectUrl = origin + basePath + 'mahasiswa/dashboard.html';
+                    redirectUrl = origin + basePath + 'mahasiswa/mahasiswa-dashboard.html';
                 } else {
                     console.error("❌ Role tidak dikenali:", role);
                     redirectUrl = origin + basePath + 'index.html';
