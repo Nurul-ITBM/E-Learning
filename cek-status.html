@@ -4,27 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek Status Akun - EduLearn</title>
+    
+    <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    
+    <!-- ✅ CSS Global & Cek Status -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cek-status.css">
+    
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen py-8">
+<body class="cek-status-page">
 
-    <a href="login.html" class="absolute top-6 left-6 text-gray-500 hover:text-indigo-600 flex items-center space-x-2">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="font-medium text-sm">Kembali ke Login</span>
+    <!-- ✅ Background Blobs -->
+    <div class="blob-container" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
+    
+    <!-- ✅ Grid overlay -->
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <!-- ✅ TOMBOL KEMBALI KE LOGIN - OPSI 5 -->
+    <a href="login.html" class="btn-back-futuristic" aria-label="Kembali ke Login">
+        <span class="icon-wrap">
+            <i class="fa-solid fa-arrow-left text-xs"></i>
+        </span>
+        <span class="label">Kembali ke Login</span>
     </a>
 
-    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 mx-4">
+    <!-- ✅ Card Cek Status -->
+    <div class="cek-status-card p-8 md:p-10 rounded-2xl w-full max-w-md">
+        
+        <!-- Header & Logo -->
         <div class="flex flex-col items-center mb-8">
-            <div class="bg-indigo-500 p-3 rounded-xl text-white mb-4 shadow-md">
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl text-white mb-4 shadow-lg shadow-indigo-500/30">
                 <i class="fa-solid fa-magnifying-glass text-3xl"></i>
             </div>
-            <h1 class="text-2xl font-bold text-slate-800">Cek Status Akun</h1>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-wide">Cek Status Akun</h1>
             <p class="text-gray-500 text-sm mt-1 text-center">Masukkan email yang Anda daftarkan</p>
         </div>
 
+        <!-- Input Email -->
         <div class="mb-5">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
             <div class="relative">
@@ -32,19 +57,29 @@
                     <i class="fa-regular fa-envelope text-gray-400"></i>
                 </div>
                 <input type="email" id="emailCek" placeholder="email@elearning.ac.id"
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 focus:bg-white">
+                    class="input-glass w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
             </div>
         </div>
 
+        <!-- Tombol Cek Status -->
         <button onclick="cekStatus()" id="cekBtn"
-            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-md transition-all flex justify-center items-center space-x-2">
+            class="btn-primary-gradient w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
             <span>Cek Status</span>
             <i class="fa-solid fa-search text-sm"></i>
         </button>
 
+        <!-- Hasil Cek -->
         <div id="hasilCek" class="mt-5"></div>
+
+        <!-- Link Bantuan -->
+        <div class="mt-6 text-center text-xs text-gray-500">
+            <p>Belum mendaftar? 
+                <a href="register.html" class="text-indigo-600 hover:underline font-semibold">Daftar di sini</a>
+            </p>
+        </div>
     </div>
 
+    <!-- Script -->
     <script src="js/config.js"></script>
     <script>
         async function cekStatus() {
@@ -53,7 +88,11 @@
             const hasil = document.getElementById('hasilCek');
 
             if (!email) {
-                hasil.innerHTML = '<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">⚠️ Masukkan email terlebih dahulu.</div>';
+                hasil.innerHTML = `
+                    <div class="hasil-card hasil-error text-sm">
+                        ⚠️ Masukkan email terlebih dahulu.
+                    </div>
+                `;
                 return;
             }
 
@@ -79,30 +118,50 @@
                     const isApproved = d.status_verifikasi === 'approved';
                     const isRejected = d.status_verifikasi === 'rejected';
 
-                    let warna = isApproved ? 'green' : (isRejected ? 'red' : 'amber');
+                    // Tentukan class CSS
+                    let cardClass = 'hasil-card ';
+                    if (isApproved) cardClass += 'hasil-approved';
+                    else if (isRejected) cardClass += 'hasil-rejected';
+                    else cardClass += 'hasil-pending';
+
+                    // Tentukan ikon & judul
                     let icon = isApproved ? 'fa-circle-check' : (isRejected ? 'fa-circle-xmark' : 'fa-clock');
                     let judul = isApproved ? 'Akun Aktif' : (isRejected ? 'Akun Ditolak' : 'Menunggu Verifikasi');
 
                     hasil.innerHTML = `
-                        <div class="p-4 rounded-lg bg-${warna}-50 border border-${warna}-200 text-${warna}-700">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="fa-solid ${icon} text-xl"></i>
-                                <strong>${judul}</strong>
+                        <div class="${cardClass}">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fa-solid ${icon} text-2xl"></i>
+                                <strong class="text-base">${judul}</strong>
                             </div>
-                            <p class="text-xs mb-1"><strong>Email:</strong> ${d.email}</p>
-                            <p class="text-xs mb-1"><strong>Status:</strong> ${d.status_verifikasi}</p>
-                            <p class="text-xs mb-3"><strong>Tanggal Daftar:</strong> ${d.tanggal_daftar}</p>
-                            ${isApproved ? '<a href="login.html" class="text-indigo-600 hover:underline text-sm font-semibold">Login sekarang →</a>' : ''}
-                            ${!isApproved && !isRejected ? '<p class="text-xs">Akun Anda masih menunggu verifikasi admin (1×24 jam kerja).</p>' : ''}
-                            ${isRejected ? '<p class="text-xs">Silakan hubungi admin untuk informasi lebih lanjut.</p>' : ''}
+                            <div class="space-y-1">
+                                <p class="text-xs"><strong>Email:</strong> ${d.email}</p>
+                                <p class="text-xs"><strong>Status:</strong> 
+                                    <span class="font-semibold uppercase">${d.status_verifikasi}</span>
+                                </p>
+                                <p class="text-xs"><strong>Tanggal Daftar:</strong> ${d.tanggal_daftar}</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-current/10">
+                                ${isApproved ? '<a href="login.html" class="text-indigo-600 hover:underline text-sm font-semibold">Login sekarang →</a>' : ''}
+                                ${!isApproved && !isRejected ? '<p class="text-xs">Akun Anda masih menunggu verifikasi admin (1×24 jam kerja).</p>' : ''}
+                                ${isRejected ? '<p class="text-xs">Silakan hubungi admin untuk informasi lebih lanjut.</p>' : ''}
+                            </div>
                         </div>
                     `;
                 } else {
-                    hasil.innerHTML = `<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">❌ ${result.message}</div>`;
+                    hasil.innerHTML = `
+                        <div class="hasil-card hasil-error text-sm">
+                            ❌ ${result.message}
+                        </div>
+                    `;
                 }
             } catch (err) {
                 console.error(err);
-                hasil.innerHTML = '<div class="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200">❌ Terjadi kesalahan koneksi.</div>';
+                hasil.innerHTML = `
+                    <div class="hasil-card hasil-error text-sm">
+                        ❌ Terjadi kesalahan koneksi.
+                    </div>
+                `;
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
