@@ -136,7 +136,7 @@ async function loadTugas(identifier) {
 function renderTugas() {
     const container = document.getElementById('containerTugas');
     
-    // Filter berdasarkan currentFilter
+    // Filter
     let filteredData = allTugasData;
     if (currentFilter === 'Tugas') {
         filteredData = allTugasData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'tugas');
@@ -155,8 +155,16 @@ function renderTugas() {
     }
 
     filteredData.forEach(t => {
-        // ✅ Tentukan jenis tugas
+        // Tentukan jenis tugas
         const isPraktikum = (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum';
+        
+        // ✅ Cek deadline
+        let isDeadlineLewat = false;
+        let deadlineDate = null;
+        if (t.tenggat_waktu) {
+            deadlineDate = new Date(String(t.tenggat_waktu).replace(' ', 'T'));
+            isDeadlineLewat = new Date() > deadlineDate;
+        }
         
         // Warna & ikon badge
         const badgeColor = isPraktikum 
@@ -164,22 +172,17 @@ function renderTugas() {
             : 'bg-indigo-50 text-indigo-600 border-indigo-100';
         const badgeIcon = isPraktikum ? 'fa-flask-vial' : 'fa-file-pen';
         const badgeText = isPraktikum ? 'Praktikum' : 'Tugas';
-        
-        // Warna border hover card
         const hoverBorder = isPraktikum ? 'hover:border-purple-300' : 'hover:border-indigo-300';
-        
-        // Tombol upload warna
         const btnColor = isPraktikum 
             ? 'bg-purple-500 hover:bg-purple-600' 
             : 'bg-indigo-500 hover:bg-indigo-600';
         
         const card = document.createElement('div');
-        card.className = `bg-white p-6 rounded-2xl shadow-sm border border-slate-100 ${hoverBorder} hover:shadow-md transition-all flex flex-col justify-between`;
+        card.className = `bg-white p-6 rounded-2xl shadow-sm border border-slate-100 ${hoverBorder} hover:shadow-md transition-all flex flex-col justify-between ${isDeadlineLewat && !t.sudah_kumpul ? 'opacity-90' : ''}`;
         
-        // ✅ Action HTML
+        // ✅ Action HTML dengan KUNCI
         let actionHTML = '';
         if (t.sudah_kumpul) {
-            // Sudah dikumpulkan
             const nilaiHTML = t.nilai ? `<br><span class="font-bold text-slate-800">Nilai: ${t.nilai}</span>` : '';
             const komentarHTML = t.komentar_dosen ? `<br><span class="text-slate-500 text-[10px] italic">"${t.komentar_dosen}"</span>` : '';
             
@@ -190,8 +193,17 @@ function renderTugas() {
                     ${komentarHTML}
                 </div>
             `;
+        } else if (isDeadlineLewat) {
+            // 🔒 KUNCI
+            actionHTML = `
+                <div class="text-center text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+                    <i class="fa-solid fa-lock mr-1"></i> 
+                    <span class="font-semibold">Terkunci</span>
+                    <br>
+                    <span class="text-[10px] text-red-500">Deadline telah berakhir</span>
+                </div>
+            `;
         } else {
-            // Belum dikumpulkan
             actionHTML = `
                 <button onclick="bukaModalUploadTugas('${t.id_tugas}', '${t.judul_tugas.replace(/'/g, "\\'")}')" class="w-full ${btnColor} text-white py-2 rounded-lg text-sm font-bold transition-colors">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload ${isPraktikum ? 'Laporan' : 'Tugas'}
@@ -199,17 +211,13 @@ function renderTugas() {
             `;
         }
         
-        // ✅ Cek deadline (lewat atau belum)
+        // ✅ Deadline HTML
         let deadlineHTML = '';
         if (t.tenggat_waktu) {
-            const deadline = new Date(t.tenggat_waktu.replace(' ', 'T'));
-            const now = new Date();
-            const isLewat = now > deadline;
-            
             deadlineHTML = `
-                <span class="${isLewat ? 'text-red-500 font-semibold' : 'text-slate-500'}">
+                <span class="${isDeadlineLewat ? 'text-red-500 font-semibold' : 'text-slate-500'}">
                     <i class="fa-regular fa-clock mr-1"></i> 
-                    ${isLewat ? 'Lewat: ' : 'Deadline: '}
+                    ${isDeadlineLewat ? 'Lewat: ' : 'Deadline: '}
                     ${t.tenggat_waktu.replace('T', ' ')}
                 </span>
             `;
@@ -220,9 +228,16 @@ function renderTugas() {
         card.innerHTML = `
             <div>
                 <div class="flex justify-between items-start mb-3 gap-2">
-                    <span class="${badgeColor} text-xs font-bold px-2.5 py-1 rounded-md border flex items-center gap-1 flex-shrink-0">
-                        <i class="fa-solid ${badgeIcon}"></i> ${badgeText}
-                    </span>
+                    <div class="flex items-center gap-1 flex-wrap">
+                        <span class="${badgeColor} text-xs font-bold px-2.5 py-1 rounded-md border flex items-center gap-1 flex-shrink-0">
+                            <i class="fa-solid ${badgeIcon}"></i> ${badgeText}
+                        </span>
+                        ${isDeadlineLewat && !t.sudah_kumpul ? `
+                            <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-md border border-red-200 flex items-center gap-1">
+                                <i class="fa-solid fa-lock"></i> Terkunci
+                            </span>
+                        ` : ''}
+                    </div>
                     <span class="text-xs font-semibold text-slate-400 flex-shrink-0">Bobot: ${t.bobot_nilai}</span>
                 </div>
                 <div class="mb-2">
