@@ -60,12 +60,11 @@ function highlightActiveMenu() {
         el.classList.remove('active');
     });
 
-    // ✅ Mapping halaman → ID menu (tambah praktikum)
+    // ✅ Mapping halaman → ID menu (TANPA praktikum)
     const menuMap = {
         'dosen-dashboard.html': 'menu-dashboard',
         'dosen-matakuliah.html': 'menu-matakuliah',
         'dosen-tugas.html': 'menu-tugas',
-        'dosen-praktikum.html': 'menu-praktikum',      // ✅ MENU BARU
         'dosen-ujian.html': 'menu-ujian',
         'dosen-absensi.html': 'menu-absensi',
         'dosen-nilai.html': 'menu-nilai',
@@ -94,12 +93,11 @@ function fillHeaderData() {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-        // ✅ Tambah title untuk praktikum
+        // ✅ Title map (TANPA praktikum)
         const titleMap = {
             'dosen-dashboard': 'Dashboard Dosen',
             'dosen-matakuliah': 'Mata Kuliah Ampuan',
             'dosen-tugas': 'Kelola Tugas',
-            'dosen-praktikum': 'Kelola Praktikum',          // ✅ TITLE BARU
             'dosen-ujian': 'Kelola Ujian',
             'dosen-absensi': 'Rekap Absensi',
             'dosen-nilai': 'Rekap Nilai',
