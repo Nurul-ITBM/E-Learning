@@ -80,7 +80,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 } else if (role === 'dosen') {
                     redirectUrl = origin + basePath + 'dosen/dosen-dashboard.html';
                 } else if (role === 'mahasiswa') {
-                    redirectUrl = origin + basePath + 'mahasiswa/mahasiswa-dashboard.html';
+                    redirectUrl = origin + basePath + 'mahasiswa/dashboard.html';
                 } else {
                     console.error("❌ Role tidak dikenali:", role);
                     redirectUrl = origin + basePath + 'index.html';
