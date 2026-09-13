@@ -93,6 +93,14 @@
             <form id="formTambahTugas" class="p-5 space-y-4">
                 <input type="hidden" id="tugas_id_kelas">
                 <input type="hidden" id="tugas_id_tugas_edit">
+                <!-- ✅ DROPDOWN JENIS TUGAS (BARU) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Tugas</label>
+                    <select id="tugas_jenis" class="w-full border rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500" required>
+                        <option value="Tugas">📝 Tugas Biasa</option>
+                        <option value="Praktikum">🧪 Laporan Praktikum</option>
+                    </select>
+                </div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Tugas</label><input id="tugas_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Deskripsi Instruksi</label><textarea id="tugas_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" required></textarea></div>
                 <div><label class="block text-xs font-bold text-slate-600 mb-1">Tenggat Waktu</label><input id="tugas_deadline" type="datetime-local" class="w-full border rounded-lg p-2 text-sm" required></div>
