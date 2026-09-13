@@ -1,25 +1,26 @@
 /* ========================================== */
-/* css/auth.css - STYLE HALAMAN AUTH          */
-/* Login, Register, Cek-Status                */
+/* css/login.css - STYLE HALAMAN LOGIN        */
 /* ========================================== */
 
 /* ==========================================
-   GLOBAL AUTH PAGE
+   BODY - LOGIN PAGE (KUNCI CENTERING)
    ========================================== */
-body.auth-page {
+body.login-page {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: #eef2ff;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    
+    /* ✅ KUNCI CENTERING */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 1rem;
 }
 
 /* ==========================================
-   BACKGROUND SEAMLESS - ANIMATED GRADIENT BLOBS
+   BACKGROUND BLOBS
    ========================================== */
 .blob-container {
     position: fixed;
@@ -93,7 +94,7 @@ body.auth-page {
 }
 
 /* ==========================================
-   GRID OVERLAY HALUS
+   GRID OVERLAY
    ========================================== */
 .grid-overlay {
     position: fixed;
@@ -109,9 +110,9 @@ body.auth-page {
 }
 
 /* ==========================================
-   AUTH CARD - GLASSMORPHISM
+   LOGIN CARD - GLASSMORPHISM
    ========================================== */
-.auth-card {
+.login-card {
     position: relative;
     z-index: 10;
     background: rgba(255, 255, 255, 0.85);
@@ -136,37 +137,29 @@ body.auth-page {
 }
 
 /* ==========================================
-   TOMBOL KEMBALI KE BERANDA - OPSI 5
-   Futuristic dengan Border Gradient Berputar
+   TOMBOL KEMBALI - FUTURISTIC
    ========================================== */
 .btn-back-futuristic {
     position: fixed;
     top: 1.5rem;
     left: 1.5rem;
     z-index: 50;
-    
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    
     padding: 0.6rem 1.2rem 0.6rem 0.8rem;
-    
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    
     border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: 0.75rem;
-    
     color: #4f46e5;
     font-weight: 600;
     font-size: 0.875rem;
     text-decoration: none;
-    
     box-shadow: 
         0 4px 12px -2px rgba(79, 70, 229, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    
     transition: all 0.3s ease;
     overflow: hidden;
     isolation: isolate;
@@ -210,10 +203,6 @@ body.auth-page {
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.btn-back-futuristic:active {
-    transform: translateX(-2px) scale(0.98);
-}
-
 .btn-back-futuristic .icon-wrap {
     display: inline-flex;
     align-items: center;
@@ -232,11 +221,6 @@ body.auth-page {
     transform: rotate(-360deg) scale(1.05);
 }
 
-.btn-back-futuristic .label {
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
 /* ==========================================
    INPUT FIELD - GLASSMORPHISM
    ========================================== */
@@ -253,9 +237,9 @@ body.auth-page {
 }
 
 /* ==========================================
-   TOMBOL AUTH - GRADIENT
+   TOMBOL LOGIN - GRADIENT
    ========================================== */
-.btn-auth-gradient {
+.btn-login-gradient {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     box-shadow: 
@@ -264,7 +248,7 @@ body.auth-page {
     transition: all 0.3s ease;
 }
 
-.btn-auth-gradient:hover {
+.btn-login-gradient:hover {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     transform: translateY(-2px);
     box-shadow: 
@@ -272,25 +256,14 @@ body.auth-page {
         0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
-.btn-auth-gradient:active {
+.btn-login-gradient:active {
     transform: translateY(0);
 }
 
-.btn-auth-gradient:disabled {
+.btn-login-gradient:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
-}
-
-/* ==========================================
-   ROLE OPTION (Register)
-   ========================================== */
-.role-option {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.role-option.active {
-    transform: scale(1.02);
 }
 
 /* ==========================================
@@ -318,7 +291,7 @@ body.auth-page {
    ========================================== */
 @media (prefers-reduced-motion: reduce) {
     .blob,
-    .auth-card,
+    .login-card,
     .btn-back-futuristic::before,
     .btn-back-futuristic .icon-wrap {
         animation: none !important;
