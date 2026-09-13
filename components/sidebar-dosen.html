@@ -1,56 +1,319 @@
-<!-- components/sidebar-dosen.html -->
-<aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0">
-    <div class="overflow-y-auto">
-        <!-- Header Sidebar -->
-        <div class="p-6 text-white rounded-br-2xl" 
-             style="background: linear-gradient(135deg, #0d9488 0%, #0369a1 100%);">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                    <i class="fa-solid fa-chalkboard-user text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-wide">EduLearn</h1>
-                    <p class="text-xs text-teal-100 uppercase tracking-wider mt-0.5">Portal Dosen</p>
-                </div>
-            </div>
-        </div>
+/* ========================================== */
+/* css/style.css - GLOBAL + SIDEBAR STYLE     */
+/* ========================================== */
 
-        <!-- Menu Navigasi -->
-        <div class="sidebar-menu-wrap">
-            <a href="dosen-dashboard.html" id="menu-dashboard" class="sidebar-nav-link dashboard-link">
-                <i class="fa-solid fa-house"></i> Dashboard
-            </a>
+/* ========================================== */
+/* FONT FAMILY GLOBAL                          */
+/* ========================================== */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
 
-            <p class="sidebar-section-title">Akademik</p>
-            
-            <a href="dosen-matakuliah.html" id="menu-matakuliah" class="sidebar-nav-link">
-                <i class="fa-solid fa-book-open-reader"></i> Mata Kuliah Ampuan
-            </a>
-            <a href="dosen-tugas.html" id="menu-tugas" class="sidebar-nav-link">
-                <i class="fa-solid fa-file-pen"></i> Kelola Tugas
-            </a>
-            <a href="dosen-ujian.html" id="menu-ujian" class="sidebar-nav-link">
-                <i class="fa-regular fa-file-lines"></i> Kelola Ujian
-            </a>
-            <a href="dosen-absensi.html" id="menu-absensi" class="sidebar-nav-link">
-                <i class="fa-solid fa-clipboard-user"></i> Rekap Absensi
-            </a>
-            <a href="dosen-nilai.html" id="menu-nilai" class="sidebar-nav-link">
-                <i class="fa-solid fa-square-poll-vertical"></i> Rekap Nilai
-            </a>
+.text-navy {
+    color: #1e293b !important;
+}
 
-            <p class="sidebar-section-title">Sistem</p>
-            <a href="dosen-profil.html" id="menu-profil" class="sidebar-nav-link">
-                <i class="fa-regular fa-user"></i> Profil Dosen
-            </a>
-        </div>
-    </div>
+/* ========================================== */
+/* BRAND GRADIENT - HEADER SIDEBAR             */
+/* ========================================== */
 
-    <!-- Tombol Keluar -->
-    <div class="sidebar-logout-wrap">
-        <button id="btnLogout" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Keluar</span>
-        </button>
-        <div class="text-center text-xs text-slate-400 mt-2"><p>&copy; 2026 EduLearn</p></div>
-    </div>
-</aside>
+/* Default: Dosen (teal → biru) */
+.bg-brand-gradient {
+    background: linear-gradient(135deg, #0d9488 0%, #0369a1 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Dekorasi halus */
+.bg-brand-gradient::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Mahasiswa (indigo → purple) */
+body.role-mahasiswa .bg-brand-gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+}
+
+/* Admin (orange) */
+body.role-admin .bg-brand-gradient {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+}
+
+/* ========================================== */
+/* SIDEBAR - BASE STYLING (MODERN)             */
+/* ========================================== */
+
+aside {
+    min-height: 100vh;
+    transition: transform 0.3s ease-in-out;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 2px 0 20px -8px rgba(15, 23, 42, 0.04);
+}
+
+/* ========================================== */
+/* SIDEBAR MENU WRAPPER                        */
+/* ========================================== */
+
+.sidebar-menu-wrap {
+    padding: 1.5rem 1rem 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* ========================================== */
+/* SIDEBAR NAV LINK - MODERN                   */
+/* ========================================== */
+
+.sidebar-nav-link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.7rem 1rem !important;
+    border-radius: 0.75rem !important;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    margin-bottom: 0.25rem;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-nav-link i {
+    width: 1.25rem;
+    text-align: center;
+    margin-right: 0.75rem;
+    transition: transform 0.25s ease;
+    font-size: 1rem;
+}
+
+/* Hover efek (Dosen - Teal) */
+.sidebar-nav-link:hover {
+    color: #0d9488;
+    background-color: rgba(240, 253, 244, 0.7);
+    transform: translateX(3px);
+}
+
+.sidebar-nav-link:hover i {
+    transform: scale(1.1);
+}
+
+/* Link aktif */
+.sidebar-nav-link.active {
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(3, 105, 161, 0.08) 100%) !important;
+    color: #0d9488 !important;
+    font-weight: 600 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 2px 8px -2px rgba(13, 148, 136, 0.15);
+    position: relative;
+}
+
+/* Indikator kiri */
+.sidebar-nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 3px;
+    background: linear-gradient(180deg, #0d9488 0%, #0369a1 100%);
+    border-radius: 0 4px 4px 0;
+}
+
+/* ========================================== */
+/* SIDEBAR SECTION TITLE                       */
+/* ========================================== */
+
+.sidebar-section-title {
+    padding: 0 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ========================================== */
+/* DASHBOARD LINK                              */
+/* ========================================== */
+
+.sidebar-nav-link.dashboard-link {
+    margin-bottom: 1.5rem;
+}
+
+/* ========================================== */
+/* LOGOUT WRAPPER                              */
+/* ========================================== */
+
+.sidebar-logout-wrap {
+    margin-top: auto !important;
+    padding: 1rem 1.5rem 2rem 1.5rem !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+/* ========================================== */
+/* MAHASISWA - SIDEBAR INDIGO                  */
+/* ========================================== */
+
+body.role-mahasiswa .sidebar-nav-link:hover {
+    color: #4f46e5 !important;
+    background-color: rgba(238, 242, 255, 0.6);
+}
+
+body.role-mahasiswa .sidebar-nav-link.active {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.08) 100%) !important;
+    color: #4f46e5 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px -2px rgba(79, 70, 229, 0.15);
+}
+
+body.role-mahasiswa .sidebar-nav-link.active::before {
+    background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+/* ========================================== */
+/* ADMIN - SIDEBAR ORANGE                      */
+/* ========================================== */
+
+body.role-admin .sidebar-nav-link:hover {
+    color: #ea580c !important;
+    background-color: rgba(255, 247, 237, 0.8) !important;
+}
+
+body.role-admin .sidebar-nav-link.active {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.08) 100%) !important;
+    color: #ea580c !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px -2px rgba(234, 88, 12, 0.15);
+}
+
+body.role-admin .sidebar-nav-link.active::before {
+    background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+}
+
+/* ========================================== */
+/* PRIMARY BUTTON                              */
+/* ========================================== */
+
+.bg-primary-btn {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+.bg-primary-btn:hover {
+    background-color: #4338ca !important;
+}
+
+/* ========================================== */
+/* RESPONSIVE MOBILE - SIDEBAR COLLAPSE        */
+/* ========================================== */
+
+#btnToggleSidebar {
+    display: none;
+}
+
+#sidebarOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9998;
+}
+
+#sidebarOverlay.show {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    aside {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 80vw;
+        transform: translateX(-100%);
+        z-index: 9999 !important;
+        box-shadow: 4px 0 24px -4px rgba(15, 23, 42, 0.15);
+        overflow-y: auto;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: #ffffff;
+    }
+
+    aside.show {
+        transform: translateX(0) !important;
+    }
+
+    main {
+        width: 100%;
+        flex: 1;
+        z-index: 1;
+    }
+
+    header {
+        z-index: 100;
+    }
+
+    #btnToggleSidebar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* ========================================== */
+/* SCROLLBAR CANTIK                            */
+/* ========================================== */
+
+aside::-webkit-scrollbar {
+    width: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* ========================================== */
+/* ACCESSIBILITY                               */
+/* ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-nav-link,
+    .sidebar-nav-link i,
+    aside {
+        transition: none !important;
+        transform: none !important;
+    }
+}
