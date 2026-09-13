@@ -17,27 +17,83 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-    <!-- TEMPAT PENAMPUNG SIDEBAR (Diisi oleh JS) -->
+    <!-- SIDEBAR -->
     <div id="sidebar-container"></div>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto flex flex-col">
         
-        <!-- TEMPAT PENAMPUNG HEADER (Diisi oleh JS) -->
+        <!-- HEADER -->
         <div id="header-container"></div>
 
         <!-- Content Area -->
         <div class="p-8">
-            <div class="flex justify-between items-end mb-6 border-b border-slate-200 pb-4">
+            
+            <!-- Header + Filter -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-200 pb-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Tugas Aktif</h2>
+                    <h2 class="text-2xl font-bold text-slate-800">Tugas & Praktikum</h2>
                     <p class="text-sm text-slate-500 mt-1">Selesaikan tugas sebelum tenggat waktu berakhir.</p>
+                </div>
+                
+                <!-- ✅ Filter Tab -->
+                <div class="flex gap-2 flex-wrap">
+                    <button data-filter="Semua" class="filter-tab bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                        Semua
+                    </button>
+                    <button data-filter="Tugas" class="filter-tab bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pen text-teal-600"></i> Tugas
+                        <span id="filterTugasCount" class="bg-teal-100 text-teal-700 px-1.5 rounded-full text-[10px] font-bold">0</span>
+                    </button>
+                    <button data-filter="Praktikum" class="filter-tab bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-flask-vial text-purple-600"></i> Praktikum
+                        <span id="filterPraktikumCount" class="bg-purple-100 text-purple-700 px-1.5 rounded-full text-[10px] font-bold">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistik -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                        <i class="fa-solid fa-list-check text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Total</p>
+                        <p class="text-lg font-bold text-slate-800" id="statTotal">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                        <i class="fa-solid fa-file-pen text-teal-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Tugas</p>
+                        <p class="text-lg font-bold text-slate-800" id="statTugas">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                        <i class="fa-solid fa-flask-vial text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Praktikum</p>
+                        <p class="text-lg font-bold text-slate-800" id="statPraktikum">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Belum Kumpul</p>
+                        <p class="text-lg font-bold text-slate-800" id="statBelum">0</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Grid Tugas -->
             <div id="containerTugas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Animasi Loading -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 animate-pulse h-40">
                     <div class="h-4 bg-slate-200 rounded w-1/3 mb-4"></div>
                     <div class="h-5 bg-slate-200 rounded w-3/4 mb-2"></div>
@@ -47,9 +103,7 @@
         </div>
     </main>
 
-    <!-- ============================================== -->
-    <!-- MODAL UPLOAD TUGAS MAHASISWA                  -->
-    <!-- ============================================== -->
+    <!-- MODAL UPLOAD TUGAS -->
     <div id="modalUploadTugas" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -61,9 +115,9 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">File Jawaban</label>
                     <input type="file" id="upload_file" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-indigo-50 file:text-indigo-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2" required>
-                    <p class="text-[10px] text-slate-400 mt-1">Maksimal 5MB. Format: PDF, DOCX, ZIP, Gambar.</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Maksimal 10MB. Format: PDF, DOCX, ZIP, Gambar.</p>
                 </div>
-                <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded-lg">Kumpulkan Tugas</button>
+                <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 rounded-lg">Kumpulkan</button>
             </form>
         </div>
     </div>
@@ -71,26 +125,6 @@
     <!-- Scripts -->
     <script src="../js/config.js"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
-    <script src="../js/tugas.js"></script>
-    <!-- ========================================== -->
-    <!-- VALIDASI UKURAN FILE (TAMBAHAN)             -->
-    <!-- ========================================== -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('upload_file');
-            
-            if (fileInput) {
-                fileInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file && file.size > 5 * 1024 * 1024) { // 5MB
-                        alert('File terlalu besar! Maksimal 5MB.');
-                        this.value = ''; // Reset input
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+    <script src="../js/tugas.js?v=2"></script>   <!-- ✅ Cache buster -->
 </body>
 </html>
