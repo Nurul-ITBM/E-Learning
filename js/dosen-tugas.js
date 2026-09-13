@@ -1,4 +1,6 @@
 // js/dosen-tugas.js
+// Fitur: Kelola Tugas + Jenis Tugas (Tugas / Praktikum)
+
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
@@ -105,31 +107,52 @@ async function loadProgressTugas(id_kelas) {
             }
             result.data.forEach(tugas => {
                 const persentase = tugas.total_mahasiswa > 0 ? Math.round((tugas.sudah_kumpul / tugas.total_mahasiswa) * 100) : 0;
+                
+                // ✅ Tentukan jenis tugas (Tugas / Praktikum)
+                const isPraktikum = (tugas.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum';
+                const badgeColor = isPraktikum 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : 'bg-teal-100 text-teal-700';
+                const badgeIcon = isPraktikum ? 'fa-flask-vial' : 'fa-file-pen';
+                const badgeText = isPraktikum ? 'Praktikum' : 'Tugas';
+                const borderHover = isPraktikum 
+                    ? 'hover:border-purple-300' 
+                    : 'hover:border-teal-300';
+                const progressColor = isPraktikum ? 'bg-purple-600' : 'bg-teal-600';
+                
                 const card = document.createElement('div');
-                card.className = "bg-slate-50 hover:bg-white border border-slate-200 hover:border-teal-300 rounded-xl p-4 cursor-pointer transition-all shadow-sm relative";
+                card.className = `bg-slate-50 hover:bg-white border border-slate-200 ${borderHover} rounded-xl p-4 cursor-pointer transition-all shadow-sm relative`;
                 card.onclick = () => loadPengumpulanTugas(tugas.id_tugas, tugas.judul_tugas);
+                
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <div class="text-[10px] text-slate-500 mb-1">
-                                <i class="fa-regular fa-calendar mr-1"></i> Pertemuan ke-${tugas.pertemuan_ke || '-'}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 text-[10px] mb-1 flex-wrap">
+                                <span class="${badgeColor} px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                                    <i class="fa-solid ${badgeIcon}"></i> ${badgeText}
+                                </span>
+                                <span class="text-slate-500">
+                                    <i class="fa-regular fa-calendar mr-1"></i> Pertemuan ke-${tugas.pertemuan_ke || '-'}
+                                </span>
                             </div>
                             <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${tugas.judul_tugas}</h4>
                         </div>
-                        <span class="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">${tugas.bobot_nilai}</span>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">${tugas.bobot_nilai}</span>
                     </div>
                     <div class="flex justify-between text-[10px] text-slate-500 mb-1">
                         <span>Deadline: ${tugas.tenggat_waktu.replace('T', ' ')}</span>
                         <span>${tugas.sudah_kumpul}/${tugas.total_mahasiswa} Kumpul</span>
                     </div>
                     <div class="w-full bg-slate-200 rounded-full h-2">
-                        <div class="bg-teal-600 h-2 rounded-full transition-all duration-500" style="width: ${persentase}%"></div>
+                        <div class="${progressColor} h-2 rounded-full transition-all duration-500" style="width: ${persentase}%"></div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+        console.error('Error loadProgressTugas:', error); 
+    }
 }
 
 // ==========================================
@@ -178,7 +201,7 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
                             ${k.komentar_dosen || '-'}
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="bukaModalNilai('${k.id_pengumpulan}', ${k.nilai || 0}, '${k.komentar_dosen || ''}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1 rounded border border-indigo-200">Nilai</button>
+                            <button onclick="bukaModalNilai('${k.id_pengumpulan}', ${k.nilai || 0}, '${(k.komentar_dosen || '').replace(/'/g, "\\'")}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1 rounded border border-indigo-200">Nilai</button>
                         </td>
                     </tr>
                 `;
@@ -186,7 +209,9 @@ async function loadPengumpulanTugas(id_tugas, judul_tugas) {
             html += `</tbody></table>`;
             container.innerHTML = html;
         }
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+        console.error('Error loadPengumpulanTugas:', error); 
+    }
 }
 
 // ==========================================
@@ -201,7 +226,9 @@ function bukaModalNilai(id_pengumpulan, nilai_sekarang, komentar_sekarang) {
     document.getElementById('modalNilaiTugas').classList.remove('hidden');
 }
 
-function tutupModal(id) { document.getElementById(id).classList.add('hidden'); }
+function tutupModal(id) { 
+    document.getElementById(id).classList.add('hidden'); 
+}
 
 document.getElementById('formNilaiTugas').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -237,10 +264,16 @@ document.getElementById('formNilaiTugas').addEventListener('submit', async funct
 document.getElementById('btnTambahTugas').addEventListener('click', function() {
     const idKelas = document.getElementById('filterKelasDosen').value;
     if (!idKelas) { alert('Pilih mata kuliah terlebih dahulu!'); return; }
+    
     document.getElementById('tugas_id_kelas').value = idKelas;
     document.getElementById('tugas_id_tugas_edit').value = '';
     document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
     document.getElementById('formTambahTugas').reset();
+    
+    // ✅ Reset dropdown jenis ke default "Tugas"
+    const jenisDropdown = document.getElementById('tugas_jenis');
+    if (jenisDropdown) jenisDropdown.value = 'Tugas';
+    
     document.getElementById('existing_lampiran_wrapper').classList.add('hidden');
     document.getElementById('modalTambahTugas').classList.remove('hidden');
 });
@@ -280,6 +313,11 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
         base64File = await fileToBase64(file);
     }
 
+    // ✅ Ambil jenis_tugas dari dropdown
+    const jenisTugas = document.getElementById('tugas_jenis') 
+        ? document.getElementById('tugas_jenis').value 
+        : 'Tugas';
+
     const data = {
         action: 'tambah_tugas',
         id_kelas: document.getElementById('tugas_id_kelas').value,
@@ -288,9 +326,12 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
         deskripsi_instruksi: document.getElementById('tugas_deskripsi').value,
         tenggat_waktu: document.getElementById('tugas_deadline').value,
         bobot_nilai: document.getElementById('tugas_bobot').value,
+        jenis_tugas: jenisTugas,   // ✅ KIRIM JENIS_TUGAS
         lampiran_base64: base64File,
         lampiran_nama_file: fileName
     };
+
+    console.log('>>> Data tugas yang dikirim:', data);
 
     try {
         const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
