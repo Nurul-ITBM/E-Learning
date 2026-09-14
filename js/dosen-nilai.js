@@ -1,6 +1,6 @@
 // ==========================================
 // js/dosen-nilai.js - Logika Rekap Nilai Dosen
-// Fitur: Filter Kelas, Tabel Nilai, Koreksi, Hitung Ulang, Export
+// ✅ 6 Komponen: Kehadiran, Keaktifan, Tugas, Praktikum, UTS, UAS
 // ==========================================
 
 // ==========================================
@@ -23,10 +23,21 @@ const GRADE_CONFIG = {
 };
 
 // ==========================================
+// KONFIGURASI BOBOT (untuk tampilan header)
+// ==========================================
+const BOBOT_CONFIG = {
+    kehadiran: '20%',
+    keaktifan: '20%',
+    tugas: '20%',
+    praktikum: '20%',
+    uts: '10%',
+    uas: '10%'
+};
+
+// ==========================================
 // INISIALISASI
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Validasi Sesi
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
         window.location.href = '../login.html';
@@ -36,10 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 2. Tunggu DOM siap
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 3. Cek elemen
     const filterKelas = document.getElementById('filterKelasNilai');
     const btnRefresh = document.getElementById('btnRefreshNilai');
     const btnHitungUlang = document.getElementById('btnHitungUlang');
@@ -50,12 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 4. Load Dropdown Kelas
     if (currentUser.id_dosen) {
         await loadKelasDosen(currentUser.id_dosen);
     }
 
-    // 5. Event Listener Dropdown
     filterKelas.addEventListener('change', async (e) => {
         currentIdKelas = e.target.value;
         
@@ -80,15 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnExport.disabled = false;
     });
 
-    // 6. Tombol Refresh
     btnRefresh.addEventListener('click', async () => {
         if (currentIdKelas) await loadRekapNilai(currentIdKelas);
     });
 
-    // 7. Tombol Hitung Ulang
     btnHitungUlang.addEventListener('click', hitungUlangNilai);
-
-    // 8. Tombol Export
     btnExport.addEventListener('click', exportCSV);
 });
 
@@ -201,7 +204,7 @@ function renderDistribusiGrade(data) {
 }
 
 // ==========================================
-// RENDER TABEL NILAI
+// RENDER TABEL NILAI (6 KOLOM)
 // ==========================================
 function renderTabelNilai(data) {
     const container = document.getElementById('containerRekapNilai');
@@ -237,10 +240,12 @@ function renderTabelNilai(data) {
                 <thead class="sticky top-0 bg-slate-100 z-10">
                     <tr>
                         <th class="sticky-col-header px-3 py-3 text-left font-bold text-slate-700 border-b-2 border-slate-200 min-w-[200px]">Mahasiswa</th>
-                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-blue-50">Tugas (20%)</th>
-                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-purple-50">UTS (30%)</th>
-                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-rose-50">UAS (40%)</th>
-                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-amber-50">Hadir (10%)</th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-amber-50">Hadir<br><span class="text-[10px] font-normal">20%</span></th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-orange-50">Keaktifan<br><span class="text-[10px] font-normal">20%</span></th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-blue-50">Tugas<br><span class="text-[10px] font-normal">20%</span></th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-purple-50">Praktikum<br><span class="text-[10px] font-normal">20%</span></th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-cyan-50">UTS<br><span class="text-[10px] font-normal">10%</span></th>
+                        <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-rose-50">UAS<br><span class="text-[10px] font-normal">10%</span></th>
                         <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px] bg-teal-100">Nilai Akhir</th>
                         <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[80px]">Grade</th>
                     </tr>
@@ -251,6 +256,11 @@ function renderTabelNilai(data) {
     mahasiswa.forEach((mhs, idx) => {
         const rowClass = !mhs.sudah_ada_nilai ? 'bg-amber-50/30' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50');
         const gradeConfig = GRADE_CONFIG[mhs.grade] || GRADE_CONFIG['-'];
+        
+        // ✅ Cek apakah nilai praktikum dari otomatis (info tooltip)
+        const praktikumTitle = mhs.nilai_praktikum_auto > 0 
+            ? `Nilai otomatis dari tugas praktikum: ${mhs.nilai_praktikum_auto}` 
+            : 'Klik untuk koreksi manual';
         
         html += `
             <tr class="${rowClass} hover:bg-teal-50/30 transition-colors border-b border-slate-100">
@@ -266,14 +276,33 @@ function renderTabelNilai(data) {
                     </div>
                 </td>
                 <td class="px-3 py-2 text-center">
+                    <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'kehadiran', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
+                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_kehadiran > 0 ? 'text-amber-700 bg-amber-50' : 'text-slate-400 bg-slate-100'}">
+                        ${mhs.nilai_kehadiran || 0}
+                    </span>
+                </td>
+                <td class="px-3 py-2 text-center">
+                    <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'keaktifan', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
+                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_keaktifan > 0 ? 'text-orange-700 bg-orange-50' : 'text-slate-400 bg-slate-100'}">
+                        ${mhs.nilai_keaktifan || 0}
+                    </span>
+                </td>
+                <td class="px-3 py-2 text-center">
                     <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'tugas', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
                         class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_tugas > 0 ? 'text-blue-700 bg-blue-50' : 'text-slate-400 bg-slate-100'}">
                         ${mhs.nilai_tugas || 0}
                     </span>
                 </td>
                 <td class="px-3 py-2 text-center">
+                    <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'praktikum', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
+                        title="${praktikumTitle}"
+                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_praktikum > 0 ? 'text-purple-700 bg-purple-50' : 'text-slate-400 bg-slate-100'}">
+                        ${mhs.nilai_praktikum || 0}
+                    </span>
+                </td>
+                <td class="px-3 py-2 text-center">
                     <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'uts', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
-                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_uts > 0 ? 'text-purple-700 bg-purple-50' : 'text-slate-400 bg-slate-100'}">
+                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_uts > 0 ? 'text-cyan-700 bg-cyan-50' : 'text-slate-400 bg-slate-100'}">
                         ${mhs.nilai_uts || 0}
                     </span>
                 </td>
@@ -281,12 +310,6 @@ function renderTabelNilai(data) {
                     <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'uas', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
                         class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_uas > 0 ? 'text-rose-700 bg-rose-50' : 'text-slate-400 bg-slate-100'}">
                         ${mhs.nilai_uas || 0}
-                    </span>
-                </td>
-                <td class="px-3 py-2 text-center">
-                    <span onclick="bukaEditNilai('${mhs.id_mahasiswa}', '${kelas.id_matkul}', 'kehadiran', '${mhs.nama}', '${mhs.nim}', '${kelas.nama_matkul}')"
-                        class="cell-editable inline-block px-2 py-1 rounded font-semibold ${mhs.nilai_kehadiran > 0 ? 'text-amber-700 bg-amber-50' : 'text-slate-400 bg-slate-100'}">
-                        ${mhs.nilai_kehadiran || 0}
                     </span>
                 </td>
                 <td class="px-3 py-2 text-center bg-teal-50/30">
@@ -308,10 +331,19 @@ function renderTabelNilai(data) {
             </table>
         </div>
         
-        <!-- Info Bawah -->
-        <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center gap-2">
-            <i class="fa-solid fa-lightbulb text-amber-500"></i>
-            <span><strong>Tips:</strong> Klik salah satu nilai (Tugas/UTS/UAS/Kehadiran) untuk mengoreksi. Nilai akhir & grade akan otomatis dihitung ulang.</span>
+        <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                <span><strong>Tips:</strong> Klik salah satu nilai untuk mengoreksi manual.</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-magic text-purple-500"></i>
+                <span><strong>Praktikum:</strong> Nilai otomatis dari rata-rata tugas berjenis "Praktikum". Bisa dikoreksi manual jika perlu.</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-teal-500"></i>
+                <span><strong>Bobot:</strong> Kehadiran 20% + Keaktifan 20% + Tugas 20% + Praktikum 20% + UTS 10% + UAS 10%</span>
+            </div>
         </div>
     `;
     
@@ -322,16 +354,13 @@ function renderTabelNilai(data) {
 // BUKA MODAL EDIT NILAI
 // ==========================================
 function bukaEditNilai(idMahasiswa, idMatkul, komponen, namaMhs, nimMhs, namaMatkul) {
-    // Isi info
     document.getElementById('editInisial').innerText = (namaMhs || '?').charAt(0).toUpperCase();
     document.getElementById('editNamaMhs').innerText = namaMhs || '-';
     document.getElementById('editNimMhs').innerText = nimMhs || '-';
     document.getElementById('editNamaMatkul').innerText = namaMatkul || '-';
     
-    // Set komponen
     document.getElementById('editKomponen').value = komponen;
     
-    // Ambil nilai saat ini
     const mhs = (currentRekapData?.mahasiswa || []).find(m => m.id_mahasiswa === idMahasiswa);
     let nilaiSekarang = 0;
     if (mhs) {
@@ -339,15 +368,15 @@ function bukaEditNilai(idMahasiswa, idMatkul, komponen, namaMhs, nimMhs, namaMat
         else if (komponen === 'uts') nilaiSekarang = mhs.nilai_uts;
         else if (komponen === 'uas') nilaiSekarang = mhs.nilai_uas;
         else if (komponen === 'kehadiran') nilaiSekarang = mhs.nilai_kehadiran;
+        else if (komponen === 'keaktifan') nilaiSekarang = mhs.nilai_keaktifan;
+        else if (komponen === 'praktikum') nilaiSekarang = mhs.nilai_praktikum;
     }
     
     document.getElementById('editNilaiBaru').value = nilaiSekarang;
     
-    // Simpan data
     document.getElementById('modalEditNilai').dataset.idMahasiswa = idMahasiswa;
     document.getElementById('modalEditNilai').dataset.idMatkul = idMatkul;
     
-    // Buka modal
     document.getElementById('modalEditNilai').classList.remove('hidden');
 }
 
@@ -407,7 +436,7 @@ async function hitungUlangNilai() {
         return;
     }
     
-    if (!confirm('Hitung ulang nilai akhir & grade untuk semua mahasiswa di kelas ini?\n\nBobot: Kehadiran 10%, Tugas 20%, UTS 30%, UAS 40%')) {
+    if (!confirm('Hitung ulang nilai akhir & grade untuk semua mahasiswa di kelas ini?\n\nBobot: Kehadiran 20%, Keaktifan 20%, Tugas 20%, Praktikum 20%, UTS 10%, UAS 10%')) {
         return;
     }
     
@@ -456,23 +485,22 @@ function exportCSV() {
     const kelas = data.kelas || {};
     const mahasiswa = data.mahasiswa || [];
     
-    // Header CSV
     let csv = `Rekap Nilai: ${kelas.nama_matkul || 'Mata Kuliah'}\n`;
     csv += `Kelas: ${kelas.nama_kelas || '-'}\n`;
     csv += `SKS: ${kelas.sks || 0}\n`;
-    csv += `Tanggal Export: ${new Date().toLocaleString('id-ID')}\n\n`;
+    csv += `Tanggal Export: ${new Date().toLocaleString('id-ID')}\n`;
+    csv += `Bobot: Kehadiran 20% + Keaktifan 20% + Tugas 20% + Praktikum 20% + UTS 10% + UAS 10%\n\n`;
     
-    // Header tabel
-    csv += 'No,NIM,Nama,Tugas (20%),UTS (30%),UAS (40%),Kehadiran (10%),Nilai Akhir,Grade\n';
+    csv += 'No,NIM,Nama,Kehadiran (20%),Keaktifan (20%),Tugas (20%),Praktikum (20%),UTS (10%),UAS (10%),Nilai Akhir,Grade\n';
     
-    // Baris mahasiswa
     mahasiswa.forEach((mhs, idx) => {
         csv += `${idx + 1},${mhs.nim || '-'},${mhs.nama || '-'},`;
-        csv += `${mhs.nilai_tugas || 0},${mhs.nilai_uts || 0},${mhs.nilai_uas || 0},`;
-        csv += `${mhs.nilai_kehadiran || 0},${mhs.nilai_akhir || 0},${mhs.grade || '-'}\n`;
+        csv += `${mhs.nilai_kehadiran || 0},${mhs.nilai_keaktifan || 0},`;
+        csv += `${mhs.nilai_tugas || 0},${mhs.nilai_praktikum || 0},`;
+        csv += `${mhs.nilai_uts || 0},${mhs.nilai_uas || 0},`;
+        csv += `${mhs.nilai_akhir || 0},${mhs.grade || '-'}\n`;
     });
     
-    // Statistik
     csv += '\n\nSTATISTIK\n';
     const stat = data.statistik || {};
     csv += `Total Mahasiswa,${stat.total_mahasiswa || 0}\n`;
@@ -486,7 +514,6 @@ function exportCSV() {
     csv += `D,${(stat.distribusi_grade || {})['D'] || 0}\n`;
     csv += `E,${(stat.distribusi_grade || {})['E'] || 0}\n`;
     
-    // Download
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
