@@ -1,10 +1,18 @@
 // ==========================================
 // js/absensi.js - Logika Halaman Absensi Mahasiswa
-// ✅ Versi Baru: Panel Absen Hari Ini + Tabel Riwayat
+// ✅ Versi Final: Panel Absen + Skenario 3 + Toleransi 30 Menit
 // ==========================================
 
+// ==========================================
+// STATE GLOBAL
+// ==========================================
 let dataAbsensiGlobal = [];
 let currentUser = null;
+
+// ==========================================
+// KONFIGURASI
+// ==========================================
+const TOLERANSI_MENIT = 30;   // ✅ Toleransi absen (30 menit)
 
 // ==========================================
 // INISIALISASI
@@ -12,15 +20,22 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Validasi Sesi
     const sessionData = localStorage.getItem('user_session') || localStorage.getItem('user');
-    if (!sessionData) { 
-        window.location.href = '../login.html'; 
-        return; 
+    if (!sessionData) {
+        window.location.href = '../login.html';
+        return;
     }
-    
-    currentUser = JSON.parse(sessionData);
+
+    try {
+        currentUser = JSON.parse(sessionData);
+    } catch (e) {
+        console.error('Session tidak valid:', e);
+        window.location.href = '../login.html';
+        return;
+    }
+
     console.log(">>> User session:", currentUser);
 
-    // 2. Set Jam Sekarang
+    // 2. Set Jam Sekarang (update tiap detik)
     updateJamSekarang();
     setInterval(updateJamSekarang, 1000);
 
@@ -36,10 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (filterStatus) filterStatus.addEventListener('change', applyFilter);
     if (btnReset) btnReset.addEventListener('click', resetFilter);
 
-    // 5. Load Data Absensi
+    // 5. Load Data Absensi Pertama Kali
     await loadAbsensi(currentUser);
 
-    // 6. Auto-refresh setiap 30 detik (biar panel absen update)
+    // 6. Auto-refresh setiap 30 detik (update panel absen)
     setInterval(() => {
         console.log(">>> Auto-refresh absensi...");
         loadAbsensi(currentUser);
@@ -52,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function updateJamSekarang() {
     const el = document.getElementById('jamSekarang');
     if (!el) return;
-    
+
     const now = new Date();
     const witaTime = now.toLocaleString('id-ID', {
         timeZone: 'Asia/Makassar',
@@ -68,50 +83,58 @@ function updateJamSekarang() {
 }
 
 // ==========================================
-// LOAD DATA ABSENSI
+// LOAD DATA ABSENSI (DENGAN RETRY)
 // ==========================================
 async function loadAbsensi(user, retryCount = 0) {
     const MAX_RETRY = 2;
-    
+
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_absensi', 
+            body: JSON.stringify({
+                action: 'get_absensi',
                 id_mahasiswa: user.id_mahasiswa || user.id_user
             })
         });
+
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
         const result = await res.json();
         console.log(">>> Data absensi:", result);
-        
+
         if (result.status === 'success') {
             dataAbsensiGlobal = result.data || [];
-            
-            // ✅ Render panel absen hari ini (FOKUS UTAMA)
+
+            // ✅ Render Panel Absen Hari Ini (FOKUS UTAMA)
             renderPanelAbsenHariIni(dataAbsensiGlobal);
-            
-            // ✅ Update statistik
+
+            // ✅ Update Statistik
             updateStatistik(dataAbsensiGlobal);
-            
-            // ✅ Render tabel riwayat
+
+            // ✅ Render Tabel Riwayat
             renderTabel(dataAbsensiGlobal);
         } else {
             showErrorState(result.message || 'Gagal memuat data.');
         }
+
     } catch (err) {
         console.error("Error load absensi:", err);
-        
+
+        // ✅ Retry logic
         if (retryCount < MAX_RETRY) {
             console.log(`>>> Retry ${retryCount + 1}/${MAX_RETRY}...`);
             await new Promise(resolve => setTimeout(resolve, 2000));
             return loadAbsensi(user, retryCount + 1);
         }
-        
+
         showErrorState('Gagal terhubung ke server. Coba lagi nanti.');
     }
 }
 
+// ==========================================
+// SHOW ERROR STATE
+// ==========================================
 function showErrorState(message) {
     const panel = document.getElementById('panelAbsenHariIni');
     if (panel) {
@@ -126,7 +149,7 @@ function showErrorState(message) {
             </div>
         `;
     }
-    
+
     const tbody = document.getElementById('tabelAbsensiBody');
     if (tbody) {
         tbody.innerHTML = `
@@ -146,25 +169,12 @@ function showErrorState(message) {
 function renderPanelAbsenHariIni(data) {
     const panel = document.getElementById('panelAbsenHariIni');
     if (!panel) return;
-    
+
     // ✅ Cari pertemuan yang BISA absen (masuk atau keluar)
-    const pertemuanAktif = data.filter(item => 
+    const pertemuanAktif = data.filter(item =>
         item.bisa_absen_masuk || item.bisa_absen_keluar
     );
-    
-    // ✅ Kalau tidak ada yang bisa absen, cari pertemuan yang belum selesai (untuk info)
-    const pertemuanHariIni = data.filter(item => {
-        if (!item.tanggal) return false;
-        // Cek apakah hari ini
-        const now = new Date();
-        const todayStr = now.toLocaleDateString('id-ID', { 
-            day: 'numeric', 
-            month: 'short', 
-            year: 'numeric' 
-        });
-        return item.tanggal === todayStr;
-    });
-    
+
     // ==========================================
     // KASUS 1: ADA PERTEMUAN YANG BISA ABSEN
     // ==========================================
@@ -173,7 +183,7 @@ function renderPanelAbsenHariIni(data) {
             <div class="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                
+
                 <div class="relative">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
@@ -186,12 +196,11 @@ function renderPanelAbsenHariIni(data) {
                         ${pertemuanAktif.length} pertemuan bisa diabsen sekarang.
                     </p>
         `;
-        
-        // Loop setiap pertemuan yang bisa diabsen
-        pertemuanAktif.forEach((item, index) => {
+
+        pertemuanAktif.forEach((item) => {
             const bisaMasuk = item.bisa_absen_masuk;
             const bisaKeluar = item.bisa_absen_keluar;
-            
+
             html += `
                 <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4 mb-3 border border-white/20">
                     <div class="mb-3">
@@ -200,30 +209,30 @@ function renderPanelAbsenHariIni(data) {
                             <i class="fa-regular fa-clock mr-1"></i>${item.tanggal} • ${item.jam_mulai} - ${item.jam_selesai}
                         </p>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-3">
                         ${bisaMasuk ? `
-                            <button onclick="kirimAbsen('MASUK', '${item.id_pertemuan}')" 
+                            <button onclick="kirimAbsen('MASUK', '${item.id_pertemuan}')"
                                 class="bg-white hover:bg-teal-50 text-teal-700 font-bold py-3 px-4 rounded-xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 pulse-active">
                                 <i class="fa-solid fa-right-to-bracket text-lg"></i>
                                 <span class="text-sm">ABSEN MASUK</span>
                             </button>
                         ` : `
-                            <button disabled 
+                            <button disabled
                                 class="bg-white/10 text-white/50 font-bold py-3 px-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-lock text-lg"></i>
                                 <span class="text-xs">MASUK</span>
                             </button>
                         `}
-                        
+
                         ${bisaKeluar ? `
-                            <button onclick="kirimAbsen('KELUAR', '${item.id_pertemuan}')" 
+                            <button onclick="kirimAbsen('KELUAR', '${item.id_pertemuan}')"
                                 class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-right-from-bracket text-lg"></i>
                                 <span class="text-sm">ABSEN KELUAR</span>
                             </button>
                         ` : `
-                            <button disabled 
+                            <button disabled
                                 class="bg-white/10 text-white/50 font-bold py-3 px-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-lock text-lg"></i>
                                 <span class="text-xs">KELUAR</span>
@@ -233,66 +242,91 @@ function renderPanelAbsenHariIni(data) {
                 </div>
             `;
         });
-        
+
         html += `
                 </div>
             </div>
         `;
-        
+
         panel.innerHTML = html;
         return;
     }
-    
+
     // ==========================================
-    // KASUS 2: TIDAK ADA YANG BISA ABSEN SEKARANG
+    // ✅ KASUS 2: SKENARIO 3 — TIDAK ADA ABSEN TERSEDIA
+    // (Ada jadwal hari ini, tapi sudah lewat/belum dibuka)
     // ==========================================
-    let message = 'Tidak ada jadwal kuliah hari ini.';
-    let subMessage = 'Cek riwayat absensi di bawah atau tunggu jadwal berikutnya.';
-    let icon = 'fa-mug-hot';
-    let colorClass = 'from-slate-100 to-slate-200';
-    let textClass = 'text-slate-600';
-    let iconBg = 'bg-slate-200 text-slate-500';
-    
-    if (pertemuanHariIni.length > 0) {
-        message = 'Tidak ada absen yang tersedia saat ini.';
-        subMessage = 'Jadwal kuliah hari ini sudah lewat atau belum dibuka.';
-        icon = 'fa-clock';
-        colorClass = 'from-amber-50 to-orange-50';
-        textClass = 'text-amber-700';
-        iconBg = 'bg-amber-100 text-amber-600';
-    }
-    
     panel.innerHTML = `
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
-            <div class="${iconBg} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <i class="fa-solid ${icon} text-2xl"></i>
+
+            <!-- Ikon Besar -->
+            <div class="bg-amber-100 text-amber-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i class="fa-solid fa-clock text-4xl"></i>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">${message}</h3>
-            <p class="text-sm text-slate-500 mb-4">${subMessage}</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl mx-auto mt-6 text-left">
-                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
-                    <div class="flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-right-to-bracket text-blue-600 text-sm"></i>
+
+            <!-- Pesan Utama -->
+            <h3 class="text-xl font-bold text-slate-800 mb-2">
+                Tidak Ada Absen yang Tersedia
+            </h3>
+
+            <!-- Sub Pesan -->
+            <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+                Jadwal kuliah hari ini sudah <strong>lewat</strong> atau <strong>belum dibuka</strong>.
+                Silakan cek kembali sesuai jadwal.
+            </p>
+
+            <!-- 3 Kartu Info (TOLERANSI 30 MENIT) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+
+                <!-- Kartu 1: Absen Masuk -->
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-right-to-bracket text-sm"></i>
+                        </div>
                         <span class="text-xs font-bold text-blue-700">Absen Masuk</span>
                     </div>
-                    <p class="text-[10px] text-blue-600">15 menit setelah jam mulai</p>
+                    <p class="text-[10px] text-blue-600 leading-relaxed">
+                        Tersedia <strong>mulai jam kuliah</strong> hingga <strong>${TOLERANSI_MENIT} menit</strong> setelahnya.
+                    </p>
                 </div>
-                <div class="bg-red-50 border border-red-100 rounded-lg p-3">
-                    <div class="flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-right-from-bracket text-red-600 text-sm"></i>
+
+                <!-- Kartu 2: Absen Keluar -->
+                <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="bg-red-100 text-red-600 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                        </div>
                         <span class="text-xs font-bold text-red-700">Absen Keluar</span>
                     </div>
-                    <p class="text-[10px] text-red-600">15 menit setelah jam selesai</p>
+                    <p class="text-[10px] text-red-600 leading-relaxed">
+                        Tersedia <strong>mulai jam selesai</strong> hingga <strong>${TOLERANSI_MENIT} menit</strong> setelahnya.
+                    </p>
                 </div>
-                <div class="bg-amber-50 border border-amber-100 rounded-lg p-3">
-                    <div class="flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+
+                <!-- Kartu 3: Lewat Waktu -->
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="bg-amber-100 text-amber-600 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                        </div>
                         <span class="text-xs font-bold text-amber-700">Lewat Waktu</span>
                     </div>
-                    <p class="text-[10px] text-amber-600">Tidak bisa absen (telat)</p>
+                    <p class="text-[10px] text-amber-600 leading-relaxed">
+                        Jika lewat dari <strong>${TOLERANSI_MENIT} menit</strong>, tidak bisa absen (status: Alpha).
+                    </p>
                 </div>
+
             </div>
+
+            <!-- Info Tambahan -->
+            <div class="mt-6 pt-4 border-t border-slate-100">
+                <p class="text-[10px] text-slate-400">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    Jika jadwal sudah dibuka tapi Anda tidak bisa absen, hubungi dosen pengampu.
+                </p>
+            </div>
+
         </div>
     `;
 }
@@ -303,21 +337,21 @@ function renderPanelAbsenHariIni(data) {
 function updateStatistik(data) {
     const total = data.length;
     let hadir = 0, terlambat = 0, alpha = 0;
-    
+
     data.forEach(item => {
         if (item.status === 'Hadir') hadir++;
         else if (item.status === 'Terlambat') terlambat++;
         else if (item.status === 'Alpha') alpha++;
     });
-    
+
     const persen = total > 0 ? Math.round((hadir / total) * 100) : 0;
-    
+
     const elHadir = document.getElementById('statHadir');
     const elTerlambat = document.getElementById('statTerlambat');
     const elAlpha = document.getElementById('statAlpha');
     const elPersen = document.getElementById('statPersen');
     const elTotal = document.getElementById('totalRiwayat');
-    
+
     if (elHadir) elHadir.innerText = hadir;
     if (elTerlambat) elTerlambat.innerText = terlambat;
     if (elAlpha) elAlpha.innerText = alpha;
@@ -331,7 +365,7 @@ function updateStatistik(data) {
 function renderTabel(data) {
     const tbody = document.getElementById('tabelAbsensiBody');
     if (!tbody) return;
-    
+
     if (data.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -343,14 +377,14 @@ function renderTabel(data) {
         `;
         return;
     }
-    
+
     tbody.innerHTML = '';
-    
+
     data.forEach(item => {
         // Warna badge status
         let color = 'text-slate-600 bg-slate-50 border-slate-200';
         let statusLabel = item.status || 'Belum';
-        
+
         if (item.status === 'Hadir') {
             color = 'text-emerald-600 bg-emerald-50 border-emerald-200';
         } else if (item.status === 'Izin' || item.status === 'Sakit') {
@@ -360,8 +394,8 @@ function renderTabel(data) {
         } else if (item.status === 'Alpha') {
             color = 'text-red-600 bg-red-50 border-red-200';
         }
-        
-        // ✅ Absen Masuk (hanya tampil status)
+
+        // ✅ Kolom Absen Masuk
         let kolomMasuk = '';
         if (item.waktu_masuk && item.waktu_masuk !== '-' && item.waktu_masuk !== '') {
             kolomMasuk = `
@@ -372,8 +406,8 @@ function renderTabel(data) {
         } else {
             kolomMasuk = `<span class="text-slate-400 text-[10px] italic">Belum absen</span>`;
         }
-        
-        // ✅ Absen Keluar (hanya tampil status)
+
+        // ✅ Kolom Absen Keluar
         let kolomKeluar = '';
         if (item.waktu_keluar && item.waktu_keluar !== '-' && item.waktu_keluar !== '') {
             kolomKeluar = `
@@ -384,7 +418,7 @@ function renderTabel(data) {
         } else {
             kolomKeluar = `<span class="text-slate-400 text-[10px] italic">Belum absen</span>`;
         }
-        
+
         tbody.innerHTML += `
             <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 <td class="px-4 py-4">
@@ -416,22 +450,22 @@ function renderTabel(data) {
 function applyFilter() {
     const tanggal = document.getElementById('filterTanggalAbsen')?.value || '';
     const status = document.getElementById('filterStatusAbsen')?.value || '';
-    
+
     let filtered = [...dataAbsensiGlobal];
-    
+
     // Filter tanggal
     if (tanggal) {
         const [year, month, day] = tanggal.split('-');
-        const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
-                          'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const bulanStr = namaBulan[parseInt(month) - 1];
         const tanggalPattern = `${parseInt(day)} ${bulanStr} ${year}`;
-        
+
         filtered = filtered.filter(item => {
             return item.tanggal && item.tanggal === tanggalPattern;
         });
     }
-    
+
     // Filter status
     if (status) {
         filtered = filtered.filter(item => {
@@ -441,23 +475,26 @@ function applyFilter() {
             return item.status === status;
         });
     }
-    
+
     renderTabel(filtered);
-    
+
     // Update total di header tabel
     const elTotal = document.getElementById('totalRiwayat');
     if (elTotal) elTotal.innerText = filtered.length;
 }
 
+// ==========================================
+// RESET FILTER
+// ==========================================
 function resetFilter() {
     const filterTanggal = document.getElementById('filterTanggalAbsen');
     const filterStatus = document.getElementById('filterStatusAbsen');
-    
+
     if (filterTanggal) filterTanggal.value = '';
     if (filterStatus) filterStatus.value = '';
-    
+
     renderTabel(dataAbsensiGlobal);
-    
+
     const elTotal = document.getElementById('totalRiwayat');
     if (elTotal) elTotal.innerText = dataAbsensiGlobal.length;
 }
@@ -470,11 +507,11 @@ async function kirimAbsen(aksi, id_pertemuan) {
         alert('Sesi tidak valid. Silakan login ulang.');
         return;
     }
-    
-    const pesanKonfirmasi = aksi === 'MASUK' 
-        ? 'Apakah Anda yakin ingin melakukan absen MASUK?' 
+
+    const pesanKonfirmasi = aksi === 'MASUK'
+        ? 'Apakah Anda yakin ingin melakukan absen MASUK?'
         : 'Apakah Anda yakin ingin melakukan absen KELUAR?';
-    
+
     if (!confirm(pesanKonfirmasi)) return;
 
     // Loading state
@@ -489,18 +526,19 @@ async function kirimAbsen(aksi, id_pertemuan) {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'proses_absen', 
-                id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user, 
-                id_pertemuan: id_pertemuan, 
-                aksi: aksi 
+            body: JSON.stringify({
+                action: 'proses_absen',
+                id_mahasiswa: currentUser.id_mahasiswa || currentUser.id_user,
+                id_pertemuan: id_pertemuan,
+                aksi: aksi
             })
         });
         const result = await res.json();
         console.log(">>> Response absen:", result);
         alert(result.message);
-        
+
         if (result.status === 'success') {
+            // Reload data absensi
             await loadAbsensi(currentUser);
         } else {
             if (btn) {
