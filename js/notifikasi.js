@@ -1,5 +1,6 @@
 // js/notifikasi.js - Sistem Notifikasi Frontend
-// ✅ Dropdown + Badge + Auto-refresh (pakai get_jumlah_notif)
+// ✅ Kirim role di setiap fetch (mahasiswa/dosen/admin)
+// ✅ Dropdown + Badge + Auto-refresh
 
 // ==========================================
 // STATE
@@ -9,12 +10,21 @@ let notifOpen = false;
 let notifAutoRefreshInterval = null;
 
 // ==========================================
-// GET USER DARI SESSION
+// AMBIL USER & ROLE DARI SESSION
 // ==========================================
 function getUserIdFromSession() {
     try {
         const user = JSON.parse(localStorage.getItem('user_session') || '{}');
         return user.id_user || user.id_mahasiswa || user.id_dosen || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function getUserRoleFromSession() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user_session') || '{}');
+        return (user.role || '').toLowerCase().trim() || null;
     } catch (e) {
         return null;
     }
@@ -31,23 +41,22 @@ function setupNotifButton() {
         return;
     }
     
-    // Hapus listener lama (kalau ada)
+    // Hapus listener lama
     const newBtn = notifBtn.cloneNode(true);
     notifBtn.parentNode.replaceChild(newBtn, notifBtn);
     
-    // Pasang event listener baru
     newBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         toggleNotifDropdown();
     });
     
-    // Buat dropdown container (kalau belum ada)
+    // Buat dropdown (kalau belum ada)
     if (!document.getElementById('notifDropdown')) {
         buatDropdownContainer();
     }
     
-    // Pasang listener klik di luar
+    // Klik di luar → tutup
     document.addEventListener('click', function(e) {
         const dropdown = document.getElementById('notifDropdown');
         if (!dropdown || !notifOpen) return;
@@ -57,7 +66,7 @@ function setupNotifButton() {
         }
     });
     
-    // Auto-refresh badge setiap 60 detik
+    // Auto-refresh setiap 60 detik
     if (notifAutoRefreshInterval) clearInterval(notifAutoRefreshInterval);
     notifAutoRefreshInterval = setInterval(loadNotifikasiBadge, 60000);
     
@@ -65,7 +74,7 @@ function setupNotifButton() {
 }
 
 // ==========================================
-// BUAT DROPDOWN CONTAINER
+// BUAT DROPDOWN
 // ==========================================
 function buatDropdownContainer() {
     const dropdown = document.createElement('div');
@@ -103,7 +112,6 @@ function toggleNotifDropdown() {
     if (notifOpen) {
         tutupNotifDropdown();
     } else {
-        // Posisikan di bawah tombol
         const rect = btn.getBoundingClientRect();
         dropdown.style.top = (rect.bottom + 8) + 'px';
         dropdown.style.right = (window.innerWidth - rect.right) + 'px';
@@ -122,13 +130,14 @@ function tutupNotifDropdown() {
 }
 
 // ==========================================
-// LOAD NOTIFIKASI (LIST FULL)
+// LOAD NOTIFIKASI (LIST) — Kirim role
 // ==========================================
 async function loadNotifikasi() {
     const listContainer = document.getElementById('notifList');
     if (!listContainer) return;
     
     const idUser = getUserIdFromSession();
+    const role = getUserRoleFromSession();
     
     if (!idUser) {
         listContainer.innerHTML = '<p class="p-4 text-center text-slate-500 text-sm">Silakan login ulang.</p>';
@@ -148,7 +157,8 @@ async function loadNotifikasi() {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'get_notifikasi',
-                id_user: idUser
+                id_user: idUser,
+                role: role                // ✅ KIRIM ROLE
             })
         });
         
@@ -201,8 +211,7 @@ function renderNotifikasi() {
             ? '<span class="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 mt-1.5"></span>' 
             : '';
         
-        // Escape judul & pesan biar tidak error kalau ada apostrof
-        const judulSafe = String(n.judul || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        // Escape link
         const linkSafe = String(n.link || '').replace(/'/g, "\\'");
         
         html += `
@@ -249,14 +258,11 @@ function getNotifStyle(tipe) {
 // HANDLE KLIK NOTIFIKASI
 // ==========================================
 async function handleClickNotif(id_notif, link, isUnread) {
-    // Tandai dibaca dulu
     if (isUnread) {
         await tandaiNotifDibaca(id_notif);
     }
     
-    // Redirect kalau ada link
     if (link && link.trim() !== '' && link !== 'undefined') {
-        // Beri sedikit delay biar user lihat state berubah
         setTimeout(() => {
             window.location.href = link;
         }, 200);
@@ -268,6 +274,8 @@ async function handleClickNotif(id_notif, link, isUnread) {
 // ==========================================
 async function tandaiNotifDibaca(id_notif) {
     const idUser = getUserIdFromSession();
+    const role = getUserRoleFromSession();
+    
     if (!idUser) return;
     
     try {
@@ -277,15 +285,14 @@ async function tandaiNotifDibaca(id_notif) {
             body: JSON.stringify({
                 action: 'tandai_notif_dibaca',
                 id_notif: id_notif,
-                id_user: idUser
+                id_user: idUser,
+                role: role               // ✅ KIRIM ROLE
             })
         });
         
-        // Update lokal
         const notif = notifData.find(n => n.id_notif === id_notif);
         if (notif) notif.sudah_dibaca = true;
         
-        // Update badge
         updateBadge();
     } catch (error) {
         console.error('Error tandai dibaca:', error);
@@ -293,10 +300,12 @@ async function tandaiNotifDibaca(id_notif) {
 }
 
 // ==========================================
-// TANDAI SEMUA DIBACA
+// TANDAI SEMUA DIBACA — Kirim role
 // ==========================================
 async function tandaiSemuaDibaca() {
     const idUser = getUserIdFromSession();
+    const role = getUserRoleFromSession();
+    
     if (!idUser) return;
     
     try {
@@ -305,13 +314,13 @@ async function tandaiSemuaDibaca() {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'tandai_semua_notif_dibaca',
-                id_user: idUser
+                id_user: idUser,
+                role: role               // ✅ KIRIM ROLE
             })
         });
         
         const result = await res.json();
         if (result.status === 'success') {
-            // Update lokal
             notifData.forEach(n => n.sudah_dibaca = true);
             renderNotifikasi();
             updateBadge();
@@ -330,7 +339,7 @@ function updateBadge() {
 }
 
 // ==========================================
-// UPDATE BADGE ONLY (tanpa data list)
+// UPDATE BADGE ONLY
 // ==========================================
 function updateBadgeOnly(count) {
     const badge = document.getElementById('notifBadge');
@@ -349,10 +358,12 @@ function updateBadgeOnly(count) {
 }
 
 // ==========================================
-// LOAD BADGE (AUTO-REFRESH) — Ringan pakai get_jumlah_notif
+// LOAD BADGE — Kirim role, pakai get_jumlah_notif
 // ==========================================
 async function loadNotifikasiBadge() {
     const idUser = getUserIdFromSession();
+    const role = getUserRoleFromSession();
+    
     if (!idUser) return;
     
     try {
@@ -361,7 +372,8 @@ async function loadNotifikasiBadge() {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'get_jumlah_notif',
-                id_user: idUser
+                id_user: idUser,
+                role: role                // ✅ KIRIM ROLE
             })
         });
         
