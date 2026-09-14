@@ -1,10 +1,11 @@
 // js/dosen-load-components.js
 // Loader Sidebar & Header untuk Portal Dosen
+// ✅ Dengan Setup Notifikasi
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // ✅ Tambahkan class role-dosen ke body
+    // ✅ Tambahkan class ke body
     document.body.classList.add('role-dosen');
-    
+
     try {
         // ==========================================
         // 1. MUAT SIDEBAR DOSEN
@@ -16,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const sidebarHTML = await response.text();
             sidebarContainer.innerHTML = sidebarHTML;
             
-            // ✅ Highlight menu aktif
             highlightActiveMenu();
         }
 
@@ -32,20 +32,31 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // ✅ Isi data header
             fillHeaderData();
+            
+            // ✅ SETUP NOTIFIKASI (BARU)
+            setTimeout(() => {
+                if (typeof setupNotifButton === 'function') {
+                    console.log('🔔 Setup notifikasi dosen...');
+                    setupNotifButton();
+                    loadNotifikasiBadge();
+                } else {
+                    console.warn('⚠️ js/notifikasi.js belum di-load.');
+                }
+            }, 100);
         }
 
         // ==========================================
-        // 3. SETUP HANDLER LOGOUT (TERPUSAT)
+        // 3. SETUP HANDLER LOGOUT
         // ==========================================
         setupLogoutHandler();
 
         // ==========================================
-        // 4. ✅ SETUP TOGGLE SIDEBAR (MOBILE)
+        // 4. SETUP TOGGLE SIDEBAR (MOBILE)
         // ==========================================
         setupSidebarToggle();
 
     } catch (error) {
-        console.error("Gagal memuat komponen:", error);
+        console.error("Gagal memuat komponen dosen:", error);
     }
 });
 
@@ -55,12 +66,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 function highlightActiveMenu() {
     const currentPage = window.location.pathname.split('/').pop() || 'dosen-dashboard.html';
     
-    // Hapus semua class active
     document.querySelectorAll('.sidebar-nav-link').forEach(el => {
         el.classList.remove('active');
     });
 
-    // ✅ Mapping halaman → ID menu (TANPA praktikum)
     const menuMap = {
         'dosen-dashboard.html': 'menu-dashboard',
         'dosen-matakuliah.html': 'menu-matakuliah',
@@ -74,9 +83,7 @@ function highlightActiveMenu() {
     const activeId = menuMap[currentPage];
     if (activeId) {
         const activeLink = document.getElementById(activeId);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
+        if (activeLink) activeLink.classList.add('active');
     }
 }
 
@@ -93,7 +100,6 @@ function fillHeaderData() {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-        // ✅ Title map (TANPA praktikum)
         const titleMap = {
             'dosen-dashboard': 'Dashboard Dosen',
             'dosen-matakuliah': 'Mata Kuliah Ampuan',
@@ -118,16 +124,13 @@ function fillHeaderData() {
         spesialisasiDisplay.innerText = user.spesialisasi || 'Dosen Pengajar';
     }
     
-    // ✅ Set inisial avatar otomatis
+    // Set inisial avatar
     const avatarInisial = document.getElementById('dosenAvatarInisial');
     if (avatarInisial) {
         const nama = user.nama_dosen || 'Dosen';
-        
-        // Ambil kata valid (skip gelar dengan titik)
         const kata = nama.split(' ').filter(k => k.length > 0 && !k.includes('.'));
         
         let inisial = '';
-        
         if (kata.length >= 2) {
             inisial = kata[0].charAt(0) + kata[1].charAt(0);
         } else if (kata.length === 1) {
@@ -141,14 +144,13 @@ function fillHeaderData() {
 }
 
 // ==========================================
-// HANDLER LOGOUT (TERPUSAT)
+// HANDLER LOGOUT
 // ==========================================
 function setupLogoutHandler() {
     document.addEventListener('click', function(e) {
         const logoutBtn = e.target.closest('#btnLogout');
         if (logoutBtn) {
             e.preventDefault();
-            
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
                 window.location.href = '../login.html';
@@ -158,10 +160,9 @@ function setupLogoutHandler() {
 }
 
 // ==========================================
-// ✅ TOGGLE SIDEBAR (MOBILE) - PERBAIKAN
+// TOGGLE SIDEBAR (MOBILE)
 // ==========================================
 function setupSidebarToggle() {
-    // Buat overlay jika belum ada
     if (!document.getElementById('sidebarOverlay')) {
         const overlay = document.createElement('div');
         overlay.id = 'sidebarOverlay';
@@ -170,17 +171,7 @@ function setupSidebarToggle() {
     
     const overlay = document.getElementById('sidebarOverlay');
     
-    // ✅ RESET STATE saat halaman load
-    const sidebarInit = document.querySelector('aside');
-    if (sidebarInit) {
-        sidebarInit.classList.remove('show');
-        overlay.classList.remove('show');
-    }
-    
-    // Event delegation untuk semua klik
     document.addEventListener('click', function(e) {
-        
-        // 1. Tombol Hamburger
         const toggleBtn = e.target.closest('#btnToggleSidebar');
         if (toggleBtn) {
             e.preventDefault();
@@ -192,7 +183,6 @@ function setupSidebarToggle() {
             return;
         }
         
-        // 2. Klik overlay → tutup sidebar
         if (e.target.id === 'sidebarOverlay') {
             const sidebar = document.querySelector('aside');
             if (sidebar) {
@@ -202,7 +192,6 @@ function setupSidebarToggle() {
             return;
         }
         
-        // 3. Klik menu link → tutup sidebar (mobile)
         const menuLink = e.target.closest('.sidebar-nav-link');
         if (menuLink && window.innerWidth <= 768) {
             const sidebar = document.querySelector('aside');
