@@ -1,5 +1,5 @@
-// js/tugas.js - Halaman Tugas Mahasiswa (VERSI DENGAN JENIS TUGAS)
-// Fitur: Tampilkan Tugas + Praktikum dengan badge & filter
+// js/tugas.js - Halaman Tugas Mahasiswa
+// ✅ Skeleton Loading + Filter Mata Kuliah + Error Handling
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Set Judul Halaman Header
@@ -34,26 +34,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. Setup Filter Tab
     setupFilterTab();
+    
+    // 5. Setup Filter Mata Kuliah
+    setupMatkulFilter();
 
-    // 5. Muat Data Tugas
+    // 6. Muat Data Tugas
     const identifier = user.id_user || user.id_mahasiswa;
     
     if (identifier) {
         await loadTugas(identifier);
     } else {
         document.getElementById('containerTugas').innerHTML = 
-            '<p class="text-red-500 col-span-3 text-center py-10">Error: Data user tidak lengkap.</p>';
+            '<p class="text-red-500 col-span-full text-center py-10">Error: Data user tidak lengkap.</p>';
     }
 });
 
 // ==========================================
-// SIMPAN DATA TUGAS GLOBAL (untuk filter)
+// VARIABEL GLOBAL
 // ==========================================
 let allTugasData = [];
 let currentFilter = 'Semua'; // 'Semua' | 'Tugas' | 'Praktikum'
+let currentMatkulFilter = '';
 
 // ==========================================
-// SETUP FILTER TAB
+// SETUP FILTER TAB (Tugas/Praktikum)
 // ==========================================
 function setupFilterTab() {
     const filterButtons = document.querySelectorAll('[data-filter]');
@@ -76,11 +80,38 @@ function setupFilterTab() {
 }
 
 // ==========================================
+// ✅ SETUP FILTER MATA KULIAH (BARU)
+// ==========================================
+function setupMatkulFilter() {
+    const dropdown = document.getElementById('filterMatkul');
+    if (dropdown) {
+        dropdown.addEventListener('change', function() {
+            currentMatkulFilter = this.value;
+            renderTugas();
+        });
+    }
+}
+
+// ==========================================
 // LOAD TUGAS
 // ==========================================
 async function loadTugas(identifier) {
     const container = document.getElementById('containerTugas');
-    container.innerHTML = '<p class="text-center text-slate-400 py-10 col-span-full"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat tugas...</p>';
+    
+    // ✅ SKELETON LOADING (6 kartu)
+    container.innerHTML = Array(6).fill(`
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 animate-pulse">
+            <div class="flex justify-between mb-3">
+                <div class="h-5 bg-slate-200 rounded w-20"></div>
+                <div class="h-4 bg-slate-200 rounded w-12"></div>
+            </div>
+            <div class="h-3 bg-slate-200 rounded w-24 mb-3"></div>
+            <div class="h-5 bg-slate-200 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-full mb-1"></div>
+            <div class="h-3 bg-slate-200 rounded w-2/3 mb-4"></div>
+            <div class="h-10 bg-slate-200 rounded w-full"></div>
+        </div>
+    `).join('');
     
     try {
         console.log(">>> Loading tugas dengan identifier:", identifier);
@@ -107,13 +138,18 @@ async function loadTugas(identifier) {
             // Simpan data global untuk filter
             allTugasData = result.data || [];
             
-            // Update statistik
+            // Update statistik & dropdown mata kuliah
             updateStatistik(allTugasData);
             
             // Render
             renderTugas();
         } else {
-            container.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">Error: ${result.message}</p>`;
+            container.innerHTML = `
+                <div class="col-span-full bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 text-3xl mb-2"></i>
+                    <p class="text-red-600 font-medium">Error: ${result.message}</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error("Error loading tugas:", error);
@@ -122,7 +158,7 @@ async function loadTugas(identifier) {
                 <i class="fa-solid fa-circle-xmark text-red-500 text-3xl mb-2"></i>
                 <p class="text-red-600 font-medium">❌ Gagal terhubung ke server.</p>
                 <p class="text-red-400 text-sm mt-1">${error.message}</p>
-                <button onclick="loadTugas('${identifier}')" class="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">
+                <button onclick="loadTugas('${identifier}')" class="mt-3 bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition-colors">
                     <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
                 </button>
             </div>
@@ -136,21 +172,31 @@ async function loadTugas(identifier) {
 function renderTugas() {
     const container = document.getElementById('containerTugas');
     
-    // Filter
+    // Filter by jenis
     let filteredData = allTugasData;
     if (currentFilter === 'Tugas') {
-        filteredData = allTugasData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'tugas');
+        filteredData = filteredData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'tugas');
     } else if (currentFilter === 'Praktikum') {
-        filteredData = allTugasData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum');
+        filteredData = filteredData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum');
+    }
+    
+    // ✅ Filter by mata kuliah
+    if (currentMatkulFilter) {
+        filteredData = filteredData.filter(t => t.mata_kuliah === currentMatkulFilter);
     }
     
     container.innerHTML = '';
     
     if (filteredData.length === 0) {
-        const msg = currentFilter === 'Semua' 
+        const msg = currentFilter === 'Semua' && !currentMatkulFilter
             ? 'Belum ada tugas untuk mata kuliah Anda.'
-            : `Belum ada ${currentFilter.toLowerCase()}.`;
-        container.innerHTML = `<p class="text-slate-500 col-span-full text-center py-10">${msg}</p>`;
+            : `Belum ada ${currentFilter.toLowerCase()}${currentMatkulFilter ? ' untuk ' + currentMatkulFilter : ''}.`;
+        container.innerHTML = `
+            <div class="col-span-full text-center py-10">
+                <i class="fa-solid fa-inbox text-slate-300 text-5xl mb-3"></i>
+                <p class="text-slate-500">${msg}</p>
+            </div>
+        `;
         return;
     }
 
@@ -160,9 +206,8 @@ function renderTugas() {
         
         // ✅ Cek deadline
         let isDeadlineLewat = false;
-        let deadlineDate = null;
         if (t.tenggat_waktu) {
-            deadlineDate = new Date(String(t.tenggat_waktu).replace(' ', 'T'));
+            const deadlineDate = new Date(String(t.tenggat_waktu).replace(' ', 'T'));
             isDeadlineLewat = new Date() > deadlineDate;
         }
         
@@ -180,7 +225,7 @@ function renderTugas() {
         const card = document.createElement('div');
         card.className = `bg-white p-6 rounded-2xl shadow-sm border border-slate-100 ${hoverBorder} hover:shadow-md transition-all flex flex-col justify-between ${isDeadlineLewat && !t.sudah_kumpul ? 'opacity-90' : ''}`;
         
-        // ✅ Action HTML dengan KUNCI
+        // Action HTML dengan KUNCI
         let actionHTML = '';
         if (t.sudah_kumpul) {
             const nilaiHTML = t.nilai ? `<br><span class="font-bold text-slate-800">Nilai: ${t.nilai}</span>` : '';
@@ -194,7 +239,6 @@ function renderTugas() {
                 </div>
             `;
         } else if (isDeadlineLewat) {
-            // 🔒 KUNCI
             actionHTML = `
                 <div class="text-center text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
                     <i class="fa-solid fa-lock mr-1"></i> 
@@ -211,7 +255,7 @@ function renderTugas() {
             `;
         }
         
-        // ✅ Deadline HTML
+        // Deadline HTML
         let deadlineHTML = '';
         if (t.tenggat_waktu) {
             deadlineHTML = `
@@ -259,7 +303,7 @@ function renderTugas() {
 }
 
 // ==========================================
-// UPDATE STATISTIK (jumlah tugas & praktikum)
+// UPDATE STATISTIK + ISI DROPDOWN MATKUL
 // ==========================================
 function updateStatistik(data) {
     const totalTugas = data.length;
@@ -284,6 +328,18 @@ function updateStatistik(data) {
     
     if (filterTugasBadge) filterTugasBadge.innerText = totalTugasBiasa;
     if (filterPraktikumBadge) filterPraktikumBadge.innerText = totalPraktikum;
+    
+    // ✅ Isi dropdown mata kuliah unik
+    const dropdown = document.getElementById('filterMatkul');
+    if (dropdown) {
+        const uniqueMatkul = [...new Set(data.map(t => t.mata_kuliah))].sort();
+        const currentValue = dropdown.value;
+        
+        dropdown.innerHTML = '<option value="">Semua Mata Kuliah</option>' + 
+            uniqueMatkul.map(m => `<option value="${m}">${m}</option>`).join('');
+        
+        dropdown.value = currentValue;
+    }
 }
 
 // ==========================================
@@ -386,7 +442,7 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
             file_nama: fileName
         };
         
-        console.log(">>> DATA YANG AKAN DIKIRIM:", JSON.stringify(data));
+        console.log(">>> DATA YANG AKAN DIKIRIM:", JSON.stringify(data).substring(0, 200) + '...');
 
         const res = await fetch(CONFIG.API_URL, { 
             method: 'POST',
@@ -411,11 +467,12 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
             }, 1000);
         } else {
             alert('❌ Gagal: ' + result.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     } catch (error) {
         console.error("Error upload:", error);
         alert('❌ Terjadi kesalahan: ' + error.message);
-    } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
