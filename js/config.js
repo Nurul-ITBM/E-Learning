@@ -1,16 +1,11 @@
 // ==========================================
 // js/config.js - Konfigurasi Global EduLearn
-// ✅ Dengan Auto-Check API_URL
+// ✅ Dengan Auto-Check API_URL + Support Custom Timeout
 // ==========================================
 
 const CONFIG = {
     // ==========================================
     // ⚠️ GANTI URL INI dengan URL dari Apps Script
-    // Cara ambil URL:
-    // 1. Buka Apps Script editor
-    // 2. Deploy → Manage deployments
-    // 3. Copy "Web app URL"
-    // 4. Paste di sini
     // ==========================================
     API_URL: 'https://script.google.com/macros/s/AKfycbzrrbV8sDbATnGg7iVxue07AbdAjuc42Ee-QLJyNo-KBJlzo0D9Jt5zDpfDqSKblBJSZg/exec',
     
@@ -21,7 +16,7 @@ const CONFIG = {
     APP_VERSION: '1.0.0',
     DEBUG: true,   // Set false di production
     
-    // Timeout fetch (ms)
+    // Timeout fetch default (ms)
     FETCH_TIMEOUT: 30000,
     
     // Auto-refresh notif (ms)
@@ -32,13 +27,11 @@ const CONFIG = {
 // AUTO-CHECK API_URL (SAAT LOAD)
 // ==========================================
 (function autoCheckApiUrl() {
-    // Cek 1: API_URL ada?
     if (!CONFIG.API_URL) {
         console.error('❌ CONFIG.API_URL KOSONG! Isi dengan URL Apps Script.');
         return;
     }
     
-    // Cek 2: Format URL benar?
     const urlValid = CONFIG.API_URL.includes('script.google.com/macros/s/') && 
                      CONFIG.API_URL.endsWith('/exec');
     
@@ -49,13 +42,11 @@ const CONFIG = {
         return;
     }
     
-    // Cek 3: URL masih pakai placeholder?
     if (CONFIG.API_URL.includes('XXXXX') || CONFIG.API_URL.includes('GANTI')) {
         console.error('❌ CONFIG.API_URL belum diganti! Masih pakai placeholder.');
         return;
     }
     
-    // Kalau semua check lulus
     if (CONFIG.DEBUG) {
         console.log('✅ CONFIG.API_URL OK:', CONFIG.API_URL.substring(0, 80) + '...');
     }
@@ -70,10 +61,9 @@ async function fetchWithRetry(url, options, maxRetries = 2, timeout = CONFIG.FET
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
         try {
             if (CONFIG.DEBUG) {
-                console.log(`🔄 Fetch attempt ${attempt}/${maxRetries + 1}`);
+                console.log(`🔄 Fetch attempt ${attempt}/${maxRetries + 1} (timeout: ${timeout}ms)`);
             }
             
-            // Timeout via AbortController
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
             
@@ -84,16 +74,13 @@ async function fetchWithRetry(url, options, maxRetries = 2, timeout = CONFIG.FET
             
             clearTimeout(timeoutId);
             
-            // ✅ Cek HTTP status
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
             
-            // ✅ Cek content-type (harus JSON)
             const contentType = response.headers.get('content-type') || '';
             if (!contentType.includes('application/json')) {
                 console.warn('⚠️ Content-Type bukan JSON:', contentType);
-                // Tetap lanjut — Apps Script kadang tidak set header dengan benar
             }
             
             if (CONFIG.DEBUG) {
@@ -105,7 +92,11 @@ async function fetchWithRetry(url, options, maxRetries = 2, timeout = CONFIG.FET
             lastError = error;
             console.warn(`⚠️ Fetch failed (attempt ${attempt}):`, error.message);
             
-            // Kalau bukan attempt terakhir, tunggu sebentar
+            // ✅ Handle AbortError (timeout)
+            if (error.name === 'AbortError') {
+                console.warn(`⏱️ Request timeout setelah ${timeout}ms`);
+            }
+            
             if (attempt <= maxRetries) {
                 const waitTime = 1000 * attempt;
                 if (CONFIG.DEBUG) {
@@ -120,24 +111,31 @@ async function fetchWithRetry(url, options, maxRetries = 2, timeout = CONFIG.FET
 }
 
 // ==========================================
-// HELPER: FETCH & PARSE JSON DENGAN ERROR HANDLING
+// ✅ FETCH JSON DENGAN CUSTOM OPTIONS
 // ==========================================
-async function fetchJSON(action, data = {}) {
+async function fetchJSON(action, data = {}, options = {}) {
+    // Default options
+    const maxRetries = options.maxRetries !== undefined ? options.maxRetries : 2;
+    const timeout = options.timeout || CONFIG.FETCH_TIMEOUT;
+    
     try {
-        const response = await fetchWithRetry(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: action, ...data })
-        });
+        const response = await fetchWithRetry(
+            CONFIG.API_URL,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: action, ...data })
+            },
+            maxRetries,
+            timeout
+        );
         
-        // ✅ Baca sebagai text dulu
         const rawText = await response.text();
         
         if (CONFIG.DEBUG) {
             console.log(`📥 Response [${action}]:`, rawText.substring(0, 200) + '...');
         }
         
-        // ✅ Coba parse JSON
         let result;
         try {
             result = JSON.parse(rawText);
@@ -181,7 +179,7 @@ async function testConnection() {
 }
 
 // ==========================================
-// EKSPOSE KE WINDOW (untuk debug dari console)
+// EKSPOSE KE WINDOW
 // ==========================================
 if (typeof window !== 'undefined') {
     window.CONFIG = CONFIG;
