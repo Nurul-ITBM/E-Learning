@@ -1,6 +1,6 @@
 // ==========================================
 // js/mahasiswa-dashboard.js - Logika Dashboard Mahasiswa
-// Fitur: Statistik, Jadwal Hari Ini, Tugas Mendatang, Ujian Aktif, Nilai
+// ✅ Fix: Update 3 kartu info bawah (Kehadiran, Tugas, Ujian)
 // ==========================================
 
 // ==========================================
@@ -25,7 +25,6 @@ const GRADE_CONFIG = {
 // INISIALISASI
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Validasi Sesi
     const sessionData = localStorage.getItem('user_session');
     if (!sessionData) {
         window.location.href = '../login.html';
@@ -35,17 +34,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 2. Cek Role
     if (currentUser.role !== 'mahasiswa') {
         alert('Akses ditolak. Anda bukan mahasiswa.');
         window.location.href = '../login.html';
         return;
     }
 
-    // 3. Tunggu DOM siap
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 4. Load Data Dashboard
     await loadDashboard(currentUser.id_user || currentUser.id_mahasiswa);
 });
 
@@ -73,6 +69,7 @@ async function loadDashboard(id_user) {
             // Render semua section
             renderWelcome(result.data.mahasiswa);
             renderStatCards(result.data.statistik);
+            renderStatCardsBawah(result.data.statistik);   // ✅ TAMBAHAN
             renderJadwalHariIni(result.data.jadwal_hari_ini, result.data.hari_ini);
             renderTugasMendatang(result.data.tugas_mendatang);
             renderUjianTersedia(result.data.ujian_tersedia);
@@ -115,7 +112,6 @@ function renderWelcome(mhs) {
         nameDisplay.innerText = mhs.nama || 'Mahasiswa';
     }
     
-    // Update header name juga
     const headerName = document.getElementById('mahasiswaNameDisplay');
     if (headerName) {
         headerName.innerText = mhs.nama || 'Mahasiswa';
@@ -128,7 +124,7 @@ function renderWelcome(mhs) {
 }
 
 // ==========================================
-// RENDER STAT CARDS
+// RENDER STAT CARDS (5 KARTU ATAS)
 // ==========================================
 function renderStatCards(stat) {
     const container = document.getElementById('statCards');
@@ -193,6 +189,35 @@ function renderStatCards(stat) {
 }
 
 // ==========================================
+// ✅ RENDER STAT CARDS BAWAH (3 KARTU INFO)
+// ==========================================
+function renderStatCardsBawah(stat) {
+    // Kehadiran Bawah
+    const elKehadiran = document.getElementById('statKehadiranBawah');
+    if (elKehadiran) {
+        elKehadiran.innerText = stat.persen_kehadiran || 0;
+    }
+    
+    // Total Tugas Bawah
+    const elTugas = document.getElementById('statTotalTugasBawah');
+    if (elTugas) {
+        elTugas.innerText = stat.total_tugas || 0;
+    }
+    
+    // Total Ujian Bawah
+    const elUjian = document.getElementById('statTotalUjianBawah');
+    if (elUjian) {
+        elUjian.innerText = stat.total_ujian || 0;
+    }
+    
+    console.log('✅ Stat cards bawah updated:', {
+        kehadiran: stat.persen_kehadiran,
+        tugas: stat.total_tugas,
+        ujian: stat.total_ujian
+    });
+}
+
+// ==========================================
 // RENDER JADWAL HARI INI
 // ==========================================
 function renderJadwalHariIni(jadwal, hariIni) {
@@ -233,7 +258,6 @@ function renderJadwalHariIni(jadwal, hariIni) {
     
     container.innerHTML = html;
     
-    // Update title hari ini
     const titleHariIni = document.getElementById('titleHariIni');
     if (titleHariIni) {
         titleHariIni.innerText = `Jadwal Kuliah Hari ${hariIni}`;
@@ -260,7 +284,6 @@ function renderTugasMendatang(tugas) {
     
     let html = '';
     tugas.forEach(item => {
-        // Hitung selisih hari ke deadline
         let deadlineBadge = '';
         try {
             const deadline = new Date(String(item.tenggat_waktu).replace(' ', 'T') + '+08:00');
