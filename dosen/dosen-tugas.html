@@ -83,17 +83,22 @@
         </div>
     </main>
 
-    <!-- Modal Tambah / Edit Tugas -->
+    <!-- ============================================== -->
+    <!-- MODAL TAMBAH / EDIT TUGAS                     -->
+    <!-- ============================================== -->
     <div id="modalTambahTugas" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-slate-800" id="modalTugasTitle">Tambah Tugas Baru</h3>
-                <button onclick="tutupModal('modalTambahTugas')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="tutupModal('modalTambahTugas')" class="text-slate-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <form id="formTambahTugas" class="p-5 space-y-4">
+            <form id="formTambahTugas" class="p-5 space-y-4 overflow-y-auto">
                 <input type="hidden" id="tugas_id_kelas">
                 <input type="hidden" id="tugas_id_tugas_edit">
-                <!-- ✅ DROPDOWN JENIS TUGAS (BARU) -->
+                
+                <!-- ✅ JENIS TUGAS (Tugas/Praktikum) -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Tugas</label>
                     <select id="tugas_jenis" class="w-full border rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500" required>
@@ -101,19 +106,68 @@
                         <option value="Praktikum">🧪 Laporan Praktikum</option>
                     </select>
                 </div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Judul Tugas</label><input id="tugas_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Deskripsi Instruksi</label><textarea id="tugas_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" required></textarea></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Tenggat Waktu</label><input id="tugas_deadline" type="datetime-local" class="w-full border rounded-lg p-2 text-sm" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Pertemuan ke-</label><input id="tugas_pertemuan_ke" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: 2" min="1" required></div>
-                <div><label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai (Angka)</label><input id="tugas_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required></div>
+                
+                <!-- JUDUL TUGAS -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Judul Tugas</label>
+                    <input id="tugas_judul" type="text" class="w-full border rounded-lg p-2 text-sm" required>
+                </div>
+                
+                <!-- DESKRIPSI -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Deskripsi Instruksi</label>
+                    <textarea id="tugas_deskripsi" class="w-full border rounded-lg p-2 text-sm h-24" required></textarea>
+                </div>
+                
+                <!-- TENGGAT WAKTU -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Tenggat Waktu</label>
+                    <input id="tugas_deadline" type="datetime-local" class="w-full border rounded-lg p-2 text-sm" required>
+                </div>
+                
+                <!-- PERTEMUAN KE -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Pertemuan ke-</label>
+                    <input id="tugas_pertemuan_ke" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="Contoh: 2" min="1" required>
+                </div>
+                
+                <!-- ✅ BOBOT NILAI (LOCKED = 100) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">
+                        Bobot Nilai
+                        <span class="text-[10px] font-normal text-slate-400">(otomatis 100)</span>
+                    </label>
+                    <div class="relative">
+                        <input id="tugas_bobot" type="number" value="100" 
+                            class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed pr-28 font-bold" 
+                            readonly>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <span class="text-[10px] font-bold text-teal-600 bg-teal-50 border border-teal-200 px-2 py-1 rounded flex items-center gap-1">
+                                <i class="fa-solid fa-lock"></i> TERKUNCI
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        Bobot sudah ditetapkan otomatis. Total semua tugas = 100%.
+                    </p>
+                </div>
+                
+                <!-- LAMPIRAN -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Lampiran Tugas (Opsional)</label>
-                    <input type="file" id="tugas_lampiran" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-teal-50 file:text-teal-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2">
+                    <input type="file" id="tugas_lampiran" 
+                        class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white file:bg-teal-50 file:text-teal-700 file:border-0 file:font-semibold file:mr-4 file:px-4 file:py-2">
                     <div id="existing_lampiran_wrapper" class="mt-2 text-sm text-slate-600 hidden">
-                        Lampiran saat ini: <a id="existing_lampiran_link" href="#" target="_blank" class="text-teal-600 underline">Download</a>
+                        Lampiran saat ini: 
+                        <a id="existing_lampiran_link" href="#" target="_blank" class="text-teal-600 underline">Download</a>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">Simpan Tugas</button>
+                
+                <!-- TOMBOL SIMPAN -->
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg">
+                    <i class="fa-solid fa-save mr-1"></i> Simpan Tugas
+                </button>
             </form>
         </div>
     </div>
