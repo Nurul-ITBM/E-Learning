@@ -1,5 +1,6 @@
 // js/mahasiswa-load-components.js
 // Loader Sidebar & Header untuk Portal Mahasiswa
+// ✅ Dengan Setup Notifikasi
 
 document.addEventListener('DOMContentLoaded', async function() {
     // ✅ Tambahkan class ke body agar CSS khusus mahasiswa (Indigo) aktif
@@ -32,6 +33,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // ✅ Isi data header
             fillHeaderData();
+            
+            // ✅ SETUP NOTIFIKASI (BARU)
+            setTimeout(() => {
+                if (typeof setupNotifButton === 'function') {
+                    console.log('🔔 Setup notifikasi mahasiswa...');
+                    setupNotifButton();
+                    loadNotifikasiBadge();
+                } else {
+                    console.warn('⚠️ js/notifikasi.js belum di-load. Tambahkan <script src="../js/notifikasi.js"></script>');
+                }
+            }, 100);
         }
 
         // ==========================================
@@ -68,7 +80,9 @@ function highlightActiveMenu() {
         'ujian.html': 'menu-ujian',
         'absensi.html': 'menu-absensi',
         'nilai.html': 'menu-nilai',
-        'profil.html': 'menu-profil'
+        'profil.html': 'menu-profil',
+        'mahasiswa-dashboard.html': 'menu-dashboard',
+        'mahasiswa-tugas.html': 'menu-tugas'
     };
 
     const activeId = menuMap[currentPage];
@@ -95,8 +109,10 @@ function fillHeaderData() {
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
         const titleMap = {
             'dashboard': 'Dashboard Mahasiswa',
+            'mahasiswa-dashboard': 'Dashboard Mahasiswa',
             'matakuliah': 'Mata Kuliah',
-            'tugas': 'Tugas',
+            'tugas': 'Tugas & Praktikum',
+            'mahasiswa-tugas': 'Tugas & Praktikum',
             'ujian': 'Ujian',
             'absensi': 'Riwayat Kehadiran',
             'nilai': 'Nilai Akademik',
