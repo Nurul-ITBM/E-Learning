@@ -419,9 +419,16 @@ document.getElementById('btnTambahTugas').addEventListener('click', function() {
     document.getElementById('modalTugasTitle').innerText = 'Tambah Tugas Baru';
     document.getElementById('formTambahTugas').reset();
     
-    // ✅ Reset dropdown jenis ke default "Tugas"
+    // ✅ Reset dropdown jenis
     const jenisDropdown = document.getElementById('tugas_jenis');
     if (jenisDropdown) jenisDropdown.value = 'Tugas';
+    
+    // ✅ SET BOBOT = 100 (terkunci)
+    const bobotInput = document.getElementById('tugas_bobot');
+    if (bobotInput) {
+        bobotInput.value = 100;
+        bobotInput.readOnly = true;   // Paksa readonly
+    }
     
     document.getElementById('existing_lampiran_wrapper').classList.add('hidden');
     document.getElementById('modalTambahTugas').classList.remove('hidden');
@@ -443,13 +450,14 @@ document.addEventListener('click', function(e) {
 // ==========================================
 document.getElementById('formTambahTugas').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const btn = this.querySelector('button');
+    const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
     btn.disabled = true;
 
     const fileInput = document.getElementById('tugas_lampiran');
     let base64File = null, fileName = null;
+    
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         if (file.size > 10 * 1024 * 1024) {
@@ -462,10 +470,13 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
         base64File = await fileToBase64(file);
     }
 
-    // ✅ Ambil jenis_tugas dari dropdown
+    // ✅ Ambil jenis_tugas
     const jenisTugas = document.getElementById('tugas_jenis') 
         ? document.getElementById('tugas_jenis').value 
         : 'Tugas';
+    
+    // ✅ BOBOT SELALU 100 (terkunci)
+    const bobot = 100;
 
     const data = {
         action: 'tambah_tugas',
@@ -474,8 +485,8 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
         judul_tugas: document.getElementById('tugas_judul').value,
         deskripsi_instruksi: document.getElementById('tugas_deskripsi').value,
         tenggat_waktu: document.getElementById('tugas_deadline').value,
-        bobot_nilai: document.getElementById('tugas_bobot').value,
-        jenis_tugas: jenisTugas,   // ✅ KIRIM JENIS_TUGAS
+        bobot_nilai: bobot,                          // ✅ SELALU 100
+        jenis_tugas: jenisTugas,
         lampiran_base64: base64File,
         lampiran_nama_file: fileName
     };
@@ -483,9 +494,16 @@ document.getElementById('formTambahTugas').addEventListener('submit', async func
     console.log('>>> Data tugas yang dikirim:', data);
 
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data) 
+        });
+        
         if (!res.ok) throw new Error(`Server Error: ${res.status}`);
+        
         const result = await res.json();
+        
         if (result.status === 'success') {
             alert('✅ ' + result.message);
             tutupModal('modalTambahTugas');
