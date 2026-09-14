@@ -99,18 +99,33 @@
                     </div>
                 </div>
                 
-                <!-- Bobot & Durasi -->
+                <!-- ✅ BOBOT (LOCKED = 100) & Durasi -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">Bobot Nilai</label>
-                        <input id="ujian_bobot" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="20" required>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">
+                            Bobot Nilai
+                            <span class="text-[10px] font-normal text-slate-400">(otomatis 100)</span>
+                        </label>
+                        <div class="relative">
+                            <input id="ujian_bobot" type="number" value="100" 
+                                class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed pr-20 font-bold" 
+                                readonly>
+                            <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                                <span class="text-[9px] font-bold text-teal-600 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded flex items-center gap-1">
+                                    <i class="fa-solid fa-lock"></i> 100
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">Durasi (menit)</label>
                         <input id="ujian_durasi" type="number" class="w-full border rounded-lg p-2 text-sm" placeholder="60" value="60" min="1" max="300" required>
                     </div>
                 </div>
-                <p class="text-[10px] text-slate-400 -mt-3">Durasi contoh: 60 (1 jam), 90 (1.5 jam), 120 (2 jam)</p>
+                <p class="text-[10px] text-slate-400 mt-1">
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    Bobot ujian sudah ditetapkan otomatis. Kontribusi ke nilai akhir: UTS 10%, UAS 10%.
+                </p>
                 
                 <!-- Status -->
                 <div>
