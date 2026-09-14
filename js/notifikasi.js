@@ -1,36 +1,42 @@
 // js/notifikasi.js - Sistem Notifikasi Frontend
-// ✅ Dropdown + Badge + Auto-refresh
+// ✅ Dropdown + Badge + Auto-refresh (pakai get_jumlah_notif)
 
 // ==========================================
 // STATE
 // ==========================================
 let notifData = [];
 let notifOpen = false;
+let notifAutoRefreshInterval = null;
 
 // ==========================================
-// INISIALISASI
+// GET USER DARI SESSION
 // ==========================================
-document.addEventListener('DOMContentLoaded', function() {
-    setupNotifButton();
-    // Auto-refresh notif setiap 60 detik
-    setInterval(loadNotifikasiBadge, 60000);
-});
+function getUserIdFromSession() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user_session') || '{}');
+        return user.id_user || user.id_mahasiswa || user.id_dosen || null;
+    } catch (e) {
+        return null;
+    }
+}
 
 // ==========================================
 // SETUP TOMBOL NOTIFIKASI
 // ==========================================
 function setupNotifButton() {
-    // Tombol lonceng (biasanya di header)
-    const notifBtn = document.getElementById('btnNotifikasi') || 
-                     document.querySelector('button:has(.fa-bell)');
+    const notifBtn = document.getElementById('btnNotifikasi');
     
     if (!notifBtn) {
-        console.warn('Tombol notifikasi tidak ditemukan di header');
+        console.warn('⚠️ Tombol #btnNotifikasi tidak ditemukan di header');
         return;
     }
     
-    notifBtn.id = 'btnNotifikasi';
-    notifBtn.addEventListener('click', function(e) {
+    // Hapus listener lama (kalau ada)
+    const newBtn = notifBtn.cloneNode(true);
+    notifBtn.parentNode.replaceChild(newBtn, notifBtn);
+    
+    // Pasang event listener baru
+    newBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         toggleNotifDropdown();
@@ -38,37 +44,52 @@ function setupNotifButton() {
     
     // Buat dropdown container (kalau belum ada)
     if (!document.getElementById('notifDropdown')) {
-        const dropdown = document.createElement('div');
-        dropdown.id = 'notifDropdown';
-        dropdown.className = 'hidden fixed bg-white rounded-2xl shadow-2xl border border-slate-200 z-[100] overflow-hidden';
-        dropdown.style.width = '360px';
-        dropdown.style.maxWidth = '90vw';
-        dropdown.innerHTML = `
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                <h3 class="text-sm font-bold text-slate-800">Notifikasi</h3>
-                <button onclick="tandaiSemuaDibaca()" class="text-xs text-teal-600 hover:underline font-semibold">
-                    Tandai semua dibaca
-                </button>
-            </div>
-            <div id="notifList" class="max-h-96 overflow-y-auto">
-                <div class="p-8 text-center text-slate-400">
-                    <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
-                    <p class="text-sm">Memuat notifikasi...</p>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(dropdown);
+        buatDropdownContainer();
     }
     
-    // Klik di luar → tutup
+    // Pasang listener klik di luar
     document.addEventListener('click', function(e) {
         const dropdown = document.getElementById('notifDropdown');
-        if (!dropdown || notifOpen === false) return;
+        if (!dropdown || !notifOpen) return;
         
         if (!dropdown.contains(e.target) && !e.target.closest('#btnNotifikasi')) {
             tutupNotifDropdown();
         }
     });
+    
+    // Auto-refresh badge setiap 60 detik
+    if (notifAutoRefreshInterval) clearInterval(notifAutoRefreshInterval);
+    notifAutoRefreshInterval = setInterval(loadNotifikasiBadge, 60000);
+    
+    console.log('✅ Setup notifikasi selesai');
+}
+
+// ==========================================
+// BUAT DROPDOWN CONTAINER
+// ==========================================
+function buatDropdownContainer() {
+    const dropdown = document.createElement('div');
+    dropdown.id = 'notifDropdown';
+    dropdown.className = 'hidden fixed bg-white rounded-2xl shadow-2xl border border-slate-200 z-[100] overflow-hidden';
+    dropdown.style.width = '360px';
+    dropdown.style.maxWidth = '90vw';
+    dropdown.innerHTML = `
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <h3 class="text-sm font-bold text-slate-800">
+                <i class="fa-solid fa-bell text-slate-600 mr-1"></i> Notifikasi
+            </h3>
+            <button onclick="tandaiSemuaDibaca()" class="text-xs text-teal-600 hover:underline font-semibold">
+                Tandai semua dibaca
+            </button>
+        </div>
+        <div id="notifList" class="max-h-96 overflow-y-auto">
+            <div class="p-8 text-center text-slate-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+                <p class="text-sm">Memuat notifikasi...</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(dropdown);
 }
 
 // ==========================================
@@ -77,7 +98,7 @@ function setupNotifButton() {
 function toggleNotifDropdown() {
     const dropdown = document.getElementById('notifDropdown');
     const btn = document.getElementById('btnNotifikasi');
-    if (!dropdown) return;
+    if (!dropdown || !btn) return;
     
     if (notifOpen) {
         tutupNotifDropdown();
@@ -101,14 +122,13 @@ function tutupNotifDropdown() {
 }
 
 // ==========================================
-// LOAD NOTIFIKASI (LIST)
+// LOAD NOTIFIKASI (LIST FULL)
 // ==========================================
 async function loadNotifikasi() {
     const listContainer = document.getElementById('notifList');
     if (!listContainer) return;
     
-    const user = JSON.parse(localStorage.getItem('user_session') || '{}');
-    const idUser = user.id_user || user.id_mahasiswa || user.id_dosen;
+    const idUser = getUserIdFromSession();
     
     if (!idUser) {
         listContainer.innerHTML = '<p class="p-4 text-center text-slate-500 text-sm">Silakan login ulang.</p>';
@@ -135,15 +155,23 @@ async function loadNotifikasi() {
         const result = await res.json();
         
         if (result.status === 'success') {
-            notifData = result.data;
+            notifData = result.data || [];
             renderNotifikasi();
             updateBadge();
         } else {
-            listContainer.innerHTML = `<p class="p-4 text-center text-red-500 text-sm">${result.message}</p>`;
+            listContainer.innerHTML = `<p class="p-4 text-center text-red-500 text-sm">${result.message || 'Gagal memuat'}</p>`;
         }
     } catch (error) {
         console.error('Error load notifikasi:', error);
-        listContainer.innerHTML = '<p class="p-4 text-center text-red-500 text-sm">Gagal memuat notifikasi.</p>';
+        listContainer.innerHTML = `
+            <div class="p-6 text-center">
+                <i class="fa-solid fa-circle-xmark text-red-400 text-3xl mb-2"></i>
+                <p class="text-red-500 text-sm">Gagal memuat notifikasi.</p>
+                <button onclick="loadNotifikasi()" class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+                </button>
+            </div>
+        `;
     }
 }
 
@@ -166,21 +194,26 @@ function renderNotifikasi() {
     
     let html = '';
     notifData.forEach(n => {
-        // Warna & ikon per tipe
         const style = getNotifStyle(n.tipe);
         const isUnread = !n.sudah_dibaca;
         const bgUnread = isUnread ? 'bg-teal-50/50' : 'bg-white';
-        const dotUnread = isUnread ? '<span class="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 mt-1.5"></span>' : '';
+        const dotUnread = isUnread 
+            ? '<span class="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 mt-1.5"></span>' 
+            : '';
+        
+        // Escape judul & pesan biar tidak error kalau ada apostrof
+        const judulSafe = String(n.judul || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const linkSafe = String(n.link || '').replace(/'/g, "\\'");
         
         html += `
-            <div onclick="handleClickNotif('${n.id_notif}', '${n.link || ''}', ${isUnread})" 
+            <div onclick="handleClickNotif('${n.id_notif}', '${linkSafe}', ${isUnread})" 
                 class="${bgUnread} hover:bg-slate-50 p-3 border-b border-slate-100 cursor-pointer transition-colors flex gap-3 items-start">
                 <div class="w-9 h-9 rounded-full ${style.bg} flex items-center justify-center flex-shrink-0">
                     <i class="fa-solid ${style.icon} ${style.color} text-sm"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-slate-800 line-clamp-1">${n.judul}</p>
-                    <p class="text-xs text-slate-500 line-clamp-2 mt-0.5">${n.pesan}</p>
+                    <p class="text-sm font-bold text-slate-800 line-clamp-1">${n.judul || '-'}</p>
+                    <p class="text-xs text-slate-500 line-clamp-2 mt-0.5">${n.pesan || '-'}</p>
                     <p class="text-[10px] text-slate-400 mt-1">
                         <i class="fa-regular fa-clock mr-1"></i>${formatWaktu(n.waktu)}
                     </p>
@@ -216,14 +249,17 @@ function getNotifStyle(tipe) {
 // HANDLE KLIK NOTIFIKASI
 // ==========================================
 async function handleClickNotif(id_notif, link, isUnread) {
-    // Tandai dibaca
+    // Tandai dibaca dulu
     if (isUnread) {
         await tandaiNotifDibaca(id_notif);
     }
     
     // Redirect kalau ada link
-    if (link && link.trim() !== '') {
-        window.location.href = link;
+    if (link && link.trim() !== '' && link !== 'undefined') {
+        // Beri sedikit delay biar user lihat state berubah
+        setTimeout(() => {
+            window.location.href = link;
+        }, 200);
     }
 }
 
@@ -231,8 +267,8 @@ async function handleClickNotif(id_notif, link, isUnread) {
 // TANDAI DIBACA (SATU)
 // ==========================================
 async function tandaiNotifDibaca(id_notif) {
-    const user = JSON.parse(localStorage.getItem('user_session') || '{}');
-    const idUser = user.id_user || user.id_mahasiswa || user.id_dosen;
+    const idUser = getUserIdFromSession();
+    if (!idUser) return;
     
     try {
         await fetch(CONFIG.API_URL, {
@@ -249,6 +285,7 @@ async function tandaiNotifDibaca(id_notif) {
         const notif = notifData.find(n => n.id_notif === id_notif);
         if (notif) notif.sudah_dibaca = true;
         
+        // Update badge
         updateBadge();
     } catch (error) {
         console.error('Error tandai dibaca:', error);
@@ -259,9 +296,7 @@ async function tandaiNotifDibaca(id_notif) {
 // TANDAI SEMUA DIBACA
 // ==========================================
 async function tandaiSemuaDibaca() {
-    const user = JSON.parse(localStorage.getItem('user_session') || '{}');
-    const idUser = user.id_user || user.id_mahasiswa || user.id_dosen;
-    
+    const idUser = getUserIdFromSession();
     if (!idUser) return;
     
     try {
@@ -287,31 +322,37 @@ async function tandaiSemuaDibaca() {
 }
 
 // ==========================================
-// UPDATE BADGE (jumlah belum dibaca)
+// UPDATE BADGE (setelah render list)
 // ==========================================
 function updateBadge() {
-    const badge = document.querySelector('#btnNotifikasi span') || 
-                  document.querySelector('button .fa-bell ~ span');
-    
-    if (!badge) return;
-    
     const unreadCount = notifData.filter(n => !n.sudah_dibaca).length;
+    updateBadgeOnly(unreadCount);
+}
+
+// ==========================================
+// UPDATE BADGE ONLY (tanpa data list)
+// ==========================================
+function updateBadgeOnly(count) {
+    const badge = document.getElementById('notifBadge');
+    const badgeCount = document.getElementById('notifBadgeCount');
     
-    if (unreadCount > 0) {
-        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-        badge.style.display = 'flex';
+    if (!badge || !badgeCount) return;
+    
+    if (count > 0) {
+        badgeCount.textContent = count > 99 ? '99+' : count;
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
     } else {
-        badge.style.display = 'none';
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
     }
 }
 
 // ==========================================
-// LOAD BADGE (untuk auto-refresh)
+// LOAD BADGE (AUTO-REFRESH) — Ringan pakai get_jumlah_notif
 // ==========================================
 async function loadNotifikasiBadge() {
-    const user = JSON.parse(localStorage.getItem('user_session') || '{}');
-    const idUser = user.id_user || user.id_mahasiswa || user.id_dosen;
-    
+    const idUser = getUserIdFromSession();
     if (!idUser) return;
     
     try {
@@ -319,18 +360,18 @@ async function loadNotifikasiBadge() {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-                action: 'get_notifikasi',
+                action: 'get_jumlah_notif',
                 id_user: idUser
             })
         });
         
         const result = await res.json();
         if (result.status === 'success') {
-            notifData = result.data;
-            updateBadge();
+            const count = result.data || 0;
+            updateBadgeOnly(count);
         }
     } catch (error) {
-        // Silent fail
+        console.warn('Gagal load badge notif:', error);
     }
 }
 
