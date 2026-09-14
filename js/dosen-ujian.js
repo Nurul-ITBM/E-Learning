@@ -114,9 +114,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('modalUjianTitle').innerText = 'Tambah Ujian Baru';
         document.getElementById('formTambahUjian').reset();
         document.getElementById('ujian_id_kelas').value = idKelas;
+        
         // Set default values
         document.getElementById('ujian_jenis').value = 'UTS';
         document.getElementById('ujian_durasi').value = 60;
+        
+        // ✅ SET BOBOT = 100 (terkunci)
+        const bobotInput = document.getElementById('ujian_bobot');
+        if (bobotInput) {
+            bobotInput.value = 100;
+            bobotInput.readOnly = true;   // Paksa readonly
+        }
+        
         document.getElementById('modalTambahUjian').classList.remove('hidden');
     });
     
@@ -326,7 +335,7 @@ async function simpanUjian() {
             deskripsi: document.getElementById('ujian_deskripsi').value,
             mulai: document.getElementById('ujian_mulai').value,
             selesai: document.getElementById('ujian_selesai').value,
-            bobot: document.getElementById('ujian_bobot').value,
+            bobot: 100,
             jenis_ujian: jenisUjian,
             durasi_menit: durasiMenit,
             link: '-'
@@ -388,7 +397,9 @@ async function editUjian(idUjian) {
             document.getElementById('ujian_deskripsi').value = ujian.deskripsi;
             document.getElementById('ujian_mulai').value = ujian.mulai;
             document.getElementById('ujian_selesai').value = ujian.selesai;
-            document.getElementById('ujian_bobot').value = ujian.bobot;
+            // ✅ SET BOBOT = 100 (terkunci)
+            document.getElementById('ujian_bobot').value = 100;
+            document.getElementById('ujian_bobot').readOnly = true;
             document.getElementById('ujian_jenis').value = ujian.jenis_ujian || 'UTS';
             document.getElementById('ujian_durasi').value = ujian.durasi_menit || 60;
             document.getElementById('modalUjianTitle').innerText = 'Edit Ujian';
