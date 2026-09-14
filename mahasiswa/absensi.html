@@ -12,7 +12,7 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
@@ -62,7 +62,9 @@
         <!-- TEMPAT PENAMPUNG HEADER -->
         <div id="header-container"></div>
 
-        <!-- Content Area -->
+        <!-- ========================================== -->
+        <!-- CONTENT AREA                               -->
+        <!-- ========================================== -->
         <div class="p-8 space-y-6">
             
             <!-- ========================================== -->
@@ -80,10 +82,10 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- ✅ PANEL ABSEN HARI INI (FOKUS UTAMA)      -->
+            <!-- PANEL ABSEN HARI INI (FOKUS UTAMA)         -->
             <!-- ========================================== -->
             <div id="panelAbsenHariIni">
-                <!-- Loading state -->
+                <!-- Loading state - akan diganti oleh JS -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
                     <i class="fa-solid fa-circle-notch fa-spin text-3xl text-teal-500 mb-3"></i>
                     <p class="text-sm text-slate-500">Memeriksa jadwal hari ini...</p>
@@ -91,53 +93,62 @@
             </div>
 
             <!-- ========================================== -->
-            <!-- ✅ STATISTIK KEHADIRAN                     -->
+            <!-- STATISTIK KEHADIRAN                        -->
             <!-- ========================================== -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <!-- Card Hadir -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <div class="bg-emerald-100 text-emerald-600 p-2.5 rounded-lg">
+                        <div class="bg-emerald-100 text-emerald-600 p-2.5 rounded-lg flex-shrink-0">
                             <i class="fa-solid fa-calendar-check text-lg"></i>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-semibold uppercase">Hadir</p>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Hadir</p>
                             <p class="text-xl font-bold text-emerald-700" id="statHadir">0</p>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Card Terlambat -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <div class="bg-orange-100 text-orange-600 p-2.5 rounded-lg">
+                        <div class="bg-orange-100 text-orange-600 p-2.5 rounded-lg flex-shrink-0">
                             <i class="fa-solid fa-clock text-lg"></i>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-semibold uppercase">Terlambat</p>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Terlambat</p>
                             <p class="text-xl font-bold text-orange-700" id="statTerlambat">0</p>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Card Alpha -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <div class="bg-red-100 text-red-600 p-2.5 rounded-lg">
+                        <div class="bg-red-100 text-red-600 p-2.5 rounded-lg flex-shrink-0">
                             <i class="fa-solid fa-user-xmark text-lg"></i>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-semibold uppercase">Alpha</p>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Alpha</p>
                             <p class="text-xl font-bold text-red-700" id="statAlpha">0</p>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Card Persentase -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-lg">
+                        <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-lg flex-shrink-0">
                             <i class="fa-solid fa-percent text-lg"></i>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-semibold uppercase">Kehadiran</p>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Kehadiran</p>
                             <p class="text-xl font-bold text-indigo-700" id="statPersen">0%</p>
                         </div>
                     </div>
                 </div>
+                
             </div>
 
             <!-- ========================================== -->
@@ -145,7 +156,9 @@
             <!-- ========================================== -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div class="flex-1 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 flex flex-col md:flex-row gap-4 items-end w-full">
+                        
+                        <!-- Filter Tanggal -->
                         <div class="w-full md:w-1/3">
                             <label class="block text-xs font-bold text-slate-600 mb-1">
                                 <i class="fa-regular fa-calendar text-teal-600 mr-1"></i> Filter Tanggal
@@ -153,6 +166,8 @@
                             <input type="date" id="filterTanggalAbsen" 
                                 class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500">
                         </div>
+                        
+                        <!-- Filter Status -->
                         <div class="w-full md:w-1/4">
                             <label class="block text-xs font-bold text-slate-600 mb-1">
                                 <i class="fa-solid fa-filter text-teal-600 mr-1"></i> Filter Status
@@ -166,9 +181,13 @@
                                 <option value="Alpha">Alpha</option>
                             </select>
                         </div>
-                        <button id="btnResetFilter" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition">
+                        
+                        <!-- Tombol Reset -->
+                        <button id="btnResetFilter" 
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition">
                             <i class="fa-solid fa-rotate-left mr-1"></i> Reset
                         </button>
+                        
                     </div>
                 </div>
             </div>
@@ -177,6 +196,8 @@
             <!-- TABEL RIWAYAT ABSENSI                      -->
             <!-- ========================================== -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                
+                <!-- Header Tabel -->
                 <div class="p-5 border-b border-slate-100 flex justify-between items-center">
                     <h3 class="text-base font-bold text-slate-800">
                         <i class="fa-solid fa-history text-teal-600 mr-2"></i>Riwayat Kehadiran
@@ -186,6 +207,7 @@
                     </span>
                 </div>
                 
+                <!-- Tabel -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-600">
                         <thead class="bg-slate-50 text-slate-800 uppercase font-bold text-xs">
@@ -207,16 +229,18 @@
                         </tbody>
                     </table>
                 </div>
+                
             </div>
+            
         </div>
     </main>
 
     <!-- ============================================ -->
-    <!-- SCRIPT                                        -->
+    <!-- SCRIPTS                                       -->
     <!-- ============================================ -->
     <script src="../js/config.js"></script>
-    <script src="../js/notifikasi.js?v=1"></script>  
+    <script src="../js/notifikasi.js?v=1"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
-    <script src="../js/absensi.js?v=2"></script>
+    <script src="../js/absensi.js?v=3"></script>
 </body>
 </html>
