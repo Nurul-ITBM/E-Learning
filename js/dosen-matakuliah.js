@@ -1,4 +1,5 @@
 // js/dosen-matakuliah.js - Data Kelas Ampuan Dosen (Lengkap dengan CRUD)
+// ✅ Skeleton Loading + Konversi Semester + Error Handling
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 3. LOGOUT (Event Delegation)
+// LOGOUT (Event Delegation)
 // ==========================================
 document.addEventListener('click', function(e) {
     const logoutBtn = e.target.closest('#btnLogout');
@@ -37,69 +38,94 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// ==========================================
+// 1. LOAD KELAS DOSEN (DENGAN SKELETON LOADING)
+// ==========================================
 async function loadKelasDosen(id_dosen) {
     const container = document.getElementById('containerMatkulDosen');
-    // Tampilkan loading
-    container.innerHTML = '<p class="text-center text-slate-400 py-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Sedang memuat data...</p>';
+    
+    // ✅ Skeleton loading (4 kartu)
+    container.innerHTML = Array(4).fill(`
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
+            <div class="flex justify-between items-start mb-3">
+                <div class="h-5 bg-slate-200 rounded w-20"></div>
+                <div class="h-4 bg-slate-200 rounded w-24"></div>
+            </div>
+            <div class="h-5 bg-slate-200 rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-slate-200 rounded w-1/2 mb-4"></div>
+            <div class="h-12 bg-slate-200 rounded w-full mb-4"></div>
+            <div class="flex gap-3">
+                <div class="h-10 bg-slate-200 rounded flex-1"></div>
+                <div class="h-10 bg-slate-200 rounded flex-1"></div>
+            </div>
+        </div>
+    `).join('');
 
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ 
                 action: 'get_matakuliah_ampuan',
                 id_dosen: id_dosen 
             })
         });
         
-        // Cek apakah response HTTP berhasil (200)
         if (!response.ok) {
             throw new Error(`HTTP Error ${response.status}`);
         }
 
         const result = await response.json();
-        console.log("DATA DARI SERVER:", result); // Lihat di Console (F12)
+        console.log("DATA DARI SERVER:", result);
 
         if (result.status === 'success') {
             container.innerHTML = ''; 
+            
             if (!result.data || result.data.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg text-center">
                         <i class="fa-solid fa-circle-exclamation mr-2"></i>
                         Belum ada kelas yang diampu oleh dosen dengan ID <b>${id_dosen}</b>.<br>
-                        <span class="text-xs">Pastikan di sheet <b>Kelas</b> di Google Sheets sudah ada baris dengan id_dosen ini.</span>
+                        <span class="text-xs">Pastikan di sheet <b>Kelas</b> sudah ada baris dengan id_dosen ini.</span>
                     </div>
                 `;
                 return;
             }
 
-            // RENDER KARTU (Kode kartu Anda yang sudah ada)
+            // Render kartu untuk setiap kelas
             result.data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
                 
-                // --- KODE BARU (SALIN INI) ---
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">Semester ${item.semester || '-'}</span>
+                            <span class="bg-teal-50 text-teal-600 text-xs font-bold px-2.5 py-1 rounded-md border border-teal-100">
+                                Semester ${item.semester || '-'}
+                            </span>
                             <span class="text-xs font-semibold text-slate-400">${item.kode_mk || '-'} - ${item.sks || '-'} SKS</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${item.mata_kuliah || 'Mata Kuliah'}</h3>
-                        <p class="text-sm text-slate-500 mb-4 flex items-center"><i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu || 'Dosen Pengampu'}</p>
+                        <p class="text-sm text-slate-500 mb-4 flex items-center">
+                            <i class="fa-solid fa-chalkboard-user mr-2 text-slate-400"></i> ${item.dosen_pengampu || 'Dosen Pengampu'}
+                        </p>
                         <div class="bg-teal-50 p-3 rounded-lg border border-teal-100 flex items-center justify-between">
-                            <span class="text-xs font-bold text-teal-700"><i class="fa-solid fa-list-check mr-2"></i> Rekap Kelas</span>
-                            <span class="text-xs font-bold text-teal-700 bg-white px-3 py-1 rounded-full border border-teal-200">${item.total_pertemuan || 0} Pertemuan</span>
+                            <span class="text-xs font-bold text-teal-700">
+                                <i class="fa-solid fa-list-check mr-2"></i> Rekap Kelas
+                            </span>
+                            <span class="text-xs font-bold text-teal-700 bg-white px-3 py-1 rounded-full border border-teal-200">
+                                ${item.total_pertemuan || 0} Pertemuan
+                            </span>
                         </div>
                     </div>
                     
-                    <!-- BAGIAN TOMBOL BARU (2 TOMBOL) -->
                     <div class="mt-5 flex gap-3">
-                        <!-- Tombol Lihat Kelas -->
-                        <button onclick="bukaModalDetail('${item.id_kelas}', '${item.mata_kuliah}')" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                        <button onclick="bukaModalDetail('${item.id_kelas}', '${(item.mata_kuliah || '').replace(/'/g, "\\'")}')" 
+                            class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
                             <i class="fa-solid fa-door-open mr-1.5"></i> Lihat Kelas
                         </button>
-                        <!-- Tombol Edit Kelas -->
-                        <button onclick="bukaModalEditMatkul('${item.id_kelas}')" class="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
+                        <button onclick="bukaModalEditMatkul('${item.id_kelas}')" 
+                            class="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 py-2.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center shadow-sm">
                             <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit
                         </button>
                     </div>
@@ -107,7 +133,12 @@ async function loadKelasDosen(id_dosen) {
                 container.appendChild(card);
             });
         } else {
-            container.innerHTML = `<p class="text-red-500 text-center">Server Error: ${result.message || 'Terjadi kesalahan'}</p>`;
+            container.innerHTML = `
+                <div class="col-span-full bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 text-3xl mb-2"></i>
+                    <p class="text-red-600 font-medium">Server Error: ${result.message || 'Terjadi kesalahan'}</p>
+                </div>
+            `;
         }
     } catch (error) {
         console.error("ERROR FETCH:", error);
@@ -118,13 +149,19 @@ async function loadKelasDosen(id_dosen) {
                 1. URL API di js/config.js salah.<br>
                 2. Apps Script belum di-deploy ulang.<br>
                 3. Backend crash (Cek Logs Apps Script).<br>
-                <span class="text-xs block mt-1">Detail error: ${error.message}</span>
+                <span class="text-xs block mt-1">Detail: ${error.message}</span>
+                <button onclick="loadKelasDosen('${id_dosen}')" 
+                    class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                    <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+                </button>
             </div>
         `;
     }
 }
 
-// --- FUNGSI MODAL DETAIL PERTEMUAN ---
+// ==========================================
+// 2. FORMAT HELPER
+// ==========================================
 function formatTanggal(isoString) {
     if (!isoString) return '-';
     const date = new Date(isoString);
@@ -139,18 +176,31 @@ function formatJam(isoString) {
     return parts[1].slice(0, 5);
 }
 
+// ==========================================
+// 3. MODAL DETAIL PERTEMUAN
+// ==========================================
 async function bukaModalDetail(id_kelas, nama_matkul) {
     const modal = document.getElementById('modalDetailKelas');
     const judul = document.getElementById('modalJudulKelas');
     const container = document.getElementById('modalContainerPertemuan');
 
     judul.innerText = nama_matkul;
-    container.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i><p>Memuat jadwal pertemuan...</p></div>`;
+    
+    // Skeleton loading untuk detail
+    container.innerHTML = `
+        <div class="animate-pulse space-y-3">
+            <div class="h-10 bg-slate-200 rounded"></div>
+            <div class="h-24 bg-slate-200 rounded"></div>
+            <div class="h-24 bg-slate-200 rounded"></div>
+            <div class="h-24 bg-slate-200 rounded"></div>
+        </div>
+    `;
     modal.classList.remove('hidden');
 
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ 
                 action: 'get_jadwal_pertemuan',
                 id_kelas: id_kelas 
@@ -158,20 +208,22 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
         });
         const result = await response.json();
 
-                if (result.status === 'success' && result.data.length > 0) {
+        if (result.status === 'success' && result.data.length > 0) {
             let html = `
                 <div class="flex justify-end mb-4">
-                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
+                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" 
+                        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> Tambah Pertemuan Baru
                     </button>
                 </div>
             `;
             
-            // Looping data pertemuan
+            // Loop data pertemuan
             result.data.forEach(pert => {
-                // Deklarasi variabel WAJIB dilakukan di sini
                 const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
-                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' ? pert.judul_materi : 'Judul Materi';
+                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' 
+                    ? pert.judul_materi 
+                    : 'Judul Materi';
                 
                 let jamTampil = '';
                 if (pert.jam_mulai && pert.jam_selesai) {
@@ -192,26 +244,25 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                         </div>
                         
                         <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
-                            <!-- Tombol Zoom / Offline -->
-                            ${isOnline ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
-                            : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`}
+                            ${isOnline 
+                                ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
+                                : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`
+                            }
                             
-                            <!-- Grup Tombol Aksi (Materi, Edit, Hapus) -->
                             <div class="flex gap-2 w-full md:w-auto">
-                                <!-- TOMBOL LIHAT MATERI (Hanya muncul jika link_materi tidak kosong) -->
                                 ${pert.link_materi ? `
                                     <a href="${pert.link_materi}" target="_blank" class="flex-1 md:w-auto bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-600 px-3 py-2 rounded-lg text-xs font-bold text-center flex items-center justify-center gap-1">
                                         <i class="fa-solid fa-file-arrow-down"></i> Materi
                                     </a>
                                 ` : ''}
                         
-                                <!-- Tombol Edit -->
-                                <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                <button onclick="bukaModalEditPertemuan('${pert.id_pertemuan}')" 
+                                    class="flex-1 md:w-auto bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold text-center">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                         
-                                <!-- Tombol Hapus -->
-                                <button onclick="hapusPertemuan('${pert.id_pertemuan}')" class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
+                                <button onclick="hapusPertemuan('${pert.id_pertemuan}')" 
+                                    class="flex-1 md:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold text-center">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
@@ -220,22 +271,31 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                 `;
             });
             
-            // Setelah loop selesai, masukkan ke container
             container.innerHTML = html;
         } else {
-            // Blok else jika tidak ada data (tetap memunculkan tombol tambah pertemuan)
+            // Empty state
             container.innerHTML = `
                 <div class="flex justify-end mb-4">
-                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
+                    <button onclick="bukaModalTambahPertemuan('${id_kelas}')" 
+                        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> Tambah Pertemuan Baru
                     </button>
                 </div>
-                <p class="text-center text-slate-500 py-10">Belum ada data pertemuan untuk kelas ini.</p>
+                <div class="text-center py-10">
+                    <i class="fa-solid fa-inbox text-slate-300 text-5xl mb-3"></i>
+                    <p class="text-slate-500">Belum ada data pertemuan untuk kelas ini.</p>
+                </div>
             `;
         }
     } catch (error) {
         console.error(error);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Gagal memuat data pertemuan.</p>`;
+        container.innerHTML = `
+            <div class="text-center py-10">
+                <i class="fa-solid fa-circle-xmark text-red-500 text-3xl mb-2"></i>
+                <p class="text-red-500">Gagal memuat data pertemuan.</p>
+                <p class="text-red-400 text-xs mt-1">${error.message}</p>
+            </div>
+        `;
     }
 }
 
@@ -244,7 +304,9 @@ function tutupModalDetail() {
     document.getElementById('modalContainerPertemuan').innerHTML = '';
 }
 
-// Membuka Modal Tambah Matkul + Load Data Mahasiswa (GANTI DENGAN INI)
+// ==========================================
+// 4. MODAL TAMBAH MATKUL
+// ==========================================
 async function bukaModalTambahMatkul() {
     const modal = document.getElementById('modalTambahMatkul');
     modal.classList.remove('hidden');
@@ -258,12 +320,19 @@ async function bukaModalTambahMatkul() {
         searchInput.style.display = 'block';
     }
 
-    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat daftar mahasiswa...</p>';
+    container.innerHTML = `
+        <div class="space-y-2 animate-pulse">
+            <div class="h-12 bg-slate-200 rounded"></div>
+            <div class="h-12 bg-slate-200 rounded"></div>
+            <div class="h-12 bg-slate-200 rounded"></div>
+        </div>
+    `;
 
     try {
         console.log(">>> Mengambil data mahasiswa dari server...");
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'get_list_mahasiswa' })
         });
 
@@ -290,7 +359,7 @@ async function bukaModalTambahMatkul() {
                 });
                 container.innerHTML = html;
 
-                // --- FITUR SEARCH BAR DINAMIS (DIPERBAIKI) ---
+                // Fitur Search
                 if (searchInput) {
                     searchInput.oninput = function() {
                         const keyword = this.value.toLowerCase().trim();
@@ -303,16 +372,10 @@ async function bukaModalTambahMatkul() {
 
                         items.forEach(item => {
                             const textContent = item.textContent.toLowerCase();
-                            // Jika teks di dalam label mengandung keyword, tampilkan. Jika tidak, sembunyikan.
                             item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
                         });
                     };
-                } else {
-                    // Jika elemen searchInput tidak ditemukan di HTML, beri peringatan di console
-                    console.warn("Peringatan: Elemen input dengan id 'searchMahasiswa' tidak ditemukan di HTML. Fitur pencarian tidak aktif.");
                 }
-                // --- AKHIR FITUR SEARCH ---
-
             } else {
                 container.innerHTML = `<p class="text-center text-sm text-yellow-600 py-4 italic">Tidak ada mahasiswa yang terdaftar di sistem.</p>`;
                 if (searchInput) searchInput.style.display = 'none';
@@ -326,22 +389,28 @@ async function bukaModalTambahMatkul() {
         container.innerHTML = `
             <p class="text-center text-sm text-red-500 py-4">
                 Gagal memuat mahasiswa. <br>
-                <span class="text-xs block mt-1">Cek Console (F12) untuk detail: ${error.message}</span>
+                <span class="text-xs block mt-1">${error.message}</span>
             </p>
         `;
         if (searchInput) searchInput.style.display = 'none';
     }
 }
+
+// ==========================================
+// 5. MODAL TAMBAH PERTEMUAN
+// ==========================================
 function bukaModalTambahPertemuan(id_kelas) {
     document.getElementById('modalTambahPertemuan').classList.remove('hidden');
     document.getElementById('formTambahPertemuan').dataset.idKelas = id_kelas;
 }
+
 function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
 
-// --- FUNGSI EDIT MATA KULIAH (TAMBAHKAN DI SINI) ---
-
+// ==========================================
+// 6. MODAL EDIT MATKUL (DENGAN KONVERSI SEMESTER LAMA)
+// ==========================================
 async function bukaModalEditMatkul(id_kelas) {
     console.log(">>> Tombol Edit diklik! ID Kelas:", id_kelas);
 
@@ -354,11 +423,18 @@ async function bukaModalEditMatkul(id_kelas) {
     }
 
     modal.classList.remove('hidden');
-    container.innerHTML = '<p class="text-center text-sm text-slate-400 py-4 italic">Memuat data...</p>';
+    container.innerHTML = `
+        <div class="space-y-2 animate-pulse">
+            <div class="h-12 bg-slate-200 rounded"></div>
+            <div class="h-12 bg-slate-200 rounded"></div>
+            <div class="h-12 bg-slate-200 rounded"></div>
+        </div>
+    `;
 
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'get_detail_kelas', id_kelas: id_kelas })
         });
 
@@ -378,11 +454,29 @@ async function bukaModalEditMatkul(id_kelas) {
             document.getElementById('edit_mk_kode').value = data.matkul.kode_mk;
             document.getElementById('edit_mk_nama').value = data.matkul.nama_mk;
             document.getElementById('edit_mk_sks').value = data.matkul.sks;
-            document.getElementById('edit_mk_semester').value = data.matkul.semester;
+            
+            // ==========================================
+            // ✅ KONVERSI SEMESTER LAMA (angka → Ganjil/Genap)
+            // ==========================================
+            const semesterRaw = String(data.matkul.semester || '').trim();
+            const semesterDropdown = document.getElementById('edit_mk_semester');
+            
+            if (semesterRaw === 'Ganjil' || semesterRaw === 'Genap') {
+                // Sudah format baru
+                semesterDropdown.value = semesterRaw;
+            } else if (semesterRaw && !isNaN(semesterRaw)) {
+                // Data lama (angka) → konversi otomatis
+                const semesterNum = parseInt(semesterRaw);
+                semesterDropdown.value = (semesterNum % 2 === 1) ? 'Ganjil' : 'Genap';
+                console.log('⚠️ Semester lama terdeteksi:', semesterRaw, '→', semesterDropdown.value);
+            } else {
+                semesterDropdown.value = '';
+            }
 
             // Load semua mahasiswa dan centang yang sudah terdaftar
             const resMhs = await fetch(CONFIG.API_URL, {
                 method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action: 'get_list_mahasiswa' })
             });
             const listMhs = await resMhs.json();
@@ -436,7 +530,9 @@ async function bukaModalEditMatkul(id_kelas) {
     }
 }
 
-// Logic Simpan Perubahan Edit Matakuliah
+// ==========================================
+// 7. SUBMIT: SIMPAN PERUBAHAN EDIT MATKUL
+// ==========================================
 document.getElementById('formEditMatkul').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
@@ -467,12 +563,16 @@ document.getElementById('formEditMatkul').addEventListener('submit', async funct
     };
 
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data) 
+        });
         const result = await res.json();
         if(result.status === 'success') {
             alert(result.message);
             tutupModal('modalEditMatkul');
-            location.reload(); // Refresh agar kartu menampilkan data terbaru
+            location.reload();
         } else {
             alert('Gagal: ' + result.message);
             btn.innerHTML = originalText;
@@ -486,15 +586,14 @@ document.getElementById('formEditMatkul').addEventListener('submit', async funct
     }
 });
 
-// Logic Simpan Mata Kuliah (GANTI DENGAN INI)
-// =========================================================
-// Logic Simpan Mata Kuliah (Dengan Animasi Loading & Anti-Double Click)
-// =========================================================
+// ==========================================
+// 8. SUBMIT: SIMPAN MATKUL BARU
+// ==========================================
 document.getElementById('formTambahMatkul').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const btn = this.querySelector('button[type="submit"]');
-    const originalText = btn.innerHTML; // Simpan teks asli tombol
+    const originalText = btn.innerHTML;
     const session = JSON.parse(localStorage.getItem('user_session'));
     
     // Ambil data mahasiswa yang dicentang
@@ -506,7 +605,7 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
         return;
     }
 
-    // 1. Tampilkan animasi loading & Nonaktifkan tombol
+    // Loading state
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Data...';
     btn.disabled = true;
 
@@ -521,31 +620,32 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
     };
     
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data) 
+        });
         const result = await res.json();
         
         if(result.status === 'success') {
             alert(result.message);
-            // Sukses: reload halaman agar kartu baru muncul. (Tidak perlu mengembalikan tombol karena page berganti)
             location.reload(); 
         } else {
             alert('Gagal: ' + result.message);
-            // 2. Jika gagal, kembalikan tombol ke semula agar bisa klik lagi
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     } catch (error) {
         console.error("Error simpan matkul:", error);
         alert('Terjadi kesalahan jaringan.');
-        // 3. Jika error jaringan, kembalikan tombol ke semula
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 });
 
-// =========================================================
-// Logic Simpan Pertemuan (Dengan Animasi Loading & Anti-Double Click)
-// =========================================================
+// ==========================================
+// 9. SUBMIT: SIMPAN PERTEMUAN BARU
+// ==========================================
 document.getElementById('formTambahPertemuan').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -561,9 +661,11 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
     let base64File = null, fileName = null;
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
-        if (file.size > 10 * 1024 * 1024) { // > 10MB
+        if (file.size > 10 * 1024 * 1024) {
             alert('Ukuran file terlalu besar! Maksimal 10MB.');
-            btn.innerHTML = originalText; btn.disabled = false; return;
+            btn.innerHTML = originalText; 
+            btn.disabled = false; 
+            return;
         }
         fileName = file.name.replace(/\s+/g, '_');
         base64File = await fileToBase64(file);
@@ -581,34 +683,36 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         materi_nama_file: fileName
     };
     
-    console.log(">>> Data yang dikirim:", data); // Tambahkan ini
+    console.log(">>> Data yang dikirim:", data);
 
     try {
-        const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data) 
+        });
         const result = await res.json();
         
         if(result.status === 'success') {
             alert('Pertemuan berhasil ditambahkan!');
             tutupModal('modalTambahPertemuan');
-            // Sukses: reload halaman agar daftar pertemuan terbaru muncul
             location.reload();
         } else {
             alert('Gagal: ' + result.message);
-            // 2. Jika gagal, kembalikan tombol
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     } catch (error) {
         console.error("Error simpan pertemuan:", error);
         alert('Terjadi kesalahan jaringan.');
-        // 3. Jika error, kembalikan tombol
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 });
 
-// --- FUNGSI EDIT & HAPUS PERTEMUAN ---
-
+// ==========================================
+// 10. MODAL EDIT PERTEMUAN
+// ==========================================
 async function bukaModalEditPertemuan(id_pertemuan) {
     const modal = document.getElementById('modalEditPertemuan');
     modal.classList.remove('hidden');
@@ -616,6 +720,7 @@ async function bukaModalEditPertemuan(id_pertemuan) {
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'get_detail_pertemuan', id_pertemuan: id_pertemuan })
         });
         const result = await res.json();
@@ -629,22 +734,18 @@ async function bukaModalEditPertemuan(id_pertemuan) {
             document.getElementById('edit_pt_judul').value = p.judul_materi;
             document.getElementById('edit_pt_link').value = p.ruang_atau_link;
 
-            // --- BAGIAN MENAMPILKAN FILE MATERI YANG SUDAH ADA ---
+            // Tampilkan file materi yang sudah ada
             const linkMateriWrapper = document.getElementById('edit_existing_materi_wrapper');
             const linkMateriAnchor = document.getElementById('edit_existing_materi_link');
             
-            // Reset tampilan
             linkMateriWrapper.classList.add('hidden');
             linkMateriAnchor.href = '#';
 
-            // Jika ada link materi (dari backend), tampilkan
             if (p.link_materi && p.link_materi.trim() !== '') {
                 linkMateriWrapper.classList.remove('hidden');
                 linkMateriAnchor.href = p.link_materi;
                 linkMateriAnchor.innerText = 'Download Materi Saat Ini';
             }
-            // ----------------------------------------------------
-
         } else {
             alert('Gagal mengambil data pertemuan: ' + result.message);
         }
@@ -654,6 +755,9 @@ async function bukaModalEditPertemuan(id_pertemuan) {
     }
 }
 
+// ==========================================
+// 11. SUBMIT: UPDATE PERTEMUAN
+// ==========================================
 document.getElementById('formEditPertemuan').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
@@ -669,38 +773,61 @@ document.getElementById('formEditPertemuan').addEventListener('submit', async fu
         jam_selesai: document.getElementById('edit_pt_jam_selesai').value,
         judul_materi: document.getElementById('edit_pt_judul').value,
         ruang_atau_link: document.getElementById('edit_pt_link').value,
-        jenis_kuliah: 'Online' // bisa disesuaikan atau diinput manual
+        jenis_kuliah: 'Online'
     };
 
-    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
-    const result = await res.json();
-    if(result.status === 'success') {
-        alert(result.message);
-        tutupModal('modalEditPertemuan');
-        location.reload(); // Reload modal detail
-    } else {
-        alert('Gagal: ' + result.message);
+    try {
+        const res = await fetch(CONFIG.API_URL, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(data) 
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            alert(result.message);
+            tutupModal('modalEditPertemuan');
+            location.reload();
+        } else {
+            alert('Gagal: ' + result.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Kesalahan jaringan.');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 });
 
+// ==========================================
+// 12. HAPUS PERTEMUAN
+// ==========================================
 async function hapusPertemuan(id_pertemuan) {
     if(!confirm('Apakah Anda yakin ingin menghapus pertemuan ini?')) return;
 
-    const res = await fetch(CONFIG.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'delete_pertemuan', id_pertemuan: id_pertemuan })
-    });
-    const result = await res.json();
-    if(result.status === 'success') {
-        alert(result.message);
-        location.reload();
-    } else {
-        alert('Gagal hapus: ' + result.message);
+    try {
+        const res = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'delete_pertemuan', id_pertemuan: id_pertemuan })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert('Gagal hapus: ' + result.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Kesalahan jaringan.');
     }
 }
 
+// ==========================================
+// 13. HELPER: FILE TO BASE64
+// ==========================================
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
