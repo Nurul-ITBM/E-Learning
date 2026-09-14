@@ -1,19 +1,32 @@
-// ==========================================
 // js/nilai.js - Logika Frontend Nilai Mahasiswa
+// ✅ Skema: 6 Komponen
+// Kehadiran 20% + Keaktifan 20% + Tugas 20% + Praktikum 20% + UTS 10% + UAS 10%
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Validasi Sesi Login
-    const sessionData = localStorage.getItem('user_session');
+    // ==========================================
+    // 1. VALIDASI SESI LOGIN
+    // ==========================================
+    const sessionData = localStorage.getItem('user_session') || localStorage.getItem('user');
     if (!sessionData) { 
         window.location.href = '../login.html'; 
         return; 
     }
     
-    const user = JSON.parse(sessionData);
+    let user;
+    try {
+        user = JSON.parse(sessionData);
+    } catch (e) {
+        console.error('Session tidak valid:', e);
+        window.location.href = '../login.html';
+        return;
+    }
+    
     console.log(">>> User session:", user);
 
-    // 2. Fetch Data Nilai dari Server
+    // ==========================================
+    // 2. FETCH DATA NILAI DARI SERVER
+    // ==========================================
     try {
         const res = await fetch(CONFIG.API_URL, {
             method: 'POST',
@@ -29,13 +42,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log(">>> Data nilai:", result);
         
         const tbody = document.getElementById('tabelNilaiBody');
+        if (!tbody) {
+            console.error('Element tabelNilaiBody tidak ditemukan!');
+            return;
+        }
         tbody.innerHTML = '';
         
-        if (result.status === 'success' && result.data.length > 0) {
+        // ==========================================
+        // 3. HANDLE RESPONSE
+        // ==========================================
+        if (result.status === 'success' && result.data && result.data.length > 0) {
             let totalSKS = 0;
             let totalBobotSKS = 0;
             let totalMataKuliah = 0;
             let jumlahGradeE = 0;
+            let totalNilaiAkhir = 0;
 
             result.data.forEach((item, index) => {
                 const sks = parseInt(item.sks) || 3; 
@@ -56,31 +77,84 @@ document.addEventListener('DOMContentLoaded', async () => {
                 totalSKS += sks;
                 totalBobotSKS += (sks * bobot);
                 totalMataKuliah++;
+                totalNilaiAkhir += parseFloat(item.akhir) || 0;
 
+                // Badge warna per grade
                 let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
                 if (g === 'A') badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
                 else if (g === 'B') badgeColor = 'bg-blue-50 text-blue-600 border-blue-200';
                 else if (g === 'C') badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
                 else if (g === 'D' || g === 'E') badgeColor = 'bg-red-50 text-red-600 border-red-200';
 
+                // ✅ 6 komponen nilai
+                const kehadiran = item.kehadiran || 0;
+                const keaktifan = item.keaktifan || 0;
+                const tugas = item.tugas || 0;
+                const praktikum = item.praktikum || 0;
+                const uts = item.uts || 0;
+                const uas = item.uas || 0;
+
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-slate-800">${index + 1}</td>
-                        <td class="px-6 py-4 font-medium text-slate-800">${item.nama_matkul || '-'}</td>
-                        <td class="px-6 py-4 text-center">${item.sks || '-'}</td>
-                        <td class="px-6 py-4 text-center">${item.tugas || 0}</td>
-                        <td class="px-6 py-4 text-center">${item.uts || 0}</td>
-                        <td class="px-6 py-4 text-center">${item.uas || 0}</td>
-                        <td class="px-6 py-4 text-center">${item.kehadiran || 0}</td>
-                        <td class="px-6 py-4 text-center font-bold text-slate-700">${item.akhir || 0}</td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">${item.grade || '-'}</span>
+                        <td class="px-4 py-4 font-bold text-slate-800">${index + 1}</td>
+                        <td class="px-4 py-4 font-medium text-slate-800">
+                            <div class="font-bold text-sm">${item.nama_matkul || '-'}</div>
+                            <div class="text-[10px] text-slate-400">${item.kode_matkul || '-'}</div>
+                        </td>
+                        <td class="px-4 py-4 text-center font-semibold text-slate-700">${item.sks || '-'}</td>
+                        
+                        <!-- ✅ 6 Kolom Nilai -->
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-amber-700 bg-amber-50 text-xs">
+                                ${kehadiran}
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-orange-700 bg-orange-50 text-xs">
+                                ${keaktifan}
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-blue-700 bg-blue-50 text-xs">
+                                ${tugas}
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-purple-700 bg-purple-50 text-xs">
+                                ${praktikum}
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-cyan-700 bg-cyan-50 text-xs">
+                                ${uts}
+                            </span>
+                        </td>
+                        <td class="px-3 py-4 text-center">
+                            <span class="inline-block px-2 py-1 rounded font-semibold text-rose-700 bg-rose-50 text-xs">
+                                ${uas}
+                            </span>
+                        </td>
+                        
+                        <!-- Nilai Akhir -->
+                        <td class="px-4 py-4 text-center">
+                            <span class="inline-block px-3 py-1 rounded font-bold text-teal-700 bg-teal-100">
+                                ${item.akhir || 0}
+                            </span>
+                        </td>
+                        
+                        <!-- Grade -->
+                        <td class="px-4 py-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeColor}">
+                                ${item.grade || '-'}
+                            </span>
                         </td>
                     </tr>
                 `;
             });
 
-            // ✅ Hitung IPK
+            // ==========================================
+            // 4. HITUNG IPK
+            // ==========================================
             console.log('>>> Total SKS:', totalSKS);
             console.log('>>> Total Bobot SKS:', totalBobotSKS);
             console.log('>>> Total MK:', totalMataKuliah);
@@ -125,6 +199,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ipkInfo.innerText = `${totalMataKuliah} MK • ${totalSKS} SKS`;
                 }
                 
+                // ✅ Update total MK label
+                const totalMkLabel = document.getElementById('totalMkLabel');
+                if (totalMkLabel) {
+                    totalMkLabel.innerText = totalMataKuliah;
+                }
+                
                 // ✅ Alert jika semua Grade E
                 if (jumlahGradeE === totalMataKuliah && totalMataKuliah > 0) {
                     const alertContainer = document.getElementById('alertIpk');
@@ -155,9 +235,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
         } else {
+            // ==========================================
+            // 5. EMPTY STATE (Belum ada nilai)
+            // ==========================================
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="text-center py-10 text-slate-400 italic">
+                    <td colspan="11" class="text-center py-10 text-slate-400 italic">
                         <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
                         Belum ada data nilai akademik.
                     </td>
@@ -169,16 +252,46 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ipkDisplay.innerText = '-';
                 ipkDisplay.classList.add('text-slate-400');
             }
+            
+            const ipkInfo = document.getElementById('ipkInfo');
+            if (ipkInfo) {
+                ipkInfo.innerText = 'Belum ada nilai';
+            }
+            
+            const totalMkLabel = document.getElementById('totalMkLabel');
+            if (totalMkLabel) {
+                totalMkLabel.innerText = '0';
+            }
         }
     } catch (err) {
+        // ==========================================
+        // 6. ERROR HANDLING
+        // ==========================================
         console.error("Error load nilai:", err);
-        document.getElementById('tabelNilaiBody').innerHTML = `
-            <tr>
-                <td colspan="9" class="text-center py-10 text-red-400">
-                    <i class="fa-solid fa-circle-exclamation text-3xl mb-2 block"></i>
-                    Gagal memuat data nilai dari server.
-                </td>
-            </tr>
-        `;
+        const tbody = document.getElementById('tabelNilaiBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="11" class="text-center py-10 text-red-400">
+                        <i class="fa-solid fa-circle-exclamation text-3xl mb-2 block"></i>
+                        <p class="font-bold">Gagal memuat data nilai dari server.</p>
+                        <p class="text-xs mt-1">${err.message}</p>
+                        <button onclick="location.reload()" class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
+                            <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
     }
 });
+
+// ==========================================
+// 7. HELPER: FORMAT ANGKA (Opsional)
+// ==========================================
+function formatNilai(nilai) {
+    if (nilai === null || nilai === undefined || nilai === '') return '0';
+    const num = parseFloat(nilai);
+    if (isNaN(num)) return '0';
+    return Math.round(num * 100) / 100;
+}
