@@ -3,7 +3,7 @@
 // ✅ Dengan Setup Notifikasi
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // ✅ Tambahkan class ke body agar CSS khusus mahasiswa (Indigo) aktif
+    // ✅ Tambahkan class ke body
     document.body.classList.add('role-mahasiswa');
 
     try {
@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const sidebarHTML = await response.text();
             sidebarContainer.innerHTML = sidebarHTML;
             
-            // ✅ Highlight menu aktif
             highlightActiveMenu();
         }
 
@@ -41,18 +40,18 @@ document.addEventListener('DOMContentLoaded', async function() {
                     setupNotifButton();
                     loadNotifikasiBadge();
                 } else {
-                    console.warn('⚠️ js/notifikasi.js belum di-load. Tambahkan <script src="../js/notifikasi.js"></script>');
+                    console.warn('⚠️ js/notifikasi.js belum di-load.');
                 }
             }, 100);
         }
 
         // ==========================================
-        // 3. SETUP HANDLER LOGOUT (TERPUSAT)
+        // 3. SETUP HANDLER LOGOUT
         // ==========================================
         setupLogoutHandler();
 
         // ==========================================
-        // 4. ✅ SETUP TOGGLE SIDEBAR (MOBILE)
+        // 4. SETUP TOGGLE SIDEBAR (MOBILE)
         // ==========================================
         setupSidebarToggle();
 
@@ -67,30 +66,31 @@ document.addEventListener('DOMContentLoaded', async function() {
 function highlightActiveMenu() {
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
     
-    // Hapus semua class active
     document.querySelectorAll('.sidebar-nav-link').forEach(el => {
         el.classList.remove('active');
     });
 
-    // Mapping halaman → ID menu
     const menuMap = {
         'dashboard.html': 'menu-dashboard',
-        'matakuliah.html': 'menu-matakuliah',
-        'tugas.html': 'menu-tugas',
-        'ujian.html': 'menu-ujian',
-        'absensi.html': 'menu-absensi',
-        'nilai.html': 'menu-nilai',
-        'profil.html': 'menu-profil',
         'mahasiswa-dashboard.html': 'menu-dashboard',
-        'mahasiswa-tugas.html': 'menu-tugas'
+        'matakuliah.html': 'menu-matakuliah',
+        'mahasiswa-matakuliah.html': 'menu-matakuliah',
+        'tugas.html': 'menu-tugas',
+        'mahasiswa-tugas.html': 'menu-tugas',
+        'ujian.html': 'menu-ujian',
+        'mahasiswa-ujian.html': 'menu-ujian',
+        'absensi.html': 'menu-absensi',
+        'mahasiswa-absensi.html': 'menu-absensi',
+        'nilai.html': 'menu-nilai',
+        'mahasiswa-nilai.html': 'menu-nilai',
+        'profil.html': 'menu-profil',
+        'mahasiswa-profil.html': 'menu-profil'
     };
 
     const activeId = menuMap[currentPage];
     if (activeId) {
         const activeLink = document.getElementById(activeId);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
+        if (activeLink) activeLink.classList.add('active');
     }
 }
 
@@ -103,7 +103,7 @@ function fillHeaderData() {
     
     const user = JSON.parse(sessionData);
     
-    // ✅ Set page title dinamis
+    // Set page title
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
@@ -111,38 +111,40 @@ function fillHeaderData() {
             'dashboard': 'Dashboard Mahasiswa',
             'mahasiswa-dashboard': 'Dashboard Mahasiswa',
             'matakuliah': 'Mata Kuliah',
+            'mahasiswa-matakuliah': 'Mata Kuliah',
             'tugas': 'Tugas & Praktikum',
             'mahasiswa-tugas': 'Tugas & Praktikum',
             'ujian': 'Ujian',
+            'mahasiswa-ujian': 'Ujian',
             'absensi': 'Riwayat Kehadiran',
+            'mahasiswa-absensi': 'Riwayat Kehadiran',
             'nilai': 'Nilai Akademik',
-            'profil': 'Profil Saya'
+            'mahasiswa-nilai': 'Nilai Akademik',
+            'profil': 'Profil Saya',
+            'mahasiswa-profil': 'Profil Saya'
         };
         pageTitle.innerText = titleMap[currentPage] || 'Dashboard Mahasiswa';
     }
     
-    // ✅ Set nama mahasiswa
+    // Set nama mahasiswa
     const nameDisplay = document.getElementById('mahasiswaNameDisplay');
     if (nameDisplay) {
         nameDisplay.innerText = user.nama_mahasiswa || user.username?.split('@')[0] || 'Mahasiswa';
     }
     
-    // ✅ Set program studi
+    // Set program studi
     const prodiDisplay = document.getElementById('mahasiswaProdiDisplay');
     if (prodiDisplay) {
         prodiDisplay.innerText = user.program_studi || 'Mahasiswa';
     }
     
-    // ✅ Set inisial avatar otomatis
+    // Set inisial avatar
     const avatarInisial = document.getElementById('mahasiswaAvatarInisial');
     if (avatarInisial) {
         const nama = user.nama_mahasiswa || 'Mahasiswa';
-        
-        // Ambil kata valid
         const kata = nama.split(' ').filter(k => k.length > 0);
         
         let inisial = '';
-        
         if (kata.length >= 2) {
             inisial = kata[0].charAt(0) + kata[1].charAt(0);
         } else if (kata.length === 1) {
@@ -156,14 +158,13 @@ function fillHeaderData() {
 }
 
 // ==========================================
-// HANDLER LOGOUT (TERPUSAT)
+// HANDLER LOGOUT
 // ==========================================
 function setupLogoutHandler() {
     document.addEventListener('click', function(e) {
         const logoutBtn = e.target.closest('#btnLogout');
         if (logoutBtn) {
             e.preventDefault();
-            
             if (confirm('Apakah Anda yakin ingin keluar?')) {
                 localStorage.removeItem('user_session');
                 window.location.href = '../login.html';
@@ -173,10 +174,9 @@ function setupLogoutHandler() {
 }
 
 // ==========================================
-// ✅ TOGGLE SIDEBAR (MOBILE)
+// TOGGLE SIDEBAR (MOBILE)
 // ==========================================
 function setupSidebarToggle() {
-    // Buat overlay jika belum ada
     if (!document.getElementById('sidebarOverlay')) {
         const overlay = document.createElement('div');
         overlay.id = 'sidebarOverlay';
@@ -185,9 +185,7 @@ function setupSidebarToggle() {
     
     const overlay = document.getElementById('sidebarOverlay');
     
-    // Event delegation untuk semua klik
     document.addEventListener('click', function(e) {
-        
         // 1. Tombol Hamburger
         const toggleBtn = e.target.closest('#btnToggleSidebar');
         if (toggleBtn) {
@@ -200,7 +198,7 @@ function setupSidebarToggle() {
             return;
         }
         
-        // 2. Klik overlay → tutup sidebar
+        // 2. Klik overlay → tutup
         if (e.target.id === 'sidebarOverlay') {
             const sidebar = document.querySelector('aside');
             if (sidebar) {
@@ -210,7 +208,7 @@ function setupSidebarToggle() {
             return;
         }
         
-        // 3. Klik menu link → tutup sidebar (mobile)
+        // 3. Klik menu link → tutup (mobile)
         const menuLink = e.target.closest('.sidebar-nav-link');
         if (menuLink && window.innerWidth <= 768) {
             const sidebar = document.querySelector('aside');
