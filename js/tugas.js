@@ -1,18 +1,119 @@
+// ==========================================
 // js/tugas.js - Halaman Tugas Mahasiswa
-// ✅ Skeleton Loading + Filter Mata Kuliah + Error Handling
+// Version: 3.1 - Fix Deadline + Optimized Loading
+// ✅ Parse tanggal Indonesia
+// ✅ Frontend cache 60s
+// ✅ DocumentFragment render
+// ✅ Timeout 90s untuk upload
+// ==========================================
 
+// ==========================================
+// STATE GLOBAL
+// ==========================================
+let allTugasData = [];
+let currentFilter = 'Semua'; // 'Semua' | 'Tugas' | 'Praktikum'
+let currentMatkulFilter = '';
+
+// ==========================================
+// HELPER: PARSE TANGGAL FORMAT INDONESIA
+// Input : "19/08/2026 13:36" atau "2026-08-19 13:36"
+// Output: Date object atau null
+// ==========================================
+function parseTanggalIndonesia(str) {
+    if (!str) return null;
+
+    try {
+        const s = String(str).trim();
+
+        // ISO: 2026-08-19T13:36 atau 2026-08-19 13:36
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+            const d = new Date(s.replace(' ', 'T'));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // Format Indonesia: DD/MM/YYYY HH:mm
+        const parts = s.split(/[\sT]+/);
+        const tgl = (parts[0] || '').split('/');
+        const jam = (parts[1] || '00:00').split(':');
+
+        if (tgl.length !== 3) return null;
+
+        const day   = parseInt(tgl[0], 10);
+        const month = parseInt(tgl[1], 10) - 1;
+        const year  = parseInt(tgl[2], 10);
+        const hour  = parseInt(jam[0] || '0', 10);
+        const min   = parseInt(jam[1] || '0', 10);
+
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+        const d = new Date(year, month, day, hour, min);
+        return isNaN(d.getTime()) ? null : d;
+
+    } catch (e) {
+        console.warn('parseTanggalIndonesia error:', str, e.message);
+        return null;
+    }
+}
+
+// ==========================================
+// HELPER: FETCH DENGAN CACHE (dari config.js)
+// Fallback ke fetchJSON kalau fetchCached tidak ada
+// ==========================================
+async function callAPI(action, data, options) {
+    options = options || {};
+    const label = options.logLabel || action;
+
+    // Pakai fetchCached dari config.js kalau tersedia
+    if (typeof fetchCached === 'function' && !options.skipCache) {
+        try {
+            return await fetchCached(action, data, {
+                ttl: options.ttl || 60000,
+                forceRefresh: options.forceRefresh || false
+            });
+        } catch (e) {
+            console.warn('[' + label + '] fetchCached gagal, fallback ke fetchJSON:', e.message);
+        }
+    }
+
+    // Fallback: fetchJSON dari config.js
+    if (typeof fetchJSON === 'function') {
+        return await fetchJSON(action, data, options);
+    }
+
+    // Last resort: fetch manual
+    const response = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        mode: 'cors',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ action: action }, data || {}))
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const text = await response.text();
+    return JSON.parse(text);
+}
+
+function invalidateAPI(prefix) {
+    if (typeof invalidateCache === 'function') {
+        invalidateCache(prefix);
+    }
+}
+
+// ==========================================
+// INIT — DOMContentLoaded
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Set Judul Halaman Header
+    // 1. Set judul
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = 'Tugas & Praktikum';
 
-    // 2. Ambil Session
+    // 2. Ambil session
     const sessionData = localStorage.getItem('user') || localStorage.getItem('user_session');
     if (!sessionData) {
         window.location.href = '../login.html';
         return;
     }
-    
+
     let user;
     try {
         user = JSON.parse(sessionData);
@@ -22,8 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 3. Event Logout
-    document.addEventListener('click', function(e) {
+    // 3. Event logout
+    document.addEventListener('click', function (e) {
         const logoutBtn = e.target.closest('#btnLogout');
         if (logoutBtn) {
             localStorage.removeItem('user');
@@ -32,60 +133,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 4. Setup Filter Tab
+    // 4. Setup filter
     setupFilterTab();
-    
-    // 5. Setup Filter Mata Kuliah
     setupMatkulFilter();
 
-    // 6. Muat Data Tugas
+    // 5. Load data tugas
     const identifier = user.id_user || user.id_mahasiswa;
-    
+
     if (identifier) {
         await loadTugas(identifier);
     } else {
-        document.getElementById('containerTugas').innerHTML = 
-            '<p class="text-red-500 col-span-full text-center py-10">Error: Data user tidak lengkap.</p>';
+        const c = document.getElementById('containerTugas');
+        if (c) c.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Error: Data user tidak lengkap.</p>';
     }
 });
 
 // ==========================================
-// VARIABEL GLOBAL
-// ==========================================
-let allTugasData = [];
-let currentFilter = 'Semua'; // 'Semua' | 'Tugas' | 'Praktikum'
-let currentMatkulFilter = '';
-
-// ==========================================
-// SETUP FILTER TAB (Tugas/Praktikum)
+// SETUP FILTER TAB
 // ==========================================
 function setupFilterTab() {
     const filterButtons = document.querySelectorAll('[data-filter]');
     filterButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             currentFilter = this.dataset.filter;
-            
-            // Update visual
+
             filterButtons.forEach(b => {
                 b.classList.remove('bg-indigo-500', 'text-white');
                 b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
             });
             this.classList.add('bg-indigo-500', 'text-white');
             this.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
-            
-            // Re-render
+
             renderTugas();
         });
     });
 }
 
 // ==========================================
-// ✅ SETUP FILTER MATA KULIAH (BARU)
+// SETUP FILTER MATA KULIAH
 // ==========================================
 function setupMatkulFilter() {
     const dropdown = document.getElementById('filterMatkul');
     if (dropdown) {
-        dropdown.addEventListener('change', function() {
+        dropdown.addEventListener('change', function () {
             currentMatkulFilter = this.value;
             renderTugas();
         });
@@ -93,12 +183,13 @@ function setupMatkulFilter() {
 }
 
 // ==========================================
-// LOAD TUGAS
+// LOAD TUGAS (dengan cache + skeleton)
 // ==========================================
 async function loadTugas(identifier) {
     const container = document.getElementById('containerTugas');
-    
-    // ✅ SKELETON LOADING (6 kartu)
+    if (!container) return;
+
+    // Skeleton 6 kartu
     container.innerHTML = Array(6).fill(`
         <div class="bg-white p-6 rounded-2xl border border-slate-100 animate-pulse">
             <div class="flex justify-between mb-3">
@@ -112,36 +203,21 @@ async function loadTugas(identifier) {
             <div class="h-10 bg-slate-200 rounded w-full"></div>
         </div>
     `).join('');
-    
+
+    const t0 = Date.now();
     try {
-        console.log(">>> Loading tugas dengan identifier:", identifier);
-        
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({ 
-                action: 'get_tugas', 
-                id_user: identifier
-            })
-        });
+        console.log('📤 Load tugas untuk:', identifier);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const result = await callAPI('get_tugas',
+            { id_user: identifier },
+            { logLabel: 'get_tugas', ttl: 60000, timeout: 30000 }
+        );
 
-        const result = await response.json();
-        console.log(">>> Response dari server:", result);
+        console.log('📥 Response (' + (Date.now() - t0) + 'ms):', result.status);
 
         if (result.status === 'success') {
-            // Simpan data global untuk filter
             allTugasData = result.data || [];
-            
-            // Update statistik & dropdown mata kuliah
             updateStatistik(allTugasData);
-            
-            // Render
             renderTugas();
         } else {
             container.innerHTML = `
@@ -167,11 +243,12 @@ async function loadTugas(identifier) {
 }
 
 // ==========================================
-// RENDER TUGAS (dengan filter)
+// RENDER TUGAS (dengan filter + DocumentFragment)
 // ==========================================
 function renderTugas() {
     const container = document.getElementById('containerTugas');
-    
+    if (!container) return;
+
     // Filter by jenis
     let filteredData = allTugasData;
     if (currentFilter === 'Tugas') {
@@ -179,14 +256,16 @@ function renderTugas() {
     } else if (currentFilter === 'Praktikum') {
         filteredData = filteredData.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum');
     }
-    
-    // ✅ Filter by mata kuliah
+
+    // Filter by mata kuliah
     if (currentMatkulFilter) {
         filteredData = filteredData.filter(t => t.mata_kuliah === currentMatkulFilter);
     }
-    
+
+    // Clear container
     container.innerHTML = '';
-    
+
+    // Empty state
     if (filteredData.length === 0) {
         const msg = currentFilter === 'Semua' && !currentMatkulFilter
             ? 'Belum ada tugas untuk mata kuliah Anda.'
@@ -200,37 +279,48 @@ function renderTugas() {
         return;
     }
 
+    // ✅ DocumentFragment — 1 render pass, lebih cepat dari appendChild loop
+    const fragment = document.createDocumentFragment();
+    const now = new Date();
+
     filteredData.forEach(t => {
-        // Tentukan jenis tugas
+        // ---- Tentukan jenis tugas ----
         const isPraktikum = (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum';
-        
-        // ✅ Cek deadline
+
+        // ---- Cek deadline (PAKAI PARSER YANG BENAR) ----
         let isDeadlineLewat = false;
+        let deadlineDate = null;
+
         if (t.tenggat_waktu) {
-            const deadlineDate = new Date(String(t.tenggat_waktu).replace(' ', 'T'));
-            isDeadlineLewat = new Date() > deadlineDate;
+            deadlineDate = parseTanggalIndonesia(t.tenggat_waktu);
+            if (deadlineDate) {
+                isDeadlineLewat = now > deadlineDate;
+            } else {
+                console.warn('⚠️ Deadline tidak bisa di-parse:', t.id_tugas, t.tenggat_waktu);
+            }
         }
-        
-        // Warna & ikon badge
-        const badgeColor = isPraktikum 
-            ? 'bg-purple-100 text-purple-700 border-purple-200' 
+
+        // ---- Warna & ikon badge ----
+        const badgeColor = isPraktikum
+            ? 'bg-purple-100 text-purple-700 border-purple-200'
             : 'bg-indigo-50 text-indigo-600 border-indigo-100';
         const badgeIcon = isPraktikum ? 'fa-flask-vial' : 'fa-file-pen';
         const badgeText = isPraktikum ? 'Praktikum' : 'Tugas';
         const hoverBorder = isPraktikum ? 'hover:border-purple-300' : 'hover:border-indigo-300';
-        const btnColor = isPraktikum 
-            ? 'bg-purple-500 hover:bg-purple-600' 
+        const btnColor = isPraktikum
+            ? 'bg-purple-500 hover:bg-purple-600'
             : 'bg-indigo-500 hover:bg-indigo-600';
-        
+
+        // ---- Card element ----
         const card = document.createElement('div');
         card.className = `bg-white p-6 rounded-2xl shadow-sm border border-slate-100 ${hoverBorder} hover:shadow-md transition-all flex flex-col justify-between ${isDeadlineLewat && !t.sudah_kumpul ? 'opacity-90' : ''}`;
-        
-        // Action HTML dengan KUNCI
+
+        // ---- Action HTML ----
         let actionHTML = '';
         if (t.sudah_kumpul) {
             const nilaiHTML = t.nilai ? `<br><span class="font-bold text-slate-800">Nilai: ${t.nilai}</span>` : '';
             const komentarHTML = t.komentar_dosen ? `<br><span class="text-slate-500 text-[10px] italic">"${t.komentar_dosen}"</span>` : '';
-            
+
             actionHTML = `
                 <div class="text-center text-xs text-green-600 bg-green-50 p-3 rounded-lg border border-green-100">
                     <i class="fa-solid fa-circle-check mr-1"></i> <span class="font-semibold">Sudah Dikumpulkan</span>
@@ -239,9 +329,10 @@ function renderTugas() {
                 </div>
             `;
         } else if (isDeadlineLewat) {
+            // ✅ Terkunci — tampilkan badge merah, tanpa tombol upload
             actionHTML = `
                 <div class="text-center text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
-                    <i class="fa-solid fa-lock mr-1"></i> 
+                    <i class="fa-solid fa-lock mr-1"></i>
                     <span class="font-semibold">Terkunci</span>
                     <br>
                     <span class="text-[10px] text-red-500">Deadline telah berakhir</span>
@@ -249,26 +340,28 @@ function renderTugas() {
             `;
         } else {
             actionHTML = `
-                <button onclick="bukaModalUploadTugas('${t.id_tugas}', '${t.judul_tugas.replace(/'/g, "\\'")}')" class="w-full ${btnColor} text-white py-2 rounded-lg text-sm font-bold transition-colors">
+                <button onclick="bukaModalUploadTugas('${t.id_tugas}', '${String(t.judul_tugas || '').replace(/'/g, "\\'")}')" class="w-full ${btnColor} text-white py-2 rounded-lg text-sm font-bold transition-colors">
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload ${isPraktikum ? 'Laporan' : 'Tugas'}
                 </button>
             `;
         }
-        
-        // Deadline HTML
+
+        // ---- Deadline HTML ----
         let deadlineHTML = '';
         if (t.tenggat_waktu) {
+            const label = isDeadlineLewat ? 'Lewat: ' : 'Deadline: ';
+            const color = isDeadlineLewat ? 'text-red-500 font-semibold' : 'text-slate-500';
             deadlineHTML = `
-                <span class="${isDeadlineLewat ? 'text-red-500 font-semibold' : 'text-slate-500'}">
-                    <i class="fa-regular fa-clock mr-1"></i> 
-                    ${isDeadlineLewat ? 'Lewat: ' : 'Deadline: '}
-                    ${t.tenggat_waktu.replace('T', ' ')}
+                <span class="${color}">
+                    <i class="fa-regular fa-clock mr-1"></i>
+                    ${label}${t.tenggat_waktu}
                 </span>
             `;
         } else {
             deadlineHTML = `<span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i> Tidak ditentukan</span>`;
         }
-        
+
+        // ---- Isi card ----
         card.innerHTML = `
             <div>
                 <div class="flex justify-between items-start mb-3 gap-2">
@@ -285,10 +378,10 @@ function renderTugas() {
                     <span class="text-xs font-semibold text-slate-400 flex-shrink-0">Bobot: ${t.bobot_nilai}</span>
                 </div>
                 <div class="mb-2">
-                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">${t.mata_kuliah}</p>
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">${t.mata_kuliah || '-'}</p>
                 </div>
-                <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">${t.judul_tugas}</h3>
-                <p class="text-sm text-slate-500 line-clamp-2 mb-3">${t.deskripsi_instruksi}</p>
+                <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">${t.judul_tugas || '-'}</h3>
+                <p class="text-sm text-slate-500 line-clamp-2 mb-3">${t.deskripsi_instruksi || 'Tidak ada deskripsi.'}</p>
                 <div class="text-xs flex items-center mb-2">
                     ${deadlineHTML}
                 </div>
@@ -298,52 +391,64 @@ function renderTugas() {
                 ${actionHTML}
             </div>
         `;
-        container.appendChild(card);
+
+        fragment.appendChild(card);
     });
+
+    // ✅ 1x append ke DOM
+    container.appendChild(fragment);
 }
 
 // ==========================================
 // UPDATE STATISTIK + ISI DROPDOWN MATKUL
 // ==========================================
 function updateStatistik(data) {
+    let totalPraktikum = 0;
+    let belumKumpul = 0;
+    const matkulSet = new Set();
+
+    data.forEach(t => {
+        const jenis = (t.jenis_tugas || 'Tugas').toLowerCase();
+        if (jenis === 'praktikum') totalPraktikum++;
+        if (!t.sudah_kumpul) belumKumpul++;
+        if (t.mata_kuliah) matkulSet.add(t.mata_kuliah);
+    });
+
     const totalTugas = data.length;
-    const totalPraktikum = data.filter(t => (t.jenis_tugas || 'Tugas').toLowerCase() === 'praktikum').length;
     const totalTugasBiasa = totalTugas - totalPraktikum;
-    const belumKumpul = data.filter(t => !t.sudah_kumpul).length;
-    
+
     // Update elemen statistik
     const elTotal = document.getElementById('statTotal');
     const elTugas = document.getElementById('statTugas');
     const elPraktikum = document.getElementById('statPraktikum');
     const elBelum = document.getElementById('statBelum');
-    
+
     if (elTotal) elTotal.innerText = totalTugas;
     if (elTugas) elTugas.innerText = totalTugasBiasa;
     if (elPraktikum) elPraktikum.innerText = totalPraktikum;
     if (elBelum) elBelum.innerText = belumKumpul;
-    
-    // Update badge di filter
+
+    // Update badge filter
     const filterTugasBadge = document.getElementById('filterTugasCount');
     const filterPraktikumBadge = document.getElementById('filterPraktikumCount');
-    
     if (filterTugasBadge) filterTugasBadge.innerText = totalTugasBiasa;
     if (filterPraktikumBadge) filterPraktikumBadge.innerText = totalPraktikum;
-    
-    // ✅ Isi dropdown mata kuliah unik
+
+    // Isi dropdown matkul
     const dropdown = document.getElementById('filterMatkul');
     if (dropdown) {
-        const uniqueMatkul = [...new Set(data.map(t => t.mata_kuliah))].sort();
+        const uniqueMatkul = Array.from(matkulSet).sort();
         const currentValue = dropdown.value;
-        
-        dropdown.innerHTML = '<option value="">Semua Mata Kuliah</option>' + 
+
+        dropdown.innerHTML = '<option value="">Semua Mata Kuliah</option>' +
             uniqueMatkul.map(m => `<option value="${m}">${m}</option>`).join('');
-        
+
         dropdown.value = currentValue;
     }
 }
 
 // ==========================================
-// FUNGSI UPLOAD TUGAS MAHASISWA
+// MODAL UPLOAD TUGAS
 // ==========================================
 function bukaModalUploadTugas(id_tugas, judul_tugas) {
     document.getElementById('upload_id_tugas').value = id_tugas;
@@ -356,7 +461,9 @@ function tutupModal(id) {
     document.getElementById(id).classList.add('hidden');
 }
 
-// Helper: Ubah file ke Base64
+// ==========================================
+// HELPER: FILE TO BASE64
+// ==========================================
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -367,13 +474,12 @@ function fileToBase64(file) {
 }
 
 // ==========================================
-// VALIDASI UKURAN FILE SAAT PILIH FILE
+// VALIDASI UKURAN FILE
 // ==========================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('upload_file');
-    
     if (fileInput) {
-        fileInput.addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file && file.size > 10 * 1024 * 1024) {
                 alert('File terlalu besar! Maksimal 10MB.');
@@ -386,16 +492,16 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==========================================
 // SUBMIT UPLOAD TUGAS
 // ==========================================
-document.getElementById('formUploadTugas').addEventListener('submit', async function(e) {
+document.getElementById('formUploadTugas').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const sessionData = localStorage.getItem('user') || localStorage.getItem('user_session');
     if (!sessionData) {
         alert('Sesi tidak valid. Silakan login ulang.');
         window.location.href = '../login.html';
         return;
     }
-    
+
     const user = JSON.parse(sessionData);
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
@@ -405,28 +511,27 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
     try {
         const fileInput = document.getElementById('upload_file');
         let base64File = null, fileName = null;
-        
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            
-            if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file terlalu besar! Maksimal 10MB.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                return;
-            }
-            
-            fileName = file.name;
-            base64File = await fileToBase64(file);
-        } else {
+
+        if (fileInput.files.length === 0) {
             alert('Silakan pilih file terlebih dahulu!');
             btn.innerHTML = originalText;
             btn.disabled = false;
             return;
         }
 
+        const file = fileInput.files[0];
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar! Maksimal 10MB.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+
+        fileName = file.name;
+        base64File = await fileToBase64(file);
+
         const idMahasiswa = user.id_mahasiswa || user.id_user;
-        
         if (!idMahasiswa) {
             alert('Data mahasiswa tidak ditemukan. Silakan login ulang.');
             btn.innerHTML = originalText;
@@ -434,45 +539,43 @@ document.getElementById('formUploadTugas').addEventListener('submit', async func
             return;
         }
 
-        const data = {
-            action: 'tambah_pengumpulan_tugas',
-            id_tugas: document.getElementById('upload_id_tugas').value,
+        const idTugas = document.getElementById('upload_id_tugas').value;
+
+        console.log('📤 Upload tugas:', idTugas, '| file:', fileName,
+                    '| size:', (file.size / 1024).toFixed(1) + 'KB');
+
+        // ⚠️ JANGAN pakai cache untuk upload
+        const result = await callAPI('tambah_pengumpulan_tugas', {
+            id_tugas: idTugas,
             id_mahasiswa: idMahasiswa,
             file_base64: base64File,
             file_nama: fileName
-        };
-        
-        console.log(">>> DATA YANG AKAN DIKIRIM:", JSON.stringify(data).substring(0, 200) + '...');
-
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify(data) 
+        }, {
+            logLabel: 'tambah_pengumpulan_tugas',
+            skipCache: true,           // ← WAJIB
+            timeout: 90000             // ← 90 detik untuk upload file
         });
-        
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const result = await res.json();
-        console.log(">>> Response upload:", result);
-        
+
+        console.log('📥 Upload response:', result.status);
+
         if (result.status === 'success') {
             alert('✅ ' + result.message);
             tutupModal('modalUploadTugas');
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
+
+            // ✅ Invalidate cache tugas karena sudah berubah
+            invalidateAPI('get_tugas');
+            invalidateAPI('get_dashboard_mahasiswa');
+
+            setTimeout(() => location.reload(), 1000);
         } else {
             alert('❌ Gagal: ' + result.message);
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
+
     } catch (error) {
-        console.error("Error upload:", error);
-        alert('❌ Terjadi kesalahan: ' + error.message);
+        console.error('Error upload:', error);
+        alert('❌ Gagal mengunggah:\n' + error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
