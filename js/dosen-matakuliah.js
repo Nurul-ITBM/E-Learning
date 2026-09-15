@@ -664,12 +664,22 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
     console.log('>>> Kirim tambah_pertemuan untuk kelas:', idKelas,
         '| materi:', fileName || 'tidak ada');
 
+    function _normalizeJamInput(v) {
+        if (!v) return '';
+        const s = String(v).trim().replace(',', '.').replace('.', ':');
+        const m = s.match(/^(\d{1,2}):(\d{2})/);
+        if (m) {
+            return String(m[1]).padStart(2, '0') + ':' + m[2];
+        }
+        return s.substring(0, 5);
+    }
+    
     try {
         const result = await callAPI('tambah_pertemuan', {
             id_kelas: idKelas,
             tanggal: document.getElementById('pt_tanggal').value,
-            jam_mulai: document.getElementById('pt_jam_mulai').value,
-            jam_selesai: document.getElementById('pt_jam_selesai').value,
+            jam_mulai: _normalizeJamInput(document.getElementById('pt_jam_mulai').value),
+            jam_selesai: _normalizeJamInput(document.getElementById('pt_jam_selesai').value),
             judul_materi: document.getElementById('pt_judul').value,
             ruang_atau_link: document.getElementById('pt_link').value,
             materi_base64: base64File,
