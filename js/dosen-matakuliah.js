@@ -1,5 +1,7 @@
-// js/dosen-matakuliah.js - Data Kelas Ampuan Dosen (Lengkap dengan CRUD)
-// ✅ Skeleton Loading + Konversi Semester + Error Handling
+// ==========================================
+// js/dosen-matakuliah.js
+// Version: 3.1 - API helper + robust error handling
+// ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
     const sessionData = localStorage.getItem('user_session');
@@ -14,11 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // 1. Set Judul Halaman di Header Komponen
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) pageTitle.innerText = 'Mata Kuliah Ampuan';
 
-    // 2. Panggil data mata kuliah
     if (user.id_dosen) {
         await loadKelasDosen(user.id_dosen);
     } else {
@@ -28,9 +28,82 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// LOGOUT (Event Delegation)
+// 🌐 API HELPER — TERPUSAT, AMAN
 // ==========================================
-document.addEventListener('click', function(e) {
+async function callAPI(action, payload, options) {
+    options = options || {};
+    const timeoutMs = options.timeoutMs || 60000;
+    const logLabel = options.logLabel || action;
+
+    // Log ringkas (SENSOR base64)
+    if (payload && (payload.materi_base64 || payload.lampiran_base64 || payload.file_base64)) {
+        console.log('📤 [' + logLabel + '] payload (base64 hidden)');
+    } else {
+        console.log('📤 [' + logLabel + '] payload:', payload);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const t0 = Date.now();
+
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(Object.assign({ action: action }, payload || {})),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        const elapsed = Date.now() - t0;
+
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status + ' (' + elapsed + 'ms)');
+        }
+
+        const text = await response.text();
+        const trimmed = text.trim();
+
+        if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+            console.error('❌ [' + logLabel + '] Server balas HTML:', trimmed.substring(0, 300));
+            throw new Error(
+                'Server mengembalikan HTML, bukan JSON. ' +
+                'Cek: (1) Deployment "Who has access" = Anyone, ' +
+                '(2) URL di config.js valid.'
+            );
+        }
+
+        let result;
+        try {
+            result = JSON.parse(trimmed);
+        } catch (parseErr) {
+            console.error('❌ [' + logLabel + '] Response bukan JSON:', trimmed.substring(0, 300));
+            throw new Error('Response bukan JSON: ' + trimmed.substring(0, 100));
+        }
+
+        console.log('📥 [' + logLabel + '] OK (' + elapsed + 'ms):', result.status);
+        return result;
+
+    } catch (err) {
+        clearTimeout(timeoutId);
+        const elapsed = Date.now() - t0;
+
+        if (err.name === 'AbortError') {
+            console.error('⏱️ [' + logLabel + '] TIMEOUT ' + timeoutMs + 'ms');
+            throw new Error('Timeout setelah ' + (timeoutMs / 1000) + ' detik.');
+        }
+
+        console.error('❌ [' + logLabel + '] GAGAL (' + elapsed + 'ms):', err.message);
+        throw err;
+    }
+}
+
+// ==========================================
+// LOGOUT
+// ==========================================
+document.addEventListener('click', function (e) {
     const logoutBtn = e.target.closest('#btnLogout');
     if (logoutBtn) {
         localStorage.removeItem('user_session');
@@ -39,12 +112,11 @@ document.addEventListener('click', function(e) {
 });
 
 // ==========================================
-// 1. LOAD KELAS DOSEN (DENGAN SKELETON LOADING)
+// 1. LOAD KELAS DOSEN
 // ==========================================
 async function loadKelasDosen(id_dosen) {
     const container = document.getElementById('containerMatkulDosen');
-    
-    // ✅ Skeleton loading (4 kartu)
+
     container.innerHTML = Array(4).fill(`
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-pulse">
             <div class="flex justify-between items-start mb-3">
@@ -62,25 +134,13 @@ async function loadKelasDosen(id_dosen) {
     `).join('');
 
     try {
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_matakuliah_ampuan',
-                id_dosen: id_dosen 
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP Error ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("DATA DARI SERVER:", result);
+        const result = await callAPI('get_matakuliah_ampuan',
+            { id_dosen: id_dosen },
+            { logLabel: 'get_matakuliah_ampuan', timeoutMs: 30000 });
 
         if (result.status === 'success') {
-            container.innerHTML = ''; 
-            
+            container.innerHTML = '';
+
             if (!result.data || result.data.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg text-center">
@@ -92,11 +152,10 @@ async function loadKelasDosen(id_dosen) {
                 return;
             }
 
-            // Render kartu untuk setiap kelas
             result.data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:border-teal-200 hover:shadow-md transition-all flex flex-col justify-between";
-                
+
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
@@ -141,15 +200,11 @@ async function loadKelasDosen(id_dosen) {
             `;
         }
     } catch (error) {
-        console.error("ERROR FETCH:", error);
+        console.error("ERROR loadKelasDosen:", error);
         container.innerHTML = `
             <div class="col-span-full bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-center">
                 <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-                Gagal memuat data. Kemungkinan:<br>
-                1. URL API di js/config.js salah.<br>
-                2. Apps Script belum di-deploy ulang.<br>
-                3. Backend crash (Cek Logs Apps Script).<br>
-                <span class="text-xs block mt-1">Detail: ${error.message}</span>
+                Gagal memuat data: ${error.message}
                 <button onclick="loadKelasDosen('${id_dosen}')" 
                     class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
                     <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
@@ -185,8 +240,7 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
     const container = document.getElementById('modalContainerPertemuan');
 
     judul.innerText = nama_matkul;
-    
-    // Skeleton loading untuk detail
+
     container.innerHTML = `
         <div class="animate-pulse space-y-3">
             <div class="h-10 bg-slate-200 rounded"></div>
@@ -198,15 +252,9 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
     modal.classList.remove('hidden');
 
     try {
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_jadwal_pertemuan',
-                id_kelas: id_kelas 
-            })
-        });
-        const result = await response.json();
+        const result = await callAPI('get_jadwal_pertemuan',
+            { id_kelas: id_kelas },
+            { logLabel: 'get_jadwal_pertemuan', timeoutMs: 30000 });
 
         if (result.status === 'success' && result.data.length > 0) {
             let html = `
@@ -217,14 +265,13 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                     </button>
                 </div>
             `;
-            
-            // Loop data pertemuan
+
             result.data.forEach(pert => {
                 const isOnline = pert.ruang_atau_link && pert.ruang_atau_link.toLowerCase().includes('http');
-                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== '' 
-                    ? pert.judul_materi 
+                const judulMateri = pert.judul_materi && pert.judul_materi.toString().trim() !== ''
+                    ? pert.judul_materi
                     : 'Judul Materi';
-                
+
                 let jamTampil = '';
                 if (pert.jam_mulai && pert.jam_selesai) {
                     const jamMulai = formatJam(pert.jam_mulai);
@@ -244,10 +291,10 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                         </div>
                         
                         <div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
-                            ${isOnline 
-                                ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>` 
-                                : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`
-                            }
+                            ${isOnline
+                        ? `<a href="${pert.ruang_atau_link}" target="_blank" class="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold text-center"><i class="fa-solid fa-video mr-2"></i> Masuk Zoom</a>`
+                        : `<span class="w-full md:w-auto text-slate-500 text-sm bg-slate-100 px-4 py-2 rounded-lg text-center border border-slate-200"><i class="fa-solid fa-building mr-2"></i> Offline</span>`
+                    }
                             
                             <div class="flex gap-2 w-full md:w-auto">
                                 ${pert.link_materi ? `
@@ -270,10 +317,9 @@ async function bukaModalDetail(id_kelas, nama_matkul) {
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
         } else {
-            // Empty state
             container.innerHTML = `
                 <div class="flex justify-end mb-4">
                     <button onclick="bukaModalTambahPertemuan('${id_kelas}')" 
@@ -314,7 +360,6 @@ async function bukaModalTambahMatkul() {
     const container = document.getElementById('mahasiswaContainer');
     const searchInput = document.getElementById('searchMahasiswa');
 
-    // Reset pencarian saat modal dibuka
     if (searchInput) {
         searchInput.value = '';
         searchInput.style.display = 'block';
@@ -329,19 +374,8 @@ async function bukaModalTambahMatkul() {
     `;
 
     try {
-        console.log(">>> Mengambil data mahasiswa dari server...");
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_list_mahasiswa' })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log(">>> Response dari Backend:", result);
+        const result = await callAPI('get_list_mahasiswa', {},
+            { logLabel: 'get_list_mahasiswa', timeoutMs: 30000 });
 
         if (result.status === 'success') {
             if (result.data && Array.isArray(result.data) && result.data.length > 0) {
@@ -359,20 +393,16 @@ async function bukaModalTambahMatkul() {
                 });
                 container.innerHTML = html;
 
-                // Fitur Search
                 if (searchInput) {
-                    searchInput.oninput = function() {
+                    searchInput.oninput = function () {
                         const keyword = this.value.toLowerCase().trim();
                         const items = container.querySelectorAll('.search-item');
-                        
                         if (keyword === '') {
                             items.forEach(el => el.style.display = 'flex');
                             return;
                         }
-
                         items.forEach(item => {
-                            const textContent = item.textContent.toLowerCase();
-                            item.style.display = textContent.includes(keyword) ? 'flex' : 'none';
+                            item.style.display = item.textContent.toLowerCase().includes(keyword) ? 'flex' : 'none';
                         });
                     };
                 }
@@ -385,10 +415,10 @@ async function bukaModalTambahMatkul() {
             if (searchInput) searchInput.style.display = 'none';
         }
     } catch (error) {
-        console.error("ERROR di bukaModalTambahMatkul:", error);
+        console.error("ERROR bukaModalTambahMatkul:", error);
         container.innerHTML = `
             <p class="text-center text-sm text-red-500 py-4">
-                Gagal memuat mahasiswa. <br>
+                Gagal memuat mahasiswa.<br>
                 <span class="text-xs block mt-1">${error.message}</span>
             </p>
         `;
@@ -409,14 +439,14 @@ function tutupModal(id) {
 }
 
 // ==========================================
-// 6. MODAL EDIT MATKUL (DENGAN KONVERSI SEMESTER LAMA)
+// 6. MODAL EDIT MATKUL
 // ==========================================
 async function bukaModalEditMatkul(id_kelas) {
     console.log(">>> Tombol Edit diklik! ID Kelas:", id_kelas);
 
     const modal = document.getElementById('modalEditMatkul');
     const container = document.getElementById('editMahasiswaContainer');
-    
+
     if (!modal) {
         alert("Error: Modal Edit tidak ditemukan di HTML!");
         return;
@@ -432,60 +462,39 @@ async function bukaModalEditMatkul(id_kelas) {
     `;
 
     try {
-        const response = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_detail_kelas', id_kelas: id_kelas })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Gagal connect ke server (HTTP ${response.status})`);
-        }
-
-        const result = await response.json();
-        console.log(">>> Data detail kelas dari backend:", result);
+        const result = await callAPI('get_detail_kelas',
+            { id_kelas: id_kelas },
+            { logLabel: 'get_detail_kelas', timeoutMs: 30000 });
 
         if (result.status === 'success') {
             const data = result.data;
-            
-            // Isi form input
+
             document.getElementById('edit_id_kelas').value = id_kelas;
             document.getElementById('edit_id_matkul').value = data.kelas.id_matkul;
             document.getElementById('edit_mk_kode').value = data.matkul.kode_mk;
             document.getElementById('edit_mk_nama').value = data.matkul.nama_mk;
             document.getElementById('edit_mk_sks').value = data.matkul.sks;
-            
-            // ==========================================
-            // ✅ KONVERSI SEMESTER LAMA (angka → Ganjil/Genap)
-            // ==========================================
+
             const semesterRaw = String(data.matkul.semester || '').trim();
             const semesterDropdown = document.getElementById('edit_mk_semester');
-            
+
             if (semesterRaw === 'Ganjil' || semesterRaw === 'Genap') {
-                // Sudah format baru
                 semesterDropdown.value = semesterRaw;
             } else if (semesterRaw && !isNaN(semesterRaw)) {
-                // Data lama (angka) → konversi otomatis
                 const semesterNum = parseInt(semesterRaw);
                 semesterDropdown.value = (semesterNum % 2 === 1) ? 'Ganjil' : 'Genap';
-                console.log('⚠️ Semester lama terdeteksi:', semesterRaw, '→', semesterDropdown.value);
             } else {
                 semesterDropdown.value = '';
             }
 
-            // Load semua mahasiswa dan centang yang sudah terdaftar
-            const resMhs = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'get_list_mahasiswa' })
-            });
-            const listMhs = await resMhs.json();
+            // Load list mahasiswa
+            const listMhs = await callAPI('get_list_mahasiswa', {},
+                { logLabel: 'get_list_mahasiswa_edit', timeoutMs: 30000 });
 
             if (listMhs.status === 'success' && listMhs.data.length > 0) {
                 let html = '';
                 listMhs.data.forEach(mhs => {
                     const isChecked = data.mahasiswa_terdaftar.includes(mhs.id_mahasiswa) ? 'checked' : '';
-                    
                     html += `
                         <label class="flex items-center space-x-3 p-2 hover:bg-white rounded-lg cursor-pointer transition border border-transparent hover:border-slate-200 search-item-edit">
                             <input type="checkbox" value="${mhs.id_mahasiswa}" class="h-4 w-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500" ${isChecked}>
@@ -498,10 +507,9 @@ async function bukaModalEditMatkul(id_kelas) {
                 });
                 container.innerHTML = html;
 
-                // Fungsi Search untuk Modal Edit
                 const searchInput = document.getElementById('edit_searchMahasiswa');
                 if (searchInput) {
-                    searchInput.oninput = function() {
+                    searchInput.oninput = function () {
                         const keyword = this.value.toLowerCase().trim();
                         const items = container.querySelectorAll('.search-item-edit');
                         if (keyword === '') {
@@ -520,10 +528,10 @@ async function bukaModalEditMatkul(id_kelas) {
             container.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error: ${result.message || 'Terjadi kesalahan'}</p>`;
         }
     } catch (error) {
-        console.error("ERROR di bukaModalEditMatkul:", error);
+        console.error("ERROR bukaModalEditMatkul:", error);
         container.innerHTML = `
             <p class="text-center text-sm text-red-500 py-4">
-                Gagal memuat data edit. <br>
+                Gagal memuat data edit.<br>
                 <span class="text-xs block mt-1">${error.message}</span>
             </p>
         `;
@@ -533,12 +541,11 @@ async function bukaModalEditMatkul(id_kelas) {
 // ==========================================
 // 7. SUBMIT: SIMPAN PERUBAHAN EDIT MATKUL
 // ==========================================
-document.getElementById('formEditMatkul').addEventListener('submit', async function(e) {
+document.getElementById('formEditMatkul').addEventListener('submit', async function (e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
-    
-    // Ambil data mahasiswa terpilih
+
     const checkedBoxes = document.querySelectorAll('#editMahasiswaContainer input[type="checkbox"]:checked');
     const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -547,29 +554,21 @@ document.getElementById('formEditMatkul').addEventListener('submit', async funct
         return;
     }
 
-    // Loading state
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
     btn.disabled = true;
 
-    const data = {
-        action: 'update_matakuliah',
-        id_kelas: document.getElementById('edit_id_kelas').value,
-        id_matkul: document.getElementById('edit_id_matkul').value,
-        kode_mk: document.getElementById('edit_mk_kode').value,
-        nama_mk: document.getElementById('edit_mk_nama').value,
-        sks: document.getElementById('edit_mk_sks').value,
-        semester: document.getElementById('edit_mk_semester').value,
-        mahasiswa_terpilih: mahasiswaTerpilih
-    };
-
     try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(data) 
-        });
-        const result = await res.json();
-        if(result.status === 'success') {
+        const result = await callAPI('update_matakuliah', {
+            id_kelas: document.getElementById('edit_id_kelas').value,
+            id_matkul: document.getElementById('edit_id_matkul').value,
+            kode_mk: document.getElementById('edit_mk_kode').value,
+            nama_mk: document.getElementById('edit_mk_nama').value,
+            sks: document.getElementById('edit_mk_sks').value,
+            semester: document.getElementById('edit_mk_semester').value,
+            mahasiswa_terpilih: mahasiswaTerpilih
+        }, { logLabel: 'update_matakuliah' });
+
+        if (result.status === 'success') {
             alert(result.message);
             tutupModal('modalEditMatkul');
             location.reload();
@@ -580,7 +579,7 @@ document.getElementById('formEditMatkul').addEventListener('submit', async funct
         }
     } catch (error) {
         console.error(error);
-        alert('Kesalahan jaringan.');
+        alert('Gagal menyimpan:\n' + error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -589,14 +588,13 @@ document.getElementById('formEditMatkul').addEventListener('submit', async funct
 // ==========================================
 // 8. SUBMIT: SIMPAN MATKUL BARU
 // ==========================================
-document.getElementById('formTambahMatkul').addEventListener('submit', async function(e) {
+document.getElementById('formTambahMatkul').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
     const session = JSON.parse(localStorage.getItem('user_session'));
-    
-    // Ambil data mahasiswa yang dicentang
+
     const checkedBoxes = document.querySelectorAll('#mahasiswaContainer input[type="checkbox"]:checked');
     const mahasiswaTerpilih = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -605,31 +603,22 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
         return;
     }
 
-    // Loading state
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Data...';
     btn.disabled = true;
 
-    const data = {
-        action: 'tambah_matakuliah',
-        kode_mk: document.getElementById('mk_kode').value,
-        nama_mk: document.getElementById('mk_nama').value,
-        sks: document.getElementById('mk_sks').value,
-        semester: document.getElementById('mk_semester').value,
-        id_dosen: session.id_dosen,
-        mahasiswa_terpilih: mahasiswaTerpilih
-    };
-    
     try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(data) 
-        });
-        const result = await res.json();
-        
-        if(result.status === 'success') {
+        const result = await callAPI('tambah_matakuliah', {
+            kode_mk: document.getElementById('mk_kode').value,
+            nama_mk: document.getElementById('mk_nama').value,
+            sks: document.getElementById('mk_sks').value,
+            semester: document.getElementById('mk_semester').value,
+            id_dosen: session.id_dosen,
+            mahasiswa_terpilih: mahasiswaTerpilih
+        }, { logLabel: 'tambah_matakuliah' });
+
+        if (result.status === 'success') {
             alert(result.message);
-            location.reload(); 
+            location.reload();
         } else {
             alert('Gagal: ' + result.message);
             btn.innerHTML = originalText;
@@ -637,7 +626,7 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
         }
     } catch (error) {
         console.error("Error simpan matkul:", error);
-        alert('Terjadi kesalahan jaringan.');
+        alert('Gagal menyimpan:\n' + error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -646,9 +635,9 @@ document.getElementById('formTambahMatkul').addEventListener('submit', async fun
 // ==========================================
 // 9. SUBMIT: SIMPAN PERTEMUAN BARU
 // ==========================================
-document.getElementById('formTambahPertemuan').addEventListener('submit', async function(e) {
+document.getElementById('formTambahPertemuan').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
     const idKelas = this.dataset.idKelas;
@@ -656,44 +645,38 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan Pertemuan...';
     btn.disabled = true;
 
-    // Ambil file yang diupload
     const fileInput = document.getElementById('pt_file_materi');
     let base64File = null, fileName = null;
+
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         if (file.size > 10 * 1024 * 1024) {
             alert('Ukuran file terlalu besar! Maksimal 10MB.');
-            btn.innerHTML = originalText; 
-            btn.disabled = false; 
+            btn.innerHTML = originalText;
+            btn.disabled = false;
             return;
         }
         fileName = file.name.replace(/\s+/g, '_');
         base64File = await fileToBase64(file);
     }
 
-    const data = {
-        action: 'tambah_pertemuan',
-        id_kelas: idKelas,
-        tanggal: document.getElementById('pt_tanggal').value,
-        jam_mulai: document.getElementById('pt_jam_mulai').value,
-        jam_selesai: document.getElementById('pt_jam_selesai').value,
-        judul_materi: document.getElementById('pt_judul').value,
-        ruang_atau_link: document.getElementById('pt_link').value,
-        materi_base64: base64File,
-        materi_nama_file: fileName
-    };
-    
-    console.log(">>> Data yang dikirim:", data);
+    // ⚠️ JANGAN log data mentah (base64 besar)
+    console.log('>>> Kirim tambah_pertemuan untuk kelas:', idKelas,
+        '| materi:', fileName || 'tidak ada');
 
     try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(data) 
-        });
-        const result = await res.json();
-        
-        if(result.status === 'success') {
+        const result = await callAPI('tambah_pertemuan', {
+            id_kelas: idKelas,
+            tanggal: document.getElementById('pt_tanggal').value,
+            jam_mulai: document.getElementById('pt_jam_mulai').value,
+            jam_selesai: document.getElementById('pt_jam_selesai').value,
+            judul_materi: document.getElementById('pt_judul').value,
+            ruang_atau_link: document.getElementById('pt_link').value,
+            materi_base64: base64File,
+            materi_nama_file: fileName
+        }, { logLabel: 'tambah_pertemuan', timeoutMs: 90000 }); // 90s kalau ada upload
+
+        if (result.status === 'success') {
             alert('Pertemuan berhasil ditambahkan!');
             tutupModal('modalTambahPertemuan');
             location.reload();
@@ -704,7 +687,7 @@ document.getElementById('formTambahPertemuan').addEventListener('submit', async 
         }
     } catch (error) {
         console.error("Error simpan pertemuan:", error);
-        alert('Terjadi kesalahan jaringan.');
+        alert('Gagal menyimpan pertemuan:\n' + error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -718,15 +701,12 @@ async function bukaModalEditPertemuan(id_pertemuan) {
     modal.classList.remove('hidden');
 
     try {
-        const res = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_detail_pertemuan', id_pertemuan: id_pertemuan })
-        });
-        const result = await res.json();
-        if(result.status === 'success') {
+        const result = await callAPI('get_detail_pertemuan',
+            { id_pertemuan: id_pertemuan },
+            { logLabel: 'get_detail_pertemuan', timeoutMs: 30000 });
+
+        if (result.status === 'success') {
             const p = result.data;
-            // Isi form dengan data yang ada
             document.getElementById('edit_pt_id_pertemuan').value = p.id_pertemuan;
             document.getElementById('edit_pt_tanggal').value = p.tanggal;
             document.getElementById('edit_pt_jam_mulai').value = p.jam_mulai;
@@ -734,10 +714,9 @@ async function bukaModalEditPertemuan(id_pertemuan) {
             document.getElementById('edit_pt_judul').value = p.judul_materi;
             document.getElementById('edit_pt_link').value = p.ruang_atau_link;
 
-            // Tampilkan file materi yang sudah ada
             const linkMateriWrapper = document.getElementById('edit_existing_materi_wrapper');
             const linkMateriAnchor = document.getElementById('edit_existing_materi_link');
-            
+
             linkMateriWrapper.classList.add('hidden');
             linkMateriAnchor.href = '#';
 
@@ -751,39 +730,32 @@ async function bukaModalEditPertemuan(id_pertemuan) {
         }
     } catch (error) {
         console.error(error);
-        alert('Koneksi error');
+        alert('Gagal memuat: ' + error.message);
     }
 }
 
 // ==========================================
 // 11. SUBMIT: UPDATE PERTEMUAN
 // ==========================================
-document.getElementById('formEditPertemuan').addEventListener('submit', async function(e) {
+document.getElementById('formEditPertemuan').addEventListener('submit', async function (e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Menyimpan...';
     btn.disabled = true;
 
-    const data = {
-        action: 'update_pertemuan',
-        id_pertemuan: document.getElementById('edit_pt_id_pertemuan').value,
-        tanggal: document.getElementById('edit_pt_tanggal').value,
-        jam_mulai: document.getElementById('edit_pt_jam_mulai').value,
-        jam_selesai: document.getElementById('edit_pt_jam_selesai').value,
-        judul_materi: document.getElementById('edit_pt_judul').value,
-        ruang_atau_link: document.getElementById('edit_pt_link').value,
-        jenis_kuliah: 'Online'
-    };
-
     try {
-        const res = await fetch(CONFIG.API_URL, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(data) 
-        });
-        const result = await res.json();
-        if(result.status === 'success') {
+        const result = await callAPI('update_pertemuan', {
+            id_pertemuan: document.getElementById('edit_pt_id_pertemuan').value,
+            tanggal: document.getElementById('edit_pt_tanggal').value,
+            jam_mulai: document.getElementById('edit_pt_jam_mulai').value,
+            jam_selesai: document.getElementById('edit_pt_jam_selesai').value,
+            judul_materi: document.getElementById('edit_pt_judul').value,
+            ruang_atau_link: document.getElementById('edit_pt_link').value,
+            jenis_kuliah: 'Online'
+        }, { logLabel: 'update_pertemuan' });
+
+        if (result.status === 'success') {
             alert(result.message);
             tutupModal('modalEditPertemuan');
             location.reload();
@@ -794,7 +766,7 @@ document.getElementById('formEditPertemuan').addEventListener('submit', async fu
         }
     } catch (error) {
         console.error(error);
-        alert('Kesalahan jaringan.');
+        alert('Gagal menyimpan:\n' + error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -804,16 +776,14 @@ document.getElementById('formEditPertemuan').addEventListener('submit', async fu
 // 12. HAPUS PERTEMUAN
 // ==========================================
 async function hapusPertemuan(id_pertemuan) {
-    if(!confirm('Apakah Anda yakin ingin menghapus pertemuan ini?')) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus pertemuan ini?')) return;
 
     try {
-        const res = await fetch(CONFIG.API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'delete_pertemuan', id_pertemuan: id_pertemuan })
-        });
-        const result = await res.json();
-        if(result.status === 'success') {
+        const result = await callAPI('delete_pertemuan',
+            { id_pertemuan: id_pertemuan },
+            { logLabel: 'delete_pertemuan', timeoutMs: 30000 });
+
+        if (result.status === 'success') {
             alert(result.message);
             location.reload();
         } else {
@@ -821,7 +791,7 @@ async function hapusPertemuan(id_pertemuan) {
         }
     } catch (error) {
         console.error(error);
-        alert('Kesalahan jaringan.');
+        alert('Gagal menghapus:\n' + error.message);
     }
 }
 
@@ -833,7 +803,7 @@ function fileToBase64(file) {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
-            console.log(">>> fileToBase64 sukses, hasil:", reader.result.substring(0, 50) + "...");
+            console.log(">>> fileToBase64 sukses:", reader.result.substring(0, 50) + "...");
             resolve(reader.result);
         };
         reader.onerror = error => {
