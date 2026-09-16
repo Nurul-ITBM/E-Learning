@@ -265,12 +265,12 @@ function renderJadwalHariIni(jadwal, hariIni) {
 }
 
 // ==========================================
-// RENDER TUGAS MENDATANG
+// RENDER TUGAS MENDATANG (FIXED)
 // ==========================================
 function renderTugasMendatang(tugas) {
     const container = document.getElementById('tugasMendatang');
     if (!container) return;
-    
+
     if (!tugas || tugas.length === 0) {
         container.innerHTML = `
             <div class="text-center py-8 text-slate-400">
@@ -281,29 +281,40 @@ function renderTugasMendatang(tugas) {
         `;
         return;
     }
-    
+
     let html = '';
     tugas.forEach(item => {
+        // ✅ Pakai tenggat_waktu_fmt (string dari backend)
+        const rawDeadline = item.tenggat_waktu_fmt || item.tenggat_waktu || '';
+        const deadline = parseTanggalIndonesia(rawDeadline);
+
         let deadlineBadge = '';
-        try {
-            const deadline = new Date(String(item.tenggat_waktu).replace(' ', 'T') + '+08:00');
+        let deadlineText = '-';
+
+        if (deadline) {
             const sekarang = new Date();
             const diffMs = deadline - sekarang;
             const diffHari = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            
+
             if (diffHari < 0) {
-                deadlineBadge = `<span class="bg-red-50 text-red-600 border border-red-100 text-[10px] font-bold px-2 py-0.5 rounded-md"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> TERLAMBAT</span>`;
+                deadlineBadge = `<span class="bg-red-50 text-red-600 border border-red-100 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-triangle-exclamation mr-0.5"></i> TERLAMBAT</span>`;
             } else if (diffHari === 0) {
-                deadlineBadge = `<span class="bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-bold px-2 py-0.5 rounded-md animate-pulse"><i class="fa-solid fa-bell mr-0.5"></i> HARI INI</span>`;
+                deadlineBadge = `<span class="bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-bold px-2 py-0.5 rounded-md animate-pulse whitespace-nowrap"><i class="fa-solid fa-bell mr-0.5"></i> HARI INI</span>`;
             } else if (diffHari <= 3) {
-                deadlineBadge = `<span class="bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-bold px-2 py-0.5 rounded-md"><i class="fa-regular fa-clock mr-0.5"></i> ${diffHari} hari lagi</span>`;
+                deadlineBadge = `<span class="bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap"><i class="fa-regular fa-clock mr-0.5"></i> ${diffHari} hari lagi</span>`;
             } else {
-                deadlineBadge = `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">${diffHari} hari lagi</span>`;
+                deadlineBadge = `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap">${diffHari} hari lagi</span>`;
             }
-        } catch (e) {
-            deadlineBadge = '';
+
+            // Format tampilan ringkas: 19 Agu, 13:36
+            const opt = {
+                day: 'numeric', month: 'short',
+                hour: '2-digit', minute: '2-digit',
+                timeZone: 'Asia/Makassar', hour12: false
+            };
+            deadlineText = deadline.toLocaleString('id-ID', opt).replace('.', ':');
         }
-        
+
         html += `
             <div class="bg-slate-50 border border-slate-100 rounded-lg p-3 hover:bg-purple-50/30 transition">
                 <div class="flex justify-between items-start mb-2 gap-2">
@@ -316,7 +327,7 @@ function renderTugasMendatang(tugas) {
                 <div class="flex items-center justify-between text-xs">
                     <span class="text-slate-500">
                         <i class="fa-regular fa-clock mr-1"></i>
-                        ${formatTanggalShort(item.tenggat_waktu)}
+                        ${deadlineText}
                     </span>
                     <a href="tugas.html" class="text-purple-600 font-bold hover:underline">
                         Kerjakan <i class="fa-solid fa-arrow-right ml-0.5"></i>
@@ -325,7 +336,7 @@ function renderTugasMendatang(tugas) {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
@@ -420,6 +431,40 @@ function renderNilaiTerkini(nilai) {
     });
     
     container.innerHTML = html;
+}
+
+// ==========================================
+// HELPER: PARSE TANGGAL INDONESIA (DD/MM/YYYY HH:mm)
+// ==========================================
+function parseTanggalIndonesia(str) {
+    if (!str) return null;
+    try {
+        const s = String(str).trim();
+
+        // ISO: 2026-08-19T13:36
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+            const d = new Date(s.replace(' ', 'T'));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // DD/MM/YYYY HH:mm
+        const parts = s.split(/[\sT]+/);
+        const tgl = (parts[0] || '').split('/');
+        const jam = (parts[1] || '00:00').split(':');
+        if (tgl.length !== 3) return null;
+
+        const day   = parseInt(tgl[0], 10);
+        const month = parseInt(tgl[1], 10) - 1;
+        const year  = parseInt(tgl[2], 10);
+        const hour  = parseInt(jam[0] || '0', 10);
+        const min   = parseInt(jam[1] || '0', 10);
+
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+        const d = new Date(year, month, day, hour, min);
+        return isNaN(d.getTime()) ? null : d;
+    } catch (e) {
+        return null;
+    }
 }
 
 // ==========================================
