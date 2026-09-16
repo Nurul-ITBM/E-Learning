@@ -239,21 +239,27 @@ function renderNotifikasi() {
 // STYLE PER TIPE
 // ==========================================
 function getNotifStyle(tipe) {
-    switch(tipe) {
+    switch (tipe) {
         case 'tugas':
-        case 'pengumpulan':
             return { icon: 'fa-file-pen', bg: 'bg-teal-100', color: 'text-teal-600' };
+        case 'pengumpulan':
+            return { icon: 'fa-cloud-arrow-up', bg: 'bg-teal-100', color: 'text-teal-600' };
         case 'nilai':
             return { icon: 'fa-star', bg: 'bg-amber-100', color: 'text-amber-600' };
         case 'ujian':
             return { icon: 'fa-pen-to-square', bg: 'bg-purple-100', color: 'text-purple-600' };
+        case 'ujian_selesai':
+            return { icon: 'fa-circle-check', bg: 'bg-emerald-100', color: 'text-emerald-600' };
         case 'absensi':
             return { icon: 'fa-clipboard-check', bg: 'bg-blue-100', color: 'text-blue-600' };
+        case 'pertemuan':
+            return { icon: 'fa-calendar-day', bg: 'bg-indigo-100', color: 'text-indigo-600' };
+        case 'matkul':
+            return { icon: 'fa-book-open', bg: 'bg-rose-100', color: 'text-rose-600' };
         default:
             return { icon: 'fa-bell', bg: 'bg-slate-100', color: 'text-slate-600' };
     }
 }
-
 // ==========================================
 // HANDLE KLIK NOTIFIKASI
 // ==========================================
