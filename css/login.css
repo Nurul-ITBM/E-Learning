@@ -257,3 +257,32 @@ body.login-page {
         transition: none !important;
     }
 }
+
+/* ==========================================
+   LOGIN CARD - GLASSMORPHISM (Diperbaiki)
+   ========================================== */
+.login-card {
+    position: relative;
+    z-index: 10;
+    
+    /* ✅ INI YANG MEMBUAT KARTU PUTIH TRANSPARAN */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    
+    /* ✅ BORDER & BAYANGAN */
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 
+        0 25px 50px -12px rgba(79, 70, 229, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    
+    width: 100%;
+    max-width: 28rem; /* max-w-md */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+    box-shadow: 
+        0 30px 60px -12px rgba(79, 70, 229, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
