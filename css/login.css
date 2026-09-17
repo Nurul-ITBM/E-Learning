@@ -286,3 +286,95 @@ body.login-page {
         0 30px 60px -12px rgba(79, 70, 229, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 }
+
+/* ==========================================
+   TOMBOL LOGIN - GRADIENT (DIPERKUAT)
+   ========================================== */
+.btn-login-gradient {
+    /* ✅ BACKGROUND GRADIENT */
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%) !important;
+    background-size: 200% 200% !important;
+    color: #ffffff !important;
+    border: none !important;
+    
+    /* ✅ UKURAN & BENTUK */
+    padding: 0.9rem 1.5rem !important;
+    border-radius: 0.75rem !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.01em;
+    
+    /* ✅ BAYANGAN BERWARNA (MENONJOL) */
+    box-shadow: 
+        0 8px 20px -4px rgba(99, 102, 241, 0.55),
+        0 4px 8px -2px rgba(139, 92, 246, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    
+    /* ✅ TRANSISI */
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Efek kilau berjalan */
+.btn-login-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        100deg,
+        transparent,
+        rgba(255, 255, 255, 0.35),
+        transparent
+    );
+    transform: skewX(-20deg);
+    animation: btn-login-sheen 3.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes btn-login-sheen {
+    0%, 60% { left: -100%; }
+    100%    { left: 150%; }
+}
+
+/* HOVER: Lebih terang & terangkat */
+.btn-login-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%) !important;
+    background-position: 100% 50% !important;
+    transform: translateY(-3px) scale(1.01) !important;
+    box-shadow: 
+        0 14px 32px -6px rgba(99, 102, 241, 0.65),
+        0 8px 16px -4px rgba(139, 92, 246, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ACTIVE: Kembali turun saat diklik */
+.btn-login-gradient:active {
+    transform: translateY(-1px) scale(0.99) !important;
+    box-shadow: 
+        0 6px 16px -4px rgba(99, 102, 241, 0.5),
+        0 3px 6px -2px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* DISABLED */
+.btn-login-gradient:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* ✅ Icon arrow sedikit bergerak saat hover */
+.btn-login-gradient:hover .fa-arrow-right {
+    transform: translateX(4px);
+    transition: transform 0.3s ease;
+}
+
+.btn-login-gradient .fa-arrow-right {
+    transition: transform 0.3s ease;
+}
