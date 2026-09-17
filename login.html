@@ -15,6 +15,9 @@
     <!-- ✅ CSS Animasi (Seamless dengan index.html) -->
     <link rel="stylesheet" href="css/animasi.css">
     
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <!-- Library Kriptografi untuk Hash Password -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
@@ -34,7 +37,7 @@
         <span class="label">Kembali ke Beranda</span>
     </a>
 
-    <!-- Card Login (Tambahkan class 'reveal' untuk animasi masuk) -->
+    <!-- Card Login -->
     <div class="login-card p-10 rounded-2xl w-full max-w-md reveal is-visible">
         
         <div class="flex flex-col items-center mb-8">
@@ -46,6 +49,7 @@
         </div>
 
         <form id="loginForm">
+            <!-- ================= USERNAME / EMAIL ================= -->
             <div class="mb-5">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Username / Email</label>
                 <div class="relative">
@@ -53,11 +57,13 @@
                         <i class="fa-regular fa-user text-gray-400"></i>
                     </div>
                     <input type="text" id="username" placeholder="Masukkan email" 
+                        autocomplete="username"
                         class="input-glass w-full pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                 </div>
             </div>
             
-            <div class="mb-6">
+            <!-- ================= PASSWORD ================= -->
+            <div class="mb-5">
                 <div class="flex justify-between mb-2">
                     <label class="block text-sm font-semibold text-gray-700">Password</label>
                     <a href="javascript:void(0)" onclick="bukaPopupLupaPassword()" 
@@ -68,6 +74,7 @@
                         <i class="fa-solid fa-lock text-gray-400"></i>
                     </div>
                     <input type="password" id="password" placeholder="••••••••" 
+                        autocomplete="current-password"
                         class="input-glass w-full pl-10 pr-10 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" required>
                     <button type="button" onclick="togglePassword()" 
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 p-1">
@@ -76,8 +83,49 @@
                 </div>
             </div>
 
+            <!-- ================= CAPTCHA SECTION ================= -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Verifikasi Keamanan
+                </label>
+                
+                <div class="captcha-box rounded-lg p-3 flex items-center gap-3">
+                    <!-- Canvas CAPTCHA -->
+                    <div class="captcha-canvas-wrap relative flex-shrink-0">
+                        <canvas id="captchaCanvas" width="160" height="55"></canvas>
+                        <div class="captcha-noise" aria-hidden="true"></div>
+                    </div>
+
+                    <!-- Tombol Refresh -->
+                    <button type="button" onclick="refreshCaptcha()" 
+                            class="captcha-refresh" 
+                            title="Ganti kode" 
+                            aria-label="Ganti kode captcha">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+
+                    <!-- Input Jawaban -->
+                    <div class="flex-1">
+                        <input type="text" id="captchaInput" 
+                            placeholder="Ketik kode" 
+                            maxlength="6"
+                            autocomplete="off"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false"
+                            class="input-glass w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-sm">
+                    </div>
+                </div>
+
+                <p id="captchaError" class="captcha-error hidden text-xs text-red-600 mt-1.5">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i>
+                    <span>Kode verifikasi salah. Coba lagi.</span>
+                </p>
+            </div>
+
+            <!-- ================= TOMBOL LOGIN ================= -->
             <button type="submit" id="loginBtn" 
-                class="btn-login-gradient w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer ripple">
+                class="btn-login-gradient ripple w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
                 <span>Masuk ke Dashboard</span>
                 <i class="fa-solid fa-arrow-right text-sm"></i>
             </button>
@@ -97,7 +145,7 @@
     <div id="modalLupaPassword" 
          class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] hidden items-center justify-center p-4">
         
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden reveal is-visible">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             
             <!-- Header -->
             <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-5 text-white">
@@ -181,10 +229,12 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- ========================================== -->
+    <!-- SCRIPTS                                    -->
+    <!-- ========================================== -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
-    <!-- ✅ JS Animasi (Partikel, Cursor, Reveal) -->
+    <!-- ✅ JS Animasi (Partikel, Cursor, Reveal, Ripple) -->
     <script src="js/animasi.js"></script>
 </body>
 </html>
