@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduLearn - Sistem Pembelajaran Terintegrasi</title>
-    
+
     <!-- Tailwind CSS & Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- ✅ CSS Global & Index -->
+
+    <!-- CSS Global & Index -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index-style.css">
-    
+    <!-- ✅ CSS Animasi Baru -->
+    <link rel="stylesheet" href="css/animasi.css">
+
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="index-page flex flex-col min-h-screen">
 
-    <!-- Background Blobs -->
-    <div class="blob-container" aria-hidden="true">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="blob blob-4"></div>
-    </div>
-    
-    <!-- Grid overlay -->
-    <div class="grid-overlay" aria-hidden="true"></div>
+    <!-- ================= SCROLL PROGRESS ================= -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- ================= BACKGROUND LAYERS ================= -->
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+    <canvas id="particles" aria-hidden="true"></canvas>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
     <!-- ==========================================
          NAVBAR
@@ -35,15 +35,12 @@
     <header class="navbar-glass">
         <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
                 <a href="index.html" class="flex items-center space-x-3 group">
                     <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
                         <i class="fa-solid fa-graduation-cap text-xl"></i>
                     </div>
                     <span class="font-bold text-2xl text-slate-800 tracking-wide">EduLearn</span>
                 </a>
-                
-                <!-- Tombol Login dan Registrasi -->
                 <div class="flex items-center space-x-3">
                     <a href="login.html" class="btn-outline-glass px-5 py-2.5 rounded-lg font-bold text-sm flex items-center space-x-2">
                         <span>Login</span>
@@ -63,34 +60,29 @@
          ========================================== -->
     <main class="flex-grow relative z-10">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center">
-            
+
             <!-- Teks Hero -->
             <div class="md:w-1/2 text-center md:text-left mb-12 md:mb-0 pr-4 md:pr-8">
-                
-                <!-- Badge -->
-                <span class="hero-badge inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/70 backdrop-blur-md text-indigo-700 text-sm font-semibold mb-6 border border-indigo-200 shadow-sm">
+                <span class="hero-badge reveal section-tag inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/70 backdrop-blur-md text-indigo-700 text-sm font-semibold mb-6 border border-indigo-200 shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
                     Platform E-Learning Modern
                 </span>
-                
-                <!-- Heading -->
-                <h1 class="hero-heading text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 leading-tight mb-6">
-                    Tingkatkan Kualitas 
+
+                <h1 class="hero-heading reveal text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-800 leading-tight mb-6" style="--d:80ms">
+                    Tingkatkan Kualitas
                     <br>
-                    <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                        Pembelajaran Akademik
-                    </span> 
-                    Anda.
+                    <span class="grad-text">Pembelajaran Akademik</span>
+                    <br>
+                    <span class="type-caret" id="typeTarget">Anda.</span>
                 </h1>
-                
-                <!-- Paragraph -->
-                <p class="hero-paragraph text-lg text-slate-600 mb-8 leading-relaxed max-w-xl mx-auto md:mx-0">
+
+                <p class="hero-paragraph reveal text-lg text-slate-600 mb-8 leading-relaxed max-w-xl mx-auto md:mx-0" style="--d:160ms">
                     Akses materi perkuliahan, kumpulkan tugas tepat waktu, dan ikuti ujian secara online dengan sistem yang terintegrasi, responsif, dan mudah digunakan.
                 </p>
-                
-                <!-- ✅ Buttons (DIPERBARUI) -->
-                <div class="hero-buttons flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-                    <a href="cek-status.html" class="btn-primary-gradient px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
+
+                <!-- Buttons -->
+                <div class="hero-buttons reveal flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-10" style="--d:240ms">
+                    <a href="cek-status.html" class="btn-primary-gradient ripple magnetic px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2">
                         <span>Cek Status Registrasi</span>
                         <i class="fa-solid fa-magnifying-glass text-sm"></i>
                     </a>
@@ -99,20 +91,39 @@
                         <span>Pelajari Fitur</span>
                     </a>
                 </div>
+
+                <!-- Mini Counter -->
+                <div class="reveal flex flex-wrap gap-8" style="--d:320ms">
+                    <div>
+                        <p class="text-3xl font-black grad-text counter" data-target="1240">0</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Mahasiswa Aktif</p>
+                    </div>
+                    <div class="w-px bg-slate-300/60"></div>
+                    <div>
+                        <p class="text-3xl font-black grad-text counter" data-target="86" data-suffix="+">0</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Mata Kuliah</p>
+                    </div>
+                    <div class="w-px bg-slate-300/60"></div>
+                    <div>
+                        <p class="text-3xl font-black grad-text counter" data-target="99" data-suffix="%">0</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Kepuasan</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Ilustrasi -->
-            <div class="md:w-1/2 flex justify-center hero-illustration">
-                <div class="relative w-full max-w-md">
-                    <!-- Dekorasi Blob Belakang -->
-                    <div class="absolute top-0 -left-4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob"></div>
-                    <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-2000"></div>
-                    <div class="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-blob animation-delay-4000"></div>
-                    
-                    <!-- Card Ilustrasi Utama (Mockup - Tema Agroteknologi) -->
-                    <div class="relative bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/60 float-slow">
+            <!-- Ilustrasi + Orbit -->
+            <div class="md:w-1/2 flex justify-center hero-illustration reveal" style="--d:200ms">
+                <div class="orbit-stage w-full max-w-md relative">
+
+                    <!-- Satelit mengorbit -->
+                    <div class="orbit-chip" aria-hidden="true"><i class="fa-solid fa-book-open"></i></div>
+                    <div class="orbit-chip" aria-hidden="true"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="orbit-chip" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></div>
+
+                    <!-- Kartu utama dengan tilt -->
+                    <div class="tilt-card glass-card relative p-8 rounded-3xl shadow-2xl border border-white/60">
                         <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg pulse-ring">
                                 <i class="fa-solid fa-seedling text-xl"></i>
                             </div>
                             <div>
@@ -120,19 +131,15 @@
                                 <p class="text-xs text-slate-500">Pertemuan 5 dari 16</p>
                             </div>
                         </div>
-                        
-                        <!-- Progress Bar -->
+
                         <div class="mb-4">
                             <div class="flex justify-between text-xs mb-1">
                                 <span class="text-slate-500 font-medium">Progress Belajar</span>
                                 <span class="text-indigo-600 font-bold">31%</span>
                             </div>
-                            <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
-                                <div class="h-full w-[31%] bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
-                            </div>
+                            <div class="bar" data-fill="31"><span></span></div>
                         </div>
 
-                        <!-- List Materi -->
                         <div class="space-y-2">
                             <div class="flex items-center gap-3 p-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100">
                                 <i class="fa-solid fa-circle-check text-indigo-500 text-sm"></i>
@@ -142,37 +149,35 @@
                                 <i class="fa-solid fa-circle-check text-indigo-500 text-sm"></i>
                                 <span class="text-xs font-medium text-slate-700">Laboratorium</span>
                             </div>
-                            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-200">
+                            <div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-200 shimmer">
                                 <i class="fa-regular fa-circle text-slate-300 text-sm"></i>
                                 <span class="text-xs font-medium text-slate-500">Praktek Lapang</span>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Floating Badge 1 -->
-                    <div class="absolute -top-4 -right-4 bg-white rounded-xl px-3 py-2 shadow-lg border border-white/60 flex items-center gap-2 float-slow" style="animation-delay: -1s;">
-                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                            <i class="fa-solid fa-trophy text-green-600 text-sm"></i>
+                        <!-- Floating badge -->
+                        <div class="absolute -top-4 -right-4 float-slow bg-white rounded-xl px-3 py-2 shadow-lg border border-white/60 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                <i class="fa-solid fa-trophy text-green-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 font-medium">Nilai Anda</p>
+                                <p class="text-xs font-bold text-slate-800">A (92)</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-medium">Nilai Anda</p>
-                            <p class="text-xs font-bold text-slate-800">A (92)</p>
-                        </div>
-                    </div>
 
-                    <!-- Floating Badge 2 -->
-                    <div class="absolute -bottom-4 -left-4 bg-white rounded-xl px-3 py-2 shadow-lg border border-white/60 flex items-center gap-2 float-slow" style="animation-delay: -2s;">
-                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                            <i class="fa-solid fa-calendar-check text-purple-600 text-sm"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 font-medium">Tugas Selesai</p>
-                            <p class="text-xs font-bold text-slate-800">12/15</p>
+                        <div class="absolute -bottom-4 -left-4 float-slow bg-white rounded-xl px-3 py-2 shadow-lg border border-white/60 flex items-center gap-2" style="animation-delay:-2s">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                <i class="fa-solid fa-calendar-check text-purple-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 font-medium">Tugas Selesai</p>
+                                <p class="text-xs font-bold text-slate-800">12/15</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -181,29 +186,21 @@
          ========================================== -->
     <section id="fitur" class="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
-            
-            <!-- Header Section -->
             <div class="text-center mb-14">
-                <span class="inline-block py-1 px-3 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold mb-3 border border-indigo-200">
-                    FITUR UNGGULAN
-                </span>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">
-                    Semua yang Anda Butuhkan 
+                <span class="reveal section-tag mb-3">FITUR UNGGULAN</span>
+                <h2 class="reveal text-3xl md:text-4xl font-extrabold text-slate-800 mb-4" style="--d:60ms">
+                    Semua yang Anda Butuhkan
                     <br>
-                    <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                        dalam Satu Platform
-                    </span>
+                    <span class="grad-text">dalam Satu Platform</span>
                 </h2>
-                <p class="text-slate-600 max-w-2xl mx-auto">
+                <p class="reveal text-slate-600 max-w-2xl mx-auto" style="--d:120ms">
                     Dirancang untuk memudahkan proses belajar mengajar, baik untuk mahasiswa maupun dosen.
                 </p>
             </div>
 
-            <!-- Grid Fitur -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
                 <!-- Fitur 1 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:0ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-indigo-500/30">
                         <i class="fa-solid fa-book-open text-xl"></i>
                     </div>
@@ -214,7 +211,7 @@
                 </div>
 
                 <!-- Fitur 2 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:80ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-purple-500/30">
                         <i class="fa-solid fa-clipboard-check text-xl"></i>
                     </div>
@@ -225,7 +222,7 @@
                 </div>
 
                 <!-- Fitur 3 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:160ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-cyan-500/30">
                         <i class="fa-solid fa-pen-to-square text-xl"></i>
                     </div>
@@ -236,7 +233,7 @@
                 </div>
 
                 <!-- Fitur 4 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:240ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-pink-500/30">
                         <i class="fa-solid fa-calendar-check text-xl"></i>
                     </div>
@@ -247,7 +244,7 @@
                 </div>
 
                 <!-- Fitur 5 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:320ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white mb-4 shadow-lg shadow-amber-500/30">
                         <i class="fa-solid fa-chart-line text-xl"></i>
                     </div>
@@ -258,7 +255,7 @@
                 </div>
 
                 <!-- Fitur 6 -->
-                <div class="feature-card rounded-2xl p-6">
+                <div class="feature-card reveal glass-card rounded-2xl p-6" style="--d:400ms">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-emerald-500/30">
                         <i class="fa-solid fa-shield-halved text-xl"></i>
                     </div>
@@ -267,7 +264,6 @@
                         Data terenkripsi dengan SHA-256. Verifikasi akun oleh admin untuk keamanan ekstra.
                     </p>
                 </div>
-
             </div>
         </div>
     </section>
@@ -276,7 +272,7 @@
          CTA SECTION
          ========================================== -->
     <section class="relative z-10 py-16 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-4xl mx-auto text-center">
+        <div class="max-w-4xl mx-auto text-center reveal">
             <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">
                 Siap Memulai Perjalanan Belajar Anda?
             </h2>
@@ -284,7 +280,7 @@
                 Bergabunglah dengan ratusan mahasiswa yang sudah merasakan kemudahan belajar dengan EduLearn.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="register.html" class="btn-primary-gradient inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg">
+                <a href="register.html" class="btn-primary-gradient ripple magnetic inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg">
                     <span>Daftar Sekarang — Gratis</span>
                     <i class="fa-solid fa-user-plus"></i>
                 </a>
@@ -302,21 +298,15 @@
     <footer class="relative z-10 bg-white/60 backdrop-blur-md border-t border-white/60 py-8 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                
-                <!-- Logo Footer -->
                 <div class="flex items-center space-x-3">
                     <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg text-white">
                         <i class="fa-solid fa-graduation-cap text-sm"></i>
                     </div>
                     <span class="font-bold text-lg text-slate-700">EduLearn</span>
                 </div>
-
-                <!-- Copyright -->
                 <p class="text-sm text-slate-500 text-center">
                     &copy; 2026 EduLearn System. Dikelola untuk keperluan akademik.
                 </p>
-
-                <!-- Social Links -->
                 <div class="flex items-center space-x-3">
                     <a href="#" class="w-9 h-9 rounded-full bg-white/70 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition-colors">
                         <i class="fa-brands fa-facebook-f text-sm"></i>
@@ -332,5 +322,7 @@
         </div>
     </footer>
 
+    <!-- ✅ JS Animasi -->
+    <script src="js/animasi.js"></script>
 </body>
 </html>
