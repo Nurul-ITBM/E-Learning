@@ -1,0 +1,429 @@
+/* ============================================================
+   ANIMASI.CSS — Efek modern untuk EduLearn
+   Tema: indigo/purple/cyan, glassmorphism, Inter
+   ============================================================ */
+
+@property --ang {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ============================================================
+   1. AURORA MESH BACKGROUND
+   ============================================================ */
+.aurora {
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(45% 45% at 18% 22%, rgba(99, 102, 241, .50), transparent 62%),
+    radial-gradient(40% 40% at 82% 18%, rgba(168, 85, 247, .42), transparent 62%),
+    radial-gradient(48% 48% at 72% 82%, rgba(6, 182, 212, .38), transparent 62%),
+    radial-gradient(38% 38% at 22% 88%, rgba(236, 72, 153, .32), transparent 62%);
+  filter: blur(50px) saturate(1.25);
+  animation: aurora-move 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes aurora-move {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1.05) rotate(0deg); }
+  50%  { transform: translate3d(3%, 2%, 0)   scale(1.15) rotate(6deg); }
+  100% { transform: translate3d(-2%, 3%, 0)  scale(1.08) rotate(-4deg); }
+}
+
+/* Grid halus */
+.grid-lines {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, .05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 35%, transparent 78%);
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 35%, transparent 78%);
+}
+
+/* Partikel kanvas */
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .75;
+}
+
+/* ============================================================
+   2. SCROLL PROGRESS
+   ============================================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  z-index: 60;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4);
+  box-shadow: 0 0 12px rgba(99, 102, 241, .7);
+  transition: width .08s linear;
+}
+
+/* ============================================================
+   3. CURSOR SPOTLIGHT
+   ============================================================ */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 420px;
+  height: 420px;
+  margin: -210px 0 0 -210px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle, rgba(129, 140, 248, .28), rgba(168, 85, 247, .12) 45%, transparent 70%);
+  transition: opacity .4s ease;
+  will-change: transform;
+}
+
+/* ============================================================
+   4. TIPOGRAFI & TYPEWRITER
+   ============================================================ */
+.grad-text {
+  background: linear-gradient(100deg, #4f46e5, #9333ea, #0891b2, #4f46e5);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: grad-shift 8s ease-in-out infinite;
+}
+
+@keyframes grad-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+.type-caret::after {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: #6366f1;
+  animation: caret-blink 1s steps(2) infinite;
+}
+
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   5. REVEAL ON SCROLL
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .8s cubic-bezier(.16, 1, .3, 1),
+              transform .8s cubic-bezier(.16, 1, .3, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+   6. TILT 3D
+   ============================================================ */
+.tilt-card {
+  transform: perspective(1000px)
+             rotateX(var(--rx, 0deg))
+             rotateY(var(--ry, 0deg))
+             translateZ(0);
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1),
+              box-shadow .3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
+              rgba(255, 255, 255, .55), transparent 65%);
+}
+.tilt-card:hover::after { opacity: 1; }
+
+/* ============================================================
+   7. ORBIT CHIPS
+   ============================================================ */
+.orbit-stage { position: relative; }
+
+.orbit-chip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, .85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 10px 24px -8px rgba(79, 70, 229, .35);
+  color: #4f46e5;
+  font-size: 18px;
+  animation: orbit-path 24s linear infinite;
+  will-change: transform;
+}
+.orbit-chip:nth-child(1) { animation-delay: 0s;   color: #4f46e5; }
+.orbit-chip:nth-child(2) { animation-delay: -8s;  color: #9333ea; }
+.orbit-chip:nth-child(3) { animation-delay: -16s; color: #0891b2; }
+
+@keyframes orbit-path {
+  from { transform: rotate(0deg)   translateY(-195px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateY(-195px) rotate(-360deg); }
+}
+
+/* ============================================================
+   8. FLOAT & PULSE
+   ============================================================ */
+.float-slow { animation: float-slow 5s ease-in-out infinite; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+.pulse-ring { position: relative; }
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid rgba(99, 102, 241, .45);
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(.9); opacity: .9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ============================================================
+   9. PROGRESS BAR
+   ============================================================ */
+.bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  transition: width 1.6s cubic-bezier(.16, 1, .3, 1);
+}
+.bar > span::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .7), transparent);
+  animation: bar-shine 2.4s linear infinite;
+}
+
+@keyframes bar-shine {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* ============================================================
+   10. SHIMMER & SKELETON
+   ============================================================ */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(110deg,
+              transparent 25%, rgba(255, 255, 255, .85) 50%, transparent 75%);
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #eef2ff 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ============================================================
+   11. GLOW BORDER
+   ============================================================ */
+.glow-border {
+  position: relative;
+  border-radius: 20px;
+  isolation: isolate;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--ang),
+              #6366f1, #a855f7, #06b6d4, #ec4899, #6366f1);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: ang-spin 6s linear infinite;
+  z-index: -1;
+}
+
+@keyframes ang-spin { to { --ang: 360deg; } }
+
+/* ============================================================
+   12. BUTTONS
+   ============================================================ */
+.btn-primary-gradient {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  box-shadow: 0 6px 20px -4px rgba(99, 102, 241, .5);
+  transition: transform .25s cubic-bezier(.16, 1, .3, 1), box-shadow .25s ease;
+}
+.btn-primary-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(99, 102, 241, .6);
+}
+.btn-primary-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent);
+  transform: skewX(-20deg);
+  animation: btn-sheen 3.4s ease-in-out infinite;
+}
+
+@keyframes btn-sheen {
+  0%, 60% { left: -60%; }
+  100%    { left: 130%; }
+}
+
+.btn-outline-glass {
+  background: rgba(255, 255, 255, .75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, .22);
+  color: #4f46e5;
+  transition: all .25s ease;
+}
+.btn-outline-glass:hover {
+  background: #fff;
+  border-color: rgba(99, 102, 241, .45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -8px rgba(99, 102, 241, .3);
+}
+
+/* Ripple */
+.ripple { position: relative; overflow: hidden; }
+.ripple .rip {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .55);
+  transform: scale(0);
+  animation: rip .65s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes rip {
+  to { transform: scale(3.2); opacity: 0; }
+}
+
+/* Magnetic */
+.magnetic {
+  transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+  will-change: transform;
+}
+
+/* ============================================================
+   13. GLASS CARD
+   ============================================================ */
+.glass-card {
+  background: rgba(255, 255, 255, .72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, .75);
+  border-radius: 20px;
+  transition: transform .4s cubic-bezier(.4, 0, .2, 1), box-shadow .4s ease, background .4s ease;
+}
+.glass-card:hover {
+  background: rgba(255, 255, 255, .95);
+  transform: translateY(-6px);
+  box-shadow: 0 22px 44px -12px rgba(79, 70, 229, .25);
+}
+
+/* ============================================================
+   14. SECTION TAG
+   ============================================================ */
+.section-tag {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #4f46e5;
+  background: rgba(99, 102, 241, .10);
+  border: 1px solid rgba(99, 102, 241, .22);
+}
+
+/* ============================================================
+   15. ACCESSIBILITY
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .orbit-chip,
+  .float-slow,
+  .pulse-ring::before,
+  .btn-primary-gradient::before,
+  .bar > span::after,
+  .grad-text,
+  .type-caret::after,
+  .skeleton,
+  .shimmer::after,
+  .glow-border::before {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
