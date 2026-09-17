@@ -8,6 +8,156 @@
 // ==========================================
 
 // ==========================================
+// 0. CAPTCHA GENERATOR & VALIDATOR
+// ==========================================
+const Captcha = (function () {
+    let currentCode = '';
+    const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // hindari 0/O, 1/I/l
+    const LENGTH = 5;
+    const COLORS = ['#4f46e5', '#7c3aed', '#0891b2', '#9333ea', '#6366f1'];
+
+    function generateCode() {
+        let code = '';
+        for (let i = 0; i < LENGTH; i++) {
+            code += CHARS.charAt(Math.floor(Math.random() * CHARS.length));
+        }
+        return code;
+    }
+
+    function draw() {
+        const canvas = document.getElementById('captchaCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        currentCode = generateCode();
+
+        // Background gradien
+        const bg = ctx.createLinearGradient(0, 0, W, H);
+        bg.addColorStop(0, '#f0f4ff');
+        bg.addColorStop(0.5, '#ede9fe');
+        bg.addColorStop(1, '#ecfeff');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Garis acak (noise)
+        for (let i = 0; i < 6; i++) {
+            ctx.strokeStyle = 'rgba(' +
+                Math.floor(99 + Math.random() * 100) + ',' +
+                Math.floor(102 + Math.random() * 80) + ',' +
+                Math.floor(241 + Math.random() * 14) + ', 0.25)';
+            ctx.lineWidth = 0.8 + Math.random() * 0.8;
+            ctx.beginPath();
+            ctx.moveTo(Math.random() * W, Math.random() * H);
+            ctx.bezierCurveTo(
+                Math.random() * W, Math.random() * H,
+                Math.random() * W, Math.random() * H,
+                Math.random() * W, Math.random() * H
+            );
+            ctx.stroke();
+        }
+
+        // Titik noise
+        for (let i = 0; i < 30; i++) {
+            ctx.fillStyle = 'rgba(99, 102, 241, ' + (0.1 + Math.random() * 0.25) + ')';
+            ctx.beginPath();
+            ctx.arc(Math.random() * W, Math.random() * H, Math.random() * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Gambar karakter
+        const charW = W / (LENGTH + 1);
+        for (let i = 0; i < currentCode.length; i++) {
+            const char = currentCode[i];
+            const fontSize = 24 + Math.random() * 8;
+            const rotation = (Math.random() - 0.5) * 0.5; // ±15 derajat
+            const x = charW * (i + 0.85) + (Math.random() - 0.5) * 6;
+            const y = H / 2 + fontSize * 0.35 + (Math.random() - 0.5) * 6;
+
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+
+            // Shadow halus
+            ctx.shadowColor = 'rgba(99, 102, 241, 0.3)';
+            ctx.shadowBlur = 3;
+
+            // Font & warna
+            ctx.font = 'bold ' + fontSize + 'px "Inter", sans-serif';
+            ctx.fillStyle = COLORS[Math.floor(Math.random() * COLORS.length)];
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(char, 0, 0);
+
+            ctx.restore();
+        }
+
+        // Garis depan (beberapa di atas teks)
+        for (let i = 0; i < 3; i++) {
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.15)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, Math.random() * H);
+            ctx.lineTo(W, Math.random() * H);
+            ctx.stroke();
+        }
+    }
+
+    function validate(input) {
+        if (!input) return false;
+        return input.trim().toUpperCase() === currentCode;
+    }
+
+    function refresh() {
+        draw();
+        const input = document.getElementById('captchaInput');
+        if (input) input.value = '';
+        hideError();
+        setState(null);
+    }
+
+    function setState(state) {
+        const box = document.querySelector('.captcha-box');
+        if (!box) return;
+        box.classList.remove('captcha-valid', 'captcha-invalid');
+        if (state === 'valid') box.classList.add('captcha-valid');
+        if (state === 'invalid') box.classList.add('captcha-invalid');
+    }
+
+    function showError(msg) {
+        const err = document.getElementById('captchaError');
+        if (!err) return;
+        if (msg) err.querySelector('span').textContent = msg;
+        err.classList.remove('hidden');
+    }
+
+    function hideError() {
+        const err = document.getElementById('captchaError');
+        if (err) err.classList.add('hidden');
+    }
+
+    return {
+        init: function () {
+            draw();
+            // Refresh saat canvas diklik
+            const canvas = document.getElementById('captchaCanvas');
+            if (canvas) canvas.addEventListener('click', refresh);
+        },
+        validate: validate,
+        refresh: refresh,
+        showError: showError,
+        hideError: hideError,
+        setState: setState,
+        getCode: function () { return currentCode; }
+    };
+})();
+
+// Expose ke window untuk onclick di HTML
+function refreshCaptcha() { Captcha.refresh(); }
+window.refreshCaptcha = refreshCaptcha;
+
+// ==========================================
 // 1. TOGGLE PASSWORD VISIBILITY
 // ==========================================
 function togglePassword() {
@@ -81,9 +231,12 @@ async function callAuthAPI(action, data, options) {
 }
 
 // ==========================================
-// 3. LOGIN HANDLER
+// 3. LOGIN HANDLER (DENGAN CAPTCHA)
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
+    // ✅ Inisialisasi CAPTCHA saat halaman dimuat
+    Captcha.init();
+
     const loginForm = document.getElementById('loginForm');
     if (!loginForm) return;
 
@@ -92,18 +245,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const user = document.getElementById('username').value.trim();
         const pass = document.getElementById('password').value;
+        const captchaInput = document.getElementById('captchaInput').value.trim();
         const btn = document.getElementById('loginBtn');
         const msg = document.getElementById('statusMessage');
         const btnOriginalContent = btn.innerHTML;
 
-        // Validasi
+        // ==========================================
+        // VALIDASI DASAR
+        // ==========================================
         if (!user || !pass) {
             msg.className = 'mt-4 text-center text-sm block p-2 rounded-lg bg-red-50 text-red-600 border border-red-200';
             msg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Username dan password wajib diisi.';
             return;
         }
 
-        // Loading state
+        // ==========================================
+        // ✅ VALIDASI CAPTCHA
+        // ==========================================
+        if (!captchaInput) {
+            Captcha.showError('Silakan masukkan kode verifikasi.');
+            Captcha.setState('invalid');
+            Captcha.refresh();
+            return;
+        }
+
+        if (!Captcha.validate(captchaInput)) {
+            Captcha.showError('Kode verifikasi salah. Coba lagi.');
+            Captcha.setState('invalid');
+            document.getElementById('captchaInput').value = '';
+            document.getElementById('captchaInput').focus();
+
+            // Auto-refresh captcha setelah 600ms
+            setTimeout(function () { Captcha.refresh(); }, 600);
+            return;
+        }
+
+        // ✅ CAPTCHA VALID
+        Captcha.hideError();
+        Captcha.setState('valid');
+
+        // ==========================================
+        // LOADING STATE
+        // ==========================================
         btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Memvalidasi...</span>';
         btn.disabled = true;
         btn.classList.add('opacity-75');
@@ -163,6 +346,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 msg.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> ' +
                                 (result.message || 'Login gagal.');
 
+                // ✅ Refresh CAPTCHA setelah login gagal
+                Captcha.refresh();
+
                 btn.innerHTML = btnOriginalContent;
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
@@ -172,6 +358,9 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('❌ Error login:', error);
             msg.className = 'mt-4 text-center text-red-600 bg-red-50 p-2 rounded-lg text-sm block border border-red-200';
             msg.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Error: ' + error.message;
+
+            // ✅ Refresh CAPTCHA setelah error koneksi
+            Captcha.refresh();
 
             btn.innerHTML = btnOriginalContent;
             btn.disabled = false;
