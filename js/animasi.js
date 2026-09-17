@@ -99,6 +99,9 @@
 /* ---------- 3. SCROLL PROGRESS ---------- */
 (function () {
   const bar = document.getElementById('scrollProgress');
+  // ✅ Guard clause: Jika tidak ada scroll progress bar (misal di halaman login), hentikan script ini.
+  if (!bar) return; 
+
   window.addEventListener('scroll', () => {
     const h = document.documentElement.scrollHeight - window.innerHeight;
     bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
