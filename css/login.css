@@ -18,6 +18,7 @@ body.register-page {
     padding: 2rem 1rem;
 }
 
+
 /* ==========================================
    BODY - LOGIN PAGE (KUNCI CENTERING)
    ========================================== */
@@ -29,9 +30,9 @@ body.login-page {
     
     /* ✅ KUNCI UTAMA AGAR CENTER */
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;       /* Memaksa body jadi flex container */
+    align-items: center !important;  /* Menengah secara vertikal */
+    justify-content: center !important; /* Menengah secara horizontal */
     padding: 1rem;
 }
 
