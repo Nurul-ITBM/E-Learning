@@ -19,6 +19,23 @@ body.register-page {
 }
 
 /* ==========================================
+   BODY - LOGIN PAGE (KUNCI CENTERING)
+   ========================================== */
+body.login-page {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #eef2ff;
+    overflow-x: hidden;
+    position: relative;
+    
+    /* ✅ KUNCI UTAMA AGAR CENTER */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* ==========================================
    REGISTER CARD - GLASSMORPHISM (Dipertegas)
    ========================================== */
 .register-card {
