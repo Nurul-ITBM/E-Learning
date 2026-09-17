@@ -12,6 +12,8 @@
     <!-- ✅ CSS Global & Register -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/register.css">
+    <!-- ✅ CSS Animasi (Seamless dengan index.html & login.html) -->
+    <link rel="stylesheet" href="css/animasi.css">
     
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,18 +23,13 @@
 </head>
 <body class="register-page">
 
-    <!-- ✅ Background Blobs -->
-    <div class="blob-container" aria-hidden="true">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-        <div class="blob blob-4"></div>
-    </div>
-    
-    <!-- ✅ Grid overlay -->
-    <div class="grid-overlay" aria-hidden="true"></div>
+    <!-- ================= BACKGROUND LAYERS (Seamless) ================= -->
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="grid-lines" aria-hidden="true"></div>
+    <canvas id="particles" aria-hidden="true"></canvas>
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
-    <!-- ✅ TOMBOL KEMBALI KE BERANDA - OPSI 5 -->
+    <!-- ✅ TOMBOL KEMBALI KE BERANDA -->
     <a href="index.html" class="btn-back-futuristic" aria-label="Kembali ke Beranda">
         <span class="icon-wrap">
             <i class="fa-solid fa-arrow-left text-xs"></i>
@@ -40,12 +37,12 @@
         <span class="label">Kembali ke Beranda</span>
     </a>
 
-    <!-- ✅ Card Registrasi -->
-    <div class="register-card p-8 md:p-10 rounded-2xl w-full max-w-md">
+    <!-- ✅ Card Registrasi (Ditambahkan class reveal untuk animasi masuk) -->
+    <div class="register-card p-8 md:p-10 rounded-2xl w-full max-w-md reveal is-visible">
         
         <!-- Header & Logo -->
         <div class="flex flex-col items-center mb-8">
-            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl text-white mb-4 shadow-lg shadow-indigo-500/30">
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl text-white mb-4 shadow-lg shadow-indigo-500/30 pulse-ring">
                 <i class="fa-solid fa-graduation-cap text-3xl"></i>
             </div>
             <h1 class="text-2xl font-bold text-slate-800 tracking-wide">Daftar Akun</h1>
@@ -206,9 +203,9 @@
                 </label>
             </div>
 
-            <!-- Tombol Registrasi (GRADIENT) -->
+            <!-- Tombol Registrasi (GRADIENT + RIPPLE) -->
             <button type="submit" id="registerBtn" 
-                class="btn-primary-gradient w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
+                class="btn-primary-gradient ripple w-full font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 cursor-pointer">
                 <span>Daftar Sekarang</span>
                 <i class="fa-solid fa-user-plus text-sm"></i>
             </button>
@@ -234,6 +231,10 @@
 
     <!-- Script -->
     <script src="js/config.js"></script>
+    <!-- ✅ JS Animasi (Partikel, Cursor, Reveal, Ripple) -->
+    <script src="js/animasi.js"></script>
+    
+    <!-- Script Inline untuk Logika Form Registrasi -->
     <script>
         // ==========================================
         // TOGGLE PASSWORD VISIBILITY
@@ -327,9 +328,7 @@
             const passwordKonfirmasi = document.getElementById('password_konfirmasi').value;
             const setuju = document.getElementById('setuju').checked;
             
-            // ==========================================
             // VALIDASI CLIENT-SIDE
-            // ==========================================
             if (!nama || !nimNip || !email || !programStudi || !password) {
                 statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                 statusMsg.innerText = '⚠️ Semua kolom wajib diisi!';
@@ -365,9 +364,7 @@
                 return;
             }
             
-            // ==========================================
             // LOADING
-            // ==========================================
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memproses...';
             btn.disabled = true;
             statusMsg.classList.add('hidden');
@@ -391,11 +388,8 @@
                 const result = await response.json();
                 console.log(">>> Response registrasi:", result);
                 
-                // ==========================================
                 // HANDLE RESPONSE
-                // ==========================================
                 if (result.status === 'success') {
-                    // ✅ SUKSES
                     statusMsg.className = 'mt-4 text-center text-sm p-4 rounded-lg bg-amber-50 text-amber-700 border border-amber-200';
                     statusMsg.innerHTML = `
                         <div class="flex flex-col items-center gap-2">
@@ -453,7 +447,6 @@
                     btn.classList.add('bg-green-600', 'text-white');
                     
                 } else {
-                    // ❌ GAGAL
                     statusMsg.className = 'mt-4 text-center text-sm p-3 rounded-lg bg-red-50 text-red-600 border border-red-200';
                     statusMsg.innerHTML = '❌ ' + result.message;
                     statusMsg.classList.remove('hidden');
