@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absensi - EduLearn</title>
-    
+
+    <!-- ============================================================
+         DEPENDENSI EXTERNAL
+         ============================================================ -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    
+
+    <!-- ============================================================
+         CUSTOM STYLE
+         ============================================================ -->
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+
+        /* --- Scrollbar custom --- */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        
-        /* Tooltip */
+
+        /* --- Tooltip --- */
         .tooltip-btn { position: relative; }
         .tooltip-btn:hover::after {
             content: attr(data-tooltip);
@@ -33,47 +41,46 @@
             z-index: 100;
             margin-bottom: 5px;
         }
-        
-        /* Pulse animation untuk tombol aktif */
+
+        /* --- Pulse animation untuk tombol absen aktif --- */
         @keyframes pulse-ring {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+            0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70%  { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         .pulse-active {
             animation: pulse-ring 2s infinite;
         }
     </style>
 </head>
+
 <body class="flex h-screen overflow-hidden text-slate-800">
 
-    <!-- TEMPAT PENAMPUNG SIDEBAR -->
+    <!-- ============================================================
+         SIDEBAR CONTAINER (diisi oleh mahasiswa-load-components.js)
+         ============================================================ -->
     <div id="sidebar-container"></div>
 
-    <!-- MAIN CONTENT -->
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
     <main class="flex-1 overflow-y-auto flex flex-col bg-slate-50">
-        
-        <!-- TEMPAT PENAMPUNG HEADER -->
+
+        <!-- === HEADER CONTAINER (diisi oleh JS) === -->
         <div id="header-container"></div>
 
-        <!-- ========================================== -->
-        <!-- CONTENT AREA                               -->
-        <!-- ========================================== -->
+        <!-- ============================================================
+             CONTENT AREA
+             ============================================================ -->
         <div class="p-8 space-y-6">
-            
-            <!-- ========================================== -->
-            <!-- JUDUL HALAMAN                              -->
-            <!-- ========================================== -->
+
+            <!-- ============================================================
+                 JUDUL HALAMAN + JAM SEKARANG
+                 ============================================================ -->
             <div class="flex justify-between items-end border-b border-slate-200 pb-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Presensi Kehadiran</h2>
-                    <p class="text-sm text-slate-500 mt-1">Lakukan absensi masuk & keluar sesuai jadwal kuliah.</p>
+                    <p class="text-sm text-slate-500 mt-1">Lakukan absensi sesuai jadwal kuliah.</p>
                 </div>
                 <div class="text-xs text-slate-500">
                     <i class="fa-regular fa-clock mr-1"></i>
@@ -81,23 +88,25 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- PANEL ABSEN HARI INI (FOKUS UTAMA)         -->
-            <!-- ========================================== -->
+            <!-- ============================================================
+                 PANEL ABSEN HARI INI (FOKUS UTAMA)
+                 - Jika ada pertemuan dalam window absen → tampil tombol
+                 - Jika tidak → tampil info skenario 3
+                 ============================================================ -->
             <div id="panelAbsenHariIni">
-                <!-- Loading state - akan diganti oleh JS -->
+                <!-- Loading state — akan diganti oleh JS -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
                     <i class="fa-solid fa-circle-notch fa-spin text-3xl text-teal-500 mb-3"></i>
                     <p class="text-sm text-slate-500">Memeriksa jadwal hari ini...</p>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- STATISTIK KEHADIRAN                        -->
-            <!-- ========================================== -->
+            <!-- ============================================================
+                 STATISTIK KEHADIRAN — 4 Card
+                 ============================================================ -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                
-                <!-- Card Hadir -->
+
+                <!-- === Card 1: Hadir === -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
                         <div class="bg-emerald-100 text-emerald-600 p-2.5 rounded-lg flex-shrink-0">
@@ -109,8 +118,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Card Terlambat -->
+
+                <!-- === Card 2: Terlambat === -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
                         <div class="bg-orange-100 text-orange-600 p-2.5 rounded-lg flex-shrink-0">
@@ -122,8 +131,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Card Alpha -->
+
+                <!-- === Card 3: Alpha === -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
                         <div class="bg-red-100 text-red-600 p-2.5 rounded-lg flex-shrink-0">
@@ -135,8 +144,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Card Persentase -->
+
+                <!-- === Card 4: Persentase Kehadiran === -->
                 <div class="bg-white border border-slate-200 rounded-xl p-4">
                     <div class="flex items-center gap-3">
                         <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-lg flex-shrink-0">
@@ -148,56 +157,57 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
 
-            <!-- ========================================== -->
-            <!-- FILTER & INFO                              -->
-            <!-- ========================================== -->
+            <!-- ============================================================
+                 FILTER & INFO
+                 ============================================================ -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex-1 flex flex-col md:flex-row gap-4 items-end w-full">
-                        
-                        <!-- Filter Tanggal -->
+
+                        <!-- --- Filter Tanggal --- -->
                         <div class="w-full md:w-1/3">
                             <label class="block text-xs font-bold text-slate-600 mb-1">
                                 <i class="fa-regular fa-calendar text-teal-600 mr-1"></i> Filter Tanggal
                             </label>
-                            <input type="date" id="filterTanggalAbsen" 
+                            <input type="date" id="filterTanggalAbsen"
                                 class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500">
                         </div>
-                        
-                        <!-- Filter Status -->
+
+                        <!-- --- Filter Status --- -->
                         <div class="w-full md:w-1/4">
                             <label class="block text-xs font-bold text-slate-600 mb-1">
                                 <i class="fa-solid fa-filter text-teal-600 mr-1"></i> Filter Status
                             </label>
-                            <select id="filterStatusAbsen" 
+                            <select id="filterStatusAbsen"
                                 class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-teal-500">
                                 <option value="">Semua Status</option>
                                 <option value="Hadir">Hadir</option>
-                                <option value="Belum">Belum Absen</option>
                                 <option value="Terlambat">Terlambat</option>
                                 <option value="Alpha">Alpha</option>
+                                <option value="Belum">Belum Absen</option>
                             </select>
                         </div>
-                        
-                        <!-- Tombol Reset -->
-                        <button id="btnResetFilter" 
+
+                        <!-- --- Tombol Reset --- -->
+                        <button id="btnResetFilter"
                             class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold transition">
                             <i class="fa-solid fa-rotate-left mr-1"></i> Reset
                         </button>
-                        
+
                     </div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TABEL RIWAYAT ABSENSI                      -->
-            <!-- ========================================== -->
+            <!-- ============================================================
+                 TABEL RIWAYAT ABSENSI
+                 Kolom: Pertemuan | Tanggal | Jam Kuliah | Absen | Status
+                 ============================================================ -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                
-                <!-- Header Tabel -->
+
+                <!-- === Header Tabel === -->
                 <div class="p-5 border-b border-slate-100 flex justify-between items-center">
                     <h3 class="text-base font-bold text-slate-800">
                         <i class="fa-solid fa-history text-teal-600 mr-2"></i>Riwayat Kehadiran
@@ -206,41 +216,45 @@
                         Total: <span id="totalRiwayat" class="font-bold text-teal-600">0</span> Pertemuan
                     </span>
                 </div>
-                
-                <!-- Tabel -->
+
+                <!-- === Tabel === -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-600">
+
+                        <!-- --- Header Kolom (5 kolom) --- -->
                         <thead class="bg-slate-50 text-slate-800 uppercase font-bold text-xs">
                             <tr>
                                 <th class="px-4 py-4">Pertemuan</th>
                                 <th class="px-4 py-4">Tanggal</th>
                                 <th class="px-4 py-4">Jam Kuliah</th>
-                                <th class="px-4 py-4 text-center">Absen Masuk</th>
-                                <th class="px-4 py-4 text-center">Absen Keluar</th>
+                                <th class="px-4 py-4 text-center">Absen</th>
                                 <th class="px-4 py-4 text-center">Status</th>
                             </tr>
                         </thead>
+
+                        <!-- --- Body Tabel (diisi oleh JS) --- -->
                         <tbody id="tabelAbsensiBody">
                             <tr>
-                                <td colspan="6" class="text-center py-10 text-slate-400 italic">
+                                <td colspan="5" class="text-center py-10 text-slate-400 italic">
                                     <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Memuat data absensi...
                                 </td>
                             </tr>
                         </tbody>
+
                     </table>
                 </div>
-                
+
             </div>
-            
+
         </div>
     </main>
 
-    <!-- ============================================ -->
-    <!-- SCRIPTS                                       -->
-    <!-- ============================================ -->
+    <!-- ============================================================
+         SCRIPTS
+         ============================================================ -->
     <script src="../js/config.js"></script>
     <script src="../js/notifikasi.js?v=1"></script>
     <script src="../js/mahasiswa-load-components.js"></script>
-    <script src="../js/absensi.js?v=3"></script>
+    <script src="../js/absensi.js?v=4"></script>
 </body>
 </html>
