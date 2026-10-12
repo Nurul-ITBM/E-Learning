@@ -1,5 +1,6 @@
 // ==========================================
 // js/dosen-absensi.js - Logika Rekap Absensi Dosen
+// Versi: 4.0 — Single Absen (sesuai Absensi.gs v4.0)
 // Fitur: Filter Kelas, Tabel Matriks, Detail Kehadiran, Koreksi, Export
 // ==========================================
 
@@ -14,12 +15,12 @@ let currentUser = null;
 // KONFIGURASI WARNA STATUS
 // ==========================================
 const STATUS_CONFIG = {
-    'Hadir': { class: 'cell-hadir', icon: 'fa-check', label: 'Hadir' },
-    'Izin': { class: 'cell-izin', icon: 'fa-envelope', label: 'Izin' },
-    'Sakit': { class: 'cell-sakit', icon: 'fa-notes-medical', label: 'Sakit' },
-    'Terlambat': { class: 'cell-telat', icon: 'fa-clock', label: 'Terlambat' },
-    'Alpha': { class: 'cell-alpha', icon: 'fa-times', label: 'Alpha' },
-    'Belum': { class: 'cell-belum', icon: 'fa-minus', label: 'Belum Absen' }
+    'Hadir':     { class: 'cell-hadir', icon: 'fa-check',       label: 'Hadir' },
+    'Izin':      { class: 'cell-izin',  icon: 'fa-envelope',    label: 'Izin' },
+    'Sakit':     { class: 'cell-sakit', icon: 'fa-notes-medical', label: 'Sakit' },
+    'Terlambat': { class: 'cell-telat', icon: 'fa-clock',       label: 'Terlambat' },
+    'Alpha':     { class: 'cell-alpha', icon: 'fa-times',       label: 'Alpha' },
+    'Belum':     { class: 'cell-belum', icon: 'fa-minus',       label: 'Belum Absen' }
 };
 
 // ==========================================
@@ -32,19 +33,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '../login.html';
         return;
     }
-    
+
     currentUser = JSON.parse(sessionData);
     console.log(">>> User session:", currentUser);
 
-    // 2. ✅ Tunggu DOM siap (karena sidebar/header dimuat dinamis)
+    // 2. Tunggu DOM siap (sidebar/header dimuat dinamis)
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 3. ✅ Cek elemen ada
+    // 3. Cek elemen ada
     const filterKelas = document.getElementById('filterKelasAbsen');
-    const btnRefresh = document.getElementById('btnRefreshAbsen');
+    const btnRefresh  = document.getElementById('btnRefreshAbsen');
     const btnGenerate = document.getElementById('btnGenerateNilaiHadir');
-    const btnExport = document.getElementById('btnExportExcel');
-    
+    const btnExport   = document.getElementById('btnExportExcel');
+
     if (!filterKelas || !btnRefresh || !btnGenerate || !btnExport) {
         console.error('❌ Elemen HTML tidak ditemukan!');
         return;
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 5. Event Listener Dropdown
     filterKelas.addEventListener('change', async (e) => {
         currentIdKelas = e.target.value;
-        
+
         if (!currentIdKelas) {
             document.getElementById('containerRekapAbsen').innerHTML = `
                 <div class="text-center py-16 text-slate-400">
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnExport.disabled = true;
             return;
         }
-        
+
         await loadRekapAbsensi(currentIdKelas);
         btnRefresh.disabled = false;
         btnGenerate.disabled = false;
@@ -102,9 +103,9 @@ async function loadKelasDosen(idDosen) {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_kelas_dosen_ujian', 
-                id_dosen: idDosen 
+            body: JSON.stringify({
+                action: 'get_kelas_dosen_ujian',
+                id_dosen: idDosen
             })
         });
         const result = await response.json();
@@ -140,9 +141,9 @@ async function loadRekapAbsensi(idKelas) {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_rekap_absensi_kelas', 
-                id_kelas: idKelas 
+            body: JSON.stringify({
+                action: 'get_rekap_absensi_kelas',
+                id_kelas: idKelas
             })
         });
         const result = await response.json();
@@ -176,14 +177,14 @@ async function loadRekapAbsensi(idKelas) {
 // ==========================================
 function renderInfoCard(data) {
     document.getElementById('infoCard').classList.remove('hidden');
-    
+
     const ringkasan = data.ringkasan || {};
     document.getElementById('infoTotalPertemuan').innerText = ringkasan.total_pertemuan || 0;
-    document.getElementById('infoTotalMhs').innerText = ringkasan.total_mahasiswa || 0;
-    document.getElementById('infoRataKehadiran').innerText = (ringkasan.rata_kehadiran || 0) + '%';
-    
+    document.getElementById('infoTotalMhs').innerText       = ringkasan.total_mahasiswa || 0;
+    document.getElementById('infoRataKehadiran').innerText  = (ringkasan.rata_kehadiran || 0) + '%';
+
     // Hitung mahasiswa dengan kehadiran < 75%
-    const mhsKurang = (data.mahasiswa || []).filter(m => 
+    const mhsKurang = (data.mahasiswa || []).filter(m =>
         m.persentase_kehadiran < 75
     ).length;
     document.getElementById('infoMhsKurang').innerText = mhsKurang;
@@ -194,11 +195,11 @@ function renderInfoCard(data) {
 // ==========================================
 function renderTabelMatriks(data) {
     const container = document.getElementById('containerRekapAbsen');
-    
-    const kelas = data.kelas || {};
+
+    const kelas     = data.kelas || {};
     const pertemuan = data.pertemuan || [];
     const mahasiswa = data.mahasiswa || [];
-    
+
     if (mahasiswa.length === 0) {
         container.innerHTML = `
             <div class="text-center py-16 text-slate-400">
@@ -208,7 +209,7 @@ function renderTabelMatriks(data) {
         `;
         return;
     }
-    
+
     if (pertemuan.length === 0) {
         container.innerHTML = `
             <div class="text-center py-16 text-slate-400">
@@ -218,8 +219,8 @@ function renderTabelMatriks(data) {
         `;
         return;
     }
-    
-    // Header info
+
+    // ---- Header Info ----
     let html = `
         <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
             <div>
@@ -232,7 +233,7 @@ function renderTabelMatriks(data) {
                 <i class="fa-regular fa-clock mr-1"></i>Diperbarui: ${new Date().toLocaleString('id-ID')}
             </div>
         </div>
-        
+
         <div class="overflow-x-auto" style="max-height: 600px;">
             <table class="min-w-full text-xs border-collapse">
                 <thead class="sticky top-0 bg-slate-100 z-10">
@@ -241,18 +242,19 @@ function renderTabelMatriks(data) {
                             Mahasiswa
                         </th>
     `;
-    
-    // Header pertemuan
+
+    // ---- Header Pertemuan ----
     pertemuan.forEach(p => {
         html += `
-            <th class="px-2 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[70px]" title="${p.tanggal} • ${p.jam_mulai}-${p.jam_selesai}">
+            <th class="px-2 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 min-w-[70px]"
+                title="${p.tanggal} • ${p.jam_mulai}-${p.jam_selesai}">
                 <div class="text-xs">P${p.pertemuan_ke}</div>
                 <div class="text-[9px] text-slate-400 font-normal">${p.tanggal ? p.tanggal.split(' ')[0] : '-'}</div>
             </th>
         `;
     });
-    
-    // Header kolom persentase
+
+    // ---- Header Kolom Persentase ----
     html += `
                         <th class="px-3 py-3 text-center font-bold text-slate-700 border-b-2 border-slate-200 bg-teal-50 min-w-[80px]">
                             <div class="text-xs">Kehadiran</div>
@@ -261,12 +263,13 @@ function renderTabelMatriks(data) {
                 </thead>
                 <tbody>
     `;
-    
-    // Baris mahasiswa
+
+    // ---- Baris Mahasiswa ----
     mahasiswa.forEach((mhs, idx) => {
-        // Warna baris jika kehadiran < 75%
-        const rowClass = mhs.persentase_kehadiran < 75 ? 'bg-red-50/50' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50');
-        
+        const rowClass = mhs.persentase_kehadiran < 75
+            ? 'bg-red-50/50'
+            : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50');
+
         html += `
             <tr class="${rowClass} hover:bg-teal-50/30 transition-colors border-b border-slate-100">
                 <td class="sticky-col px-3 py-2 border-r border-slate-100 ${rowClass}">
@@ -281,15 +284,18 @@ function renderTabelMatriks(data) {
                     </div>
                 </td>
         `;
-        
-        // Cell absensi per pertemuan
+
+        // ---- Cell Absensi per Pertemuan (pakai waktu_absen) ----
         mhs.absensi.forEach(abs => {
             const statusConfig = STATUS_CONFIG[abs.status] || STATUS_CONFIG['Belum'];
-            const tooltip = `P${abs.pertemuan_ke}: ${statusConfig.label}${abs.waktu_masuk !== '-' ? ' • Masuk: ' + abs.waktu_masuk : ''}${abs.waktu_keluar !== '-' ? ' • Keluar: ' + abs.waktu_keluar : ''}`;
-            
+
+            // ✅ Tooltip pakai waktu_absen tunggal (bukan masuk/keluar)
+            const tooltip = `P${abs.pertemuan_ke}: ${statusConfig.label}` +
+                (abs.waktu_absen && abs.waktu_absen !== '-' ? ' • Absen: ' + abs.waktu_absen : '');
+
             html += `
                 <td class="px-1 py-2 text-center border-r border-slate-100">
-                    <button onclick="bukaDetailKehadiran('${abs.id_pertemuan}', '${mhs.id_mahasiswa}')" 
+                    <button onclick="bukaDetailKehadiran('${abs.id_pertemuan}', '${mhs.id_mahasiswa}')"
                         class="tooltip-cell w-9 h-9 rounded-lg ${statusConfig.class} hover:scale-110 transition-transform inline-flex items-center justify-center font-bold text-[10px]"
                         data-tooltip="${tooltip}">
                         <i class="fa-solid ${statusConfig.icon}"></i>
@@ -297,12 +303,12 @@ function renderTabelMatriks(data) {
                 </td>
             `;
         });
-        
-        // Kolom persentase
+
+        // ---- Kolom Persentase ----
         let persenColor = 'text-emerald-600 bg-emerald-50';
         if (mhs.persentase_kehadiran < 50) persenColor = 'text-red-600 bg-red-50';
         else if (mhs.persentase_kehadiran < 75) persenColor = 'text-amber-600 bg-amber-50';
-        
+
         html += `
                 <td class="px-3 py-2 text-center bg-teal-50/30">
                     <div class="inline-flex flex-col items-center">
@@ -315,13 +321,13 @@ function renderTabelMatriks(data) {
             </tr>
         `;
     });
-    
+
+    // ---- Ringkasan Bawah ----
     html += `
                 </tbody>
             </table>
         </div>
-        
-        <!-- Ringkasan Bawah -->
+
         <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
                 <p class="text-slate-600 mb-1"><i class="fa-solid fa-check-circle text-emerald-500 mr-1"></i> Kehadiran ≥ 75%</p>
@@ -343,7 +349,7 @@ function renderTabelMatriks(data) {
             </div>
         </div>
     `;
-    
+
     container.innerHTML = html;
 }
 
@@ -355,10 +361,10 @@ async function bukaDetailKehadiran(idPertemuan, idMahasiswa) {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'get_detail_kehadiran', 
+            body: JSON.stringify({
+                action: 'get_detail_kehadiran',
                 id_pertemuan: idPertemuan,
-                id_mahasiswa: idMahasiswa 
+                id_mahasiswa: idMahasiswa
             })
         });
         const result = await response.json();
@@ -366,30 +372,33 @@ async function bukaDetailKehadiran(idPertemuan, idMahasiswa) {
 
         if (result.status === 'success' && result.data) {
             const d = result.data;
-            
-            // Isi data
+
+            // ---- Info Mahasiswa ----
             document.getElementById('detailInisial').innerText = (d.mahasiswa.nama || '?').charAt(0).toUpperCase();
             document.getElementById('detailNamaMhs').innerText = d.mahasiswa.nama || '-';
-            document.getElementById('detailNimMhs').innerText = d.mahasiswa.nim || '-';
+            document.getElementById('detailNimMhs').innerText  = d.mahasiswa.nim || '-';
+
+            // ---- Info Pertemuan ----
             document.getElementById('detailPertemuanKe').innerText = 'Pertemuan ' + (d.pertemuan_ke || '-');
-            document.getElementById('detailTanggal').innerText = d.tanggal || '-';
-            document.getElementById('detailJamKuliah').innerText = `${d.jam_mulai} - ${d.jam_selesai}`;
-            document.getElementById('detailMateri').innerText = d.judul_materi || '-';
-            document.getElementById('detailWaktuMasuk').innerText = d.absensi.waktu_masuk || '-';
-            document.getElementById('detailWaktuKeluar').innerText = d.absensi.waktu_keluar || '-';
-            
-            // Status badge
+            document.getElementById('detailTanggal').innerText      = d.tanggal || '-';
+            document.getElementById('detailJamKuliah').innerText    = `${d.jam_mulai} - ${d.jam_selesai}`;
+            document.getElementById('detailMateri').innerText       = d.judul_materi || '-';
+
+            // ---- Info Absensi (1 kolom waktu) ----
+            document.getElementById('detailWaktuAbsen').innerText = d.absensi.waktu_absen || '-';
+
+            // ---- Status Badge ----
             const statusEl = document.getElementById('detailStatus');
             const statusConfig = STATUS_CONFIG[d.absensi.status] || STATUS_CONFIG['Belum'];
             statusEl.innerText = statusConfig.label;
             statusEl.className = `font-bold px-2 py-1 rounded ${statusConfig.class}`;
-            
-            // Simpan untuk koreksi
+
+            // ---- Simpan untuk koreksi ----
             document.getElementById('detailKoreksiStatus').dataset.idPertemuan = idPertemuan;
             document.getElementById('detailKoreksiStatus').dataset.idMahasiswa = idMahasiswa;
             document.getElementById('detailKoreksiStatus').value = '';
-            
-            // Buka modal
+
+            // ---- Buka modal ----
             document.getElementById('modalDetailKehadiran').classList.remove('hidden');
         } else {
             alert('❌ ' + (result.message || 'Gagal memuat detail.'));
@@ -404,23 +413,23 @@ async function bukaDetailKehadiran(idPertemuan, idMahasiswa) {
 // SIMPAN KOREKSI KEHADIRAN
 // ==========================================
 async function simpanKoreksi() {
-    const statusBaru = document.getElementById('detailKoreksiStatus').value;
+    const statusBaru  = document.getElementById('detailKoreksiStatus').value;
     const idPertemuan = document.getElementById('detailKoreksiStatus').dataset.idPertemuan;
     const idMahasiswa = document.getElementById('detailKoreksiStatus').dataset.idMahasiswa;
-    
+
     if (!statusBaru) {
         alert('⚠️ Pilih status baru terlebih dahulu.');
         return;
     }
-    
+
     if (!confirm(`Ubah status kehadiran menjadi "${statusBaru}"?`)) return;
-    
+
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'koreksi_kehadiran', 
+            body: JSON.stringify({
+                action: 'koreksi_kehadiran',
                 id_pertemuan: idPertemuan,
                 id_mahasiswa: idMahasiswa,
                 status_baru: statusBaru,
@@ -451,30 +460,34 @@ async function generateNilaiKehadiran() {
         alert('⚠️ Pilih mata kuliah dulu.');
         return;
     }
-    
+
     if (!confirm('Generate nilai kehadiran untuk semua mahasiswa di kelas ini?\n\nNilai kehadiran akan dihitung dari persentase kehadiran dan disimpan ke sheet Nilai.')) {
         return;
     }
-    
+
     const btn = document.getElementById('btnGenerateNilaiHadir');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
     btn.disabled = true;
-    
+
     try {
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ 
-                action: 'generate_nilai_kehadiran', 
-                id_kelas: currentIdKelas 
+            body: JSON.stringify({
+                action: 'generate_nilai_kehadiran',
+                id_kelas: currentIdKelas
             })
         });
         const result = await response.json();
         console.log(">>> Generate nilai:", result);
 
         if (result.status === 'success') {
-            alert(`✅ ${result.message}\n\nTotal mahasiswa: ${result.total}\nBerhasil: ${result.sukses}`);
+            // ✅ Sesuaikan dengan response GAS v4.0
+            const total    = result.total    || 0;
+            const updated  = result.updated  || 0;
+            const inserted = result.inserted || 0;
+            alert(`✅ ${result.message}\n\nTotal mahasiswa: ${total}\nUpdate: ${updated}\nInsert: ${inserted}`);
             await loadRekapAbsensi(currentIdKelas);
         } else {
             alert('❌ ' + result.message);
@@ -496,25 +509,25 @@ function exportExcel() {
         alert('⚠️ Tidak ada data untuk di-export.');
         return;
     }
-    
-    const data = currentRekapData;
-    const kelas = data.kelas || {};
+
+    const data      = currentRekapData;
+    const kelas     = data.kelas || {};
     const pertemuan = data.pertemuan || [];
     const mahasiswa = data.mahasiswa || [];
-    
-    // Header CSV
+
+    // ---- Header CSV ----
     let csv = `Rekap Absensi: ${kelas.nama_matkul || 'Mata Kuliah'}\n`;
     csv += `Kelas: ${kelas.nama_kelas || '-'}\n`;
     csv += `Tanggal Export: ${new Date().toLocaleString('id-ID')}\n\n`;
-    
-    // Header tabel
+
+    // ---- Header Tabel ----
     csv += 'No,NIM,Nama';
     pertemuan.forEach(p => {
         csv += `,P${p.pertemuan_ke}`;
     });
     csv += ',Kehadiran (%)\n';
-    
-    // Baris mahasiswa
+
+    // ---- Baris Mahasiswa ----
     mahasiswa.forEach((mhs, idx) => {
         csv += `${idx + 1},${mhs.nim || '-'},${mhs.nama || '-'}`;
         mhs.absensi.forEach(abs => {
@@ -522,14 +535,14 @@ function exportExcel() {
         });
         csv += `,${mhs.persentase_kehadiran}%\n`;
     });
-    
-    // Download
+
+    // ---- Download ----
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `Rekap_Absensi_${kelas.nama_kelas || 'kelas'}_${Date.now()}.csv`;
     link.click();
-    
+
     console.log('✅ Export berhasil');
 }
 
