@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnHitungUlang.addEventListener('click', hitungUlangNilai);
 
     // 8. Tombol Export
-    btnExport.addEventListener('click', exportCSV);
+    btnExport.addEventListener('click', printPDF);
 });
 
 // ==========================================
@@ -567,59 +567,120 @@ async function hitungUlangNilai() {
 }
 
 // ==========================================
-// EXPORT CSV (6 KOMPONEN)
+// PRINT PDF (Ganti Export CSV)
 // ==========================================
-function exportCSV() {
+function printPDF() {
     if (!currentRekapData) {
-        alert('⚠️ Tidak ada data untuk di-export.');
+        alert('⚠️ Tidak ada data untuk dicetak.');
         return;
     }
     
     const data = currentRekapData;
     const kelas = data.kelas || {};
     const mahasiswa = data.mahasiswa || [];
-    
-    // Header CSV
-    let csv = `Rekap Nilai: ${kelas.nama_matkul || 'Mata Kuliah'}\n`;
-    csv += `Kelas: ${kelas.nama_kelas || '-'}\n`;
-    csv += `SKS: ${kelas.sks || 0}\n`;
-    csv += `Tanggal Export: ${new Date().toLocaleString('id-ID')}\n`;
-    csv += `Bobot: Kehadiran 20% + Keaktifan 20% + Tugas 20% + Praktikum 20% + UTS 10% + UAS 10%\n\n`;
-    
-    // Header tabel
-    csv += 'No,NIM,Nama,Kehadiran (20%),Keaktifan (20%),Tugas (20%),Praktikum (20%),UTS (10%),UAS (10%),Nilai Akhir,Grade\n';
-    
-    // Baris mahasiswa
-    mahasiswa.forEach((mhs, idx) => {
-        csv += `${idx + 1},${mhs.nim || '-'},${mhs.nama || '-'},`;
-        csv += `${mhs.nilai_kehadiran || 0},${mhs.nilai_keaktifan || 0},`;
-        csv += `${mhs.nilai_tugas || 0},${mhs.nilai_praktikum || 0},`;
-        csv += `${mhs.nilai_uts || 0},${mhs.nilai_uas || 0},`;
-        csv += `${mhs.nilai_akhir || 0},${mhs.grade || '-'}\n`;
-    });
-    
-    // Statistik
-    csv += '\n\nSTATISTIK\n';
     const stat = data.statistik || {};
-    csv += `Total Mahasiswa,${stat.total_mahasiswa || 0}\n`;
-    csv += `Rata-rata Nilai,${stat.rata_nilai_akhir || 0}\n`;
-    csv += `Mahasiswa Nilai < 60,${stat.mhs_kurang_60 || 0}\n\n`;
+    const tanggal = new Date().toLocaleString('id-ID');
+
+    // Membuat struktur HTML khusus untuk jendela cetak (Print View)
+    let htmlContent = `
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <title>Rekap Nilai - ${kelas.nama_matkul || 'Mata Kuliah'}</title>
+            <style>
+                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; color: #333; margin: 20px; }
+                h2 { text-align: center; margin-bottom: 5px; font-size: 16px; text-transform: uppercase; }
+                .info { text-align: center; margin-bottom: 15px; font-size: 11px; color: #555; line-height: 1.4; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { border: 1px solid #999; padding: 6px; text-align: center; }
+                th { background-color: #f2f2f2; font-weight: bold; font-size: 10px; }
+                td.left { text-align: left; }
+                .nilai-akhir { font-weight: bold; background-color: #f9f9f9; }
+                .grade { font-weight: bold; }
+                .footer { margin-top: 20px; font-size: 9px; text-align: right; color: #777; }
+                @media print {
+                    @page { margin: 10mm; size: landscape; } /* Set landscape agar tabel muat */
+                    body { margin: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            <h2>Rekap Nilai Mahasiswa</h2>
+            <div class="info">
+                <strong>Mata Kuliah:</strong> ${kelas.nama_matkul || '-'} &nbsp;|&nbsp; 
+                <strong>Kelas:</strong> ${kelas.nama_kelas || '-'} &nbsp;|&nbsp; 
+                <strong>SKS:</strong> ${kelas.sks || 0} <br>
+                <strong>Tanggal Cetak:</strong> ${tanggal}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>NIM</th>
+                        <th>Nama Mahasiswa</th>
+                        <th>Hadir<br>(20%)</th>
+                        <th>Keaktifan<br>(20%)</th>
+                        <th>Tugas<br>(20%)</th>
+                        <th>Praktikum<br>(20%)</th>
+                        <th>UTS<br>(10%)</th>
+                        <th>UAS<br>(10%)</th>
+                        <th>Nilai Akhir</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    mahasiswa.forEach((mhs, idx) => {
+        htmlContent += `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${mhs.nim || '-'}</td>
+                <td class="left">${mhs.nama || '-'}</td>
+                <td>${mhs.nilai_kehadiran || 0}</td>
+                <td>${mhs.nilai_keaktifan || 0}</td>
+                <td>${mhs.nilai_tugas || 0}</td>
+                <td>${mhs.nilai_praktikum || 0}</td>
+                <td>${mhs.nilai_uts || 0}</td>
+                <td>${mhs.nilai_uas || 0}</td>
+                <td class="nilai-akhir">${mhs.nilai_akhir || 0}</td>
+                <td class="grade">${mhs.grade || '-'}</td>
+            </tr>
+        `;
+    });
+
+    htmlContent += `
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 15px; font-size: 11px;">
+                <strong>Statistik Kelas:</strong> &nbsp;
+                Total Mahasiswa: <b>${stat.total_mahasiswa || 0}</b> &nbsp;|&nbsp; 
+                Rata-rata Nilai: <b>${stat.rata_nilai_akhir || 0}</b> &nbsp;|&nbsp; 
+                Nilai < 60: <b>${stat.mhs_kurang_60 || 0}</b>
+            </div>
+            
+            <div class="footer">
+                Dicetak dari EduLearn Portal Dosen
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Buka jendela baru untuk print
+    const printWindow = window.open('', '_blank');
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
     
-    csv += 'Distribusi Grade\n';
-    csv += `A,${(stat.distribusi_grade || {})['A'] || 0}\n`;
-    csv += `B,${(stat.distribusi_grade || {})['B'] || 0}\n`;
-    csv += `C,${(stat.distribusi_grade || {})['C'] || 0}\n`;
-    csv += `D,${(stat.distribusi_grade || {})['D'] || 0}\n`;
-    csv += `E,${(stat.distribusi_grade || {})['E'] || 0}\n`;
-    
-    // Download
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Rekap_Nilai_${kelas.nama_kelas || 'kelas'}_${Date.now()}.csv`;
-    link.click();
-    
-    console.log('✅ Export CSV berhasil');
+    // Tunggu konten dimuat, lalu panggil dialog print
+    printWindow.onload = function() {
+        printWindow.focus();
+        printWindow.print();
+        // Opsional: Tutup otomatis setelah dialog print selesai (beberapa browser memblokir ini)
+        // printWindow.close(); 
+    };
 }
 
 // ==========================================
