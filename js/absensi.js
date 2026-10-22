@@ -24,10 +24,10 @@ let currentUser = null;       // Sesi user yang sedang login
 // ==========================================
 // KONFIGURASI
 // ==========================================
-const TOLERANSI_MENIT   = 30;      // Toleransi absen (menit) — sinkron dengan GAS
-const AUTO_REFRESH_MS   = 30000;   // Interval auto-refresh panel (30 detik)
-const MAX_RETRY_LOAD    = 2;       // Retry saat fetch gagal
-const RETRY_DELAY_MS    = 2000;    // Jeda antar retry (2 detik)
+const BATAS_TERLAMBAT_MENIT = 30;   // Sinkron dengan GAS: > 30 mnt dari jam_mulai → Terlambat
+const AUTO_REFRESH_MS   = 30000;
+const MAX_RETRY_LOAD    = 2;
+const RETRY_DELAY_MS    = 2000;
 
 // Mapping status → styling badge
 const STATUS_BADGE_STYLE = {
@@ -195,20 +195,21 @@ function buildKartuInfoSkenario3() {
                     <span class="text-xs font-bold text-blue-700">Waktu Absen</span>
                 </div>
                 <p class="text-[10px] text-blue-600 leading-relaxed">
-                    Tersedia <strong>mulai jam kuliah</strong> hingga <strong>${TOLERANSI_MENIT} menit</strong> setelahnya.
+                    Tersedia <strong>mulai jam kuliah</strong> hingga <strong>jam selesai</strong>.
                 </p>
             </div>
 
-            <!-- === Kartu 2: Lewat Waktu === -->
+            <!-- === Kartu 2: Batas Terlambat === -->
             <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="bg-amber-100 text-amber-600 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                         <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                     </div>
-                    <span class="text-xs font-bold text-amber-700">Lewat Waktu</span>
+                    <span class="text-xs font-bold text-amber-700">Batas Terlambat</span>
                 </div>
                 <p class="text-[10px] text-amber-600 leading-relaxed">
-                    Jika lewat dari <strong>${TOLERANSI_MENIT} menit</strong>, tidak bisa absen (status: Alpha).
+                    Absen lebih dari <strong>${BATAS_TERLAMBAT_MENIT} menit</strong>
+                    setelah jam mulai dianggap <strong>Terlambat</strong>.
                 </p>
             </div>
         </div>
